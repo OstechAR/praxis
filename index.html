@@ -1,0 +1,2524 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Praxis by Oakridge</title>
+<meta name="description" content="Short, visual explanations of how money works, with free tools to run the numbers yourself.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* Praxis by Oakridge.
+   Palette: Artstyle & Visual Production Standard, section 3.
+   Black is the stage in every viewer theme, so the tokens do not change
+   between light and dark. Gold = money and value. Blue = information and
+   systems. White = neutral text and structure. */
+:root,
+:root[data-theme="dark"],
+:root[data-theme="light"] {
+  --black: #000000;
+  --surface: #12161D;
+  --hairline: #232A36;
+  --white: #F5F7FA;
+  --muted: #9AA3B2;
+  --gold: #D4AF37;
+  --blue: #3B82F6;
+  --page: 1160px;
+  --gutter: 20px;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --black: #000000; --white: #F5F7FA; }
+}
+:root {
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+*, *::before, *::after { box-sizing: inherit; }
+html { min-height: 100%; scroll-padding-top: calc(env(safe-area-inset-top, 0px) + 72px); }
+body {
+  margin: 0;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: var(--black);
+  color: var(--white);
+  font-family: 'Geist', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  font-variant-numeric: tabular-nums;
+  -webkit-font-smoothing: antialiased;
+  -webkit-text-size-adjust: 100%;
+}
+h1, h2, h3, p, dl, dd, figure, ul { margin: 0; padding: 0; }
+ul { list-style: none; }
+a { color: inherit; }
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; border-radius: 4px; }
+[hidden] { display: none !important; }
+.muted { color: var(--muted); }
+.wrap { width: 100%; max-width: var(--page); margin: 0 auto; padding: 0 var(--gutter); }
+
+/* ---------- Site bar ---------- */
+.bar {
+  position: sticky;
+  top: env(safe-area-inset-top, 0px);
+  z-index: 20;
+  background: var(--black);
+  border-bottom: 1px solid var(--hairline);
+}
+.bar-inner { display: flex; align-items: center; gap: 16px; height: 56px; }
+.brand { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; flex: none; }
+.brand svg { width: 28px; height: 28px; flex: none; }
+.brand b { font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.brand span { display: none; font-size: 14px; color: var(--muted); }
+.site-nav {
+  margin-left: auto;
+  display: flex; gap: 2px;
+  overflow-x: auto; scrollbar-width: none;
+  margin-right: calc(var(--gutter) * -1); padding-right: var(--gutter);
+}
+.site-nav::-webkit-scrollbar { display: none; }
+.site-nav a {
+  flex: none;
+  display: inline-flex; align-items: center; gap: 8px;
+  height: 44px; padding: 0 9px;
+  font-size: 14px; font-weight: 500; color: var(--muted);
+  text-decoration: none; white-space: nowrap;
+}
+.site-nav a:hover { color: var(--white); }
+.site-nav a[aria-current="page"] { color: var(--white); box-shadow: inset 0 -2px 0 var(--gold); }
+.tag {
+  display: inline-block; padding: 1px 7px;
+  border: 1px solid var(--hairline); border-radius: 999px;
+  font-size: 12px; line-height: 18px; font-weight: 500; color: var(--muted);
+}
+.site-nav .tag { display: none; }
+
+/* ---------- Page frame ---------- */
+#view { flex: 1 0 auto; }
+#view:focus { outline: none; }
+.section { padding: 56px 0; border-top: 1px solid var(--hairline); }
+.section-head { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; margin-bottom: 24px; }
+h2 { font-size: 26px; line-height: 1.2; font-weight: 600; letter-spacing: -0.02em; }
+.lede { font-size: 18px; line-height: 1.5; color: var(--muted); max-width: 46ch; }
+.text-link { font-weight: 500; white-space: nowrap; text-underline-offset: 4px; text-decoration-color: var(--hairline); }
+.text-link:hover { text-decoration-color: var(--white); }
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  height: 48px; padding: 0 22px;
+  border: 1px solid var(--hairline); border-radius: 24px;
+  background: transparent; color: var(--white);
+  font-size: 16px; font-weight: 500; text-decoration: none; cursor: pointer;
+}
+.btn:hover { border-color: var(--muted); }
+.btn.primary { background: var(--white); border-color: var(--white); color: var(--black); font-weight: 600; }
+.btn.primary:hover { background: #DDE2EA; border-color: #DDE2EA; }
+.actions { display: flex; flex-wrap: wrap; gap: 10px; }
+
+/* ---------- Blocks: the Praxis unit of money ---------- */
+.blk {
+  display: block; aspect-ratio: 1 / 1; border-radius: 22%;
+  box-shadow: inset 0 2px 0 rgba(255,255,255,.35), inset 0 -2px 0 rgba(0,0,0,.25);
+}
+.blk.b { background: var(--blue); }
+.blk.g { background: var(--gold); }
+.blk.w { background: var(--white); box-shadow: inset 0 -2px 0 rgba(0,0,0,.2); }
+.blk.o { background: transparent; box-shadow: inset 0 0 0 1px var(--hairline); }
+.dot { display: inline-block; width: 10px; height: 10px; border-radius: 2px; flex: none; }
+.dot.b { background: var(--blue); }
+.dot.g { background: var(--gold); }
+
+/* ---------- Home: hero ---------- */
+.hero { padding: 40px 0 56px; display: grid; gap: 44px; }
+.hero h1 {
+  font-size: clamp(52px, 15vw, 112px);
+  line-height: 0.94; font-weight: 600; letter-spacing: -0.045em;
+}
+.hero .lede { margin-top: 24px; }
+.hero .actions { margin-top: 28px; }
+.stage { display: block; max-width: 300px; text-decoration: none; }
+.stage .q { font-size: 20px; line-height: 1.25; font-weight: 600; letter-spacing: -0.01em; }
+.stack { margin-top: 18px; display: grid; gap: 3px; }
+.stack .interest { display: flex; flex-wrap: wrap-reverse; gap: 3px; }
+.stack .interest .blk { width: calc((100% - 27px) / 10); }
+.stack .borrowed { display: grid; grid-template-columns: repeat(10, minmax(0, 1fr)); gap: 3px; }
+.stage .legend { margin-top: 16px; display: grid; gap: 6px; font-size: 14px; line-height: 20px; }
+.stage .legend div { display: flex; align-items: center; gap: 10px; }
+.stage .legend b { margin-left: auto; font-weight: 600; }
+.stage .cap { margin-top: 14px; font-size: 14px; line-height: 20px; color: var(--muted); }
+.stage:hover .q { text-decoration: underline; text-underline-offset: 4px; }
+/* The one orchestrated moment: interest stacks up on top of what was borrowed. */
+@keyframes stack-in { from { opacity: 0; transform: translateY(-8px) scale(.6); } to { opacity: 1; transform: none; } }
+.stack .interest .blk { animation: stack-in .3s cubic-bezier(.2,.8,.3,1) both; animation-delay: calc(450ms + var(--i, 0) * 36ms); }
+@media (prefers-reduced-motion: reduce) { .stack .interest .blk { animation: none; } }
+
+/* ---------- Video cards and posters ---------- */
+.shelf { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px 14px; }
+.card { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; align-content: start; text-decoration: none; }
+.card h3 { font-size: 16px; line-height: 1.3; font-weight: 600; letter-spacing: -0.005em; }
+a.card:hover h3 { text-decoration: underline; text-underline-offset: 3px; }
+.card .meta { display: flex; justify-content: space-between; gap: 10px; margin-top: 4px; font-size: 13px; line-height: 18px; color: var(--muted); }
+.card.wide { grid-column: 1 / -1; }
+.poster {
+  container-type: inline-size;
+  position: relative; overflow: hidden;
+  aspect-ratio: 9 / 16;
+  border: 1px solid var(--hairline); border-radius: 14px;
+  background: var(--black);
+}
+.poster-in { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: space-between; padding: 9cqw; }
+.poster.wide { aspect-ratio: 16 / 9; }
+.poster.wide .poster-in { padding: 5cqw; }
+.poster .fig { font-size: 30cqw; line-height: .9; font-weight: 600; letter-spacing: -0.05em; }
+.poster.wide .fig { font-size: 13cqw; }
+.poster .line { margin-top: 5cqw; font-size: 8cqw; line-height: 1.2; font-weight: 500; color: var(--muted); max-width: 12ch; }
+.poster.wide .line { margin-top: 2cqw; font-size: 4cqw; max-width: 24ch; }
+.poster .blockset { display: grid; gap: 4cqw; }
+.poster.wide .blockset { width: 46%; gap: 2cqw; }
+.poster .blocks { display: grid; grid-template-columns: repeat(var(--cols, 10), minmax(0, 1fr)); gap: 1.4cqw; }
+.poster.wide .blocks { gap: .7cqw; }
+.poster .blocks .blk { box-shadow: inset 0 1px 0 rgba(255,255,255,.35), inset 0 -1px 0 rgba(0,0,0,.25); }
+.poster .blocks .blk.o { box-shadow: inset 0 0 0 1px var(--hairline); }
+.poster.pending .fig { color: var(--muted); }
+
+/* ---------- Home: tools and interactive ---------- */
+.split { display: grid; gap: 40px; }
+.calc-list { border-top: 1px solid var(--hairline); }
+.calc-list li { display: grid; gap: 2px; padding: 14px 0; border-bottom: 1px solid var(--hairline); }
+.calc-list b { font-weight: 600; }
+.calc-list span { font-size: 15px; color: var(--muted); }
+.split .lede { margin-top: 12px; }
+.split .actions { margin-top: 24px; }
+
+/* ---------- Library ---------- */
+.page-head { padding: 40px 0 32px; }
+.page-head h1 { font-size: clamp(40px, 10vw, 64px); line-height: 1; font-weight: 600; letter-spacing: -0.035em; }
+.page-head .lede { margin-top: 14px; }
+.filters { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 24px; }
+.filters button {
+  height: 44px; padding: 0 16px;
+  border: 1px solid var(--hairline); border-radius: 22px;
+  background: transparent; color: var(--muted);
+  font-size: 15px; font-weight: 500; cursor: pointer;
+}
+.filters button[aria-pressed="true"] { background: var(--white); border-color: var(--white); color: var(--black); font-weight: 600; }
+.group { padding: 0 0 56px; }
+.group h2 { margin-bottom: 20px; font-size: 20px; }
+.empty { padding: 28px 0; color: var(--muted); }
+
+/* ---------- Video page ---------- */
+.back { display: inline-flex; align-items: center; gap: 6px; height: 44px; margin-top: 16px; font-size: 15px; font-weight: 500; color: var(--muted); text-decoration: none; }
+.back:hover { color: var(--white); }
+.video { display: grid; gap: 32px; padding: 8px 0 64px; }
+.video .poster { max-width: 170px; }
+.video h1 { font-size: clamp(32px, 7vw, 52px); line-height: 1.04; font-weight: 600; letter-spacing: -0.03em; max-width: 16ch; }
+.video .when { margin-top: 12px; font-size: 15px; color: var(--muted); }
+.video .summary { margin-top: 24px; font-size: 18px; line-height: 1.55; max-width: 56ch; }
+.video .takeaway { margin-top: 20px; padding-left: 16px; border-left: 2px solid var(--gold); font-size: 18px; line-height: 1.45; font-weight: 500; max-width: 44ch; }
+.video .actions { margin-top: 28px; }
+.numbers { margin-top: 36px; max-width: 520px; border-top: 1px solid var(--hairline); }
+.numbers div { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; padding: 12px 0; border-bottom: 1px solid var(--hairline); }
+.numbers dt { color: var(--muted); font-size: 15px; }
+.numbers dd { font-weight: 600; text-align: right; }
+.fine { margin-top: 16px; font-size: 13px; line-height: 19px; color: var(--muted); max-width: 60ch; }
+
+/* ---------- Coming-soon page ---------- */
+.soon { padding: 48px 0 72px; display: grid; gap: 40px; }
+.soon h1 { font-size: clamp(44px, 12vw, 88px); line-height: .96; font-weight: 600; letter-spacing: -0.04em; max-width: 9ch; }
+.soon .lede { margin-top: 20px; }
+.soon .actions { margin-top: 28px; }
+.year { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; max-width: 420px; }
+.year div { display: grid; gap: 6px; font-size: 12px; line-height: 16px; color: var(--muted); text-align: center; }
+
+/* ---------- Embedded pages (calculator, future interactive pieces) ---------- */
+html.embed-mode, html.embed-mode body { height: 100%; }
+html.embed-mode body { overflow: hidden; }
+#embeds { flex: 1 1 auto; min-height: 0; display: flex; }
+.embed { flex: 1 1 auto; min-height: 0; position: relative; display: flex; }
+.embed iframe { flex: 1 1 auto; width: 100%; height: 100%; border: 0; background: var(--black); }
+.embed .fallback {
+  position: absolute; inset: 0; background: var(--black);
+  display: grid; align-content: center; justify-items: start; gap: 16px;
+  padding: 24px var(--gutter);
+}
+.embed .fallback h1 { font-size: 26px; line-height: 1.2; font-weight: 600; letter-spacing: -0.02em; }
+
+/* ---------- Footer ---------- */
+.foot { border-top: 1px solid var(--hairline); padding: 32px 0 40px; font-size: 14px; line-height: 21px; color: var(--muted); }
+.foot-inner { display: grid; gap: 20px; }
+.foot .brand b { font-size: 15px; color: var(--white); }
+.foot .brand span { display: inline; }
+.foot nav { display: flex; flex-wrap: wrap; gap: 4px 20px; }
+.foot nav a { display: inline-flex; align-items: center; min-height: 32px; text-decoration: none; }
+.foot nav a:hover { color: var(--white); }
+.foot p { max-width: 58ch; }
+
+/* ---------- Wider screens ---------- */
+@media (min-width: 560px) {
+  :root { --gutter: 28px; }
+  .brand span { display: inline; }
+  .site-nav a { padding: 0 12px; font-size: 15px; }
+  .site-nav .tag { display: inline-block; }
+  .shelf { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px 18px; }
+}
+@media (min-width: 900px) {
+  :root { --gutter: 40px; }
+  .bar-inner { height: 64px; }
+  .hero { grid-template-columns: minmax(0, 1fr) 340px; align-items: end; gap: 64px; padding: 72px 0 88px; }
+  .section { padding: 72px 0; }
+  .shelf { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 36px 20px; }
+  .card.wide { grid-column: span 2; }
+  .split { grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: 72px; align-items: start; }
+  .page-head { padding: 64px 0 40px; }
+  .video { grid-template-columns: 260px minmax(0, 1fr); gap: 56px; padding-top: 24px; }
+  .video .poster { max-width: none; }
+  .stage { max-width: 340px; }
+  .soon { grid-template-columns: minmax(0, 1fr) 420px; align-items: end; gap: 64px; padding: 88px 0 104px; }
+  .foot-inner { grid-template-columns: auto 1fr; align-items: start; gap: 16px 56px; }
+  .foot p { grid-column: 1 / -1; }
+}
+</style>
+</head>
+<body>
+
+<header class="bar">
+  <div class="wrap bar-inner">
+    <a class="brand" href="#/" data-brand></a>
+    <nav class="site-nav" id="site-nav" aria-label="Site"></nav>
+  </div>
+</header>
+
+<main id="view" tabindex="-1"></main>
+<div id="embeds" hidden></div>
+
+<footer class="foot" id="foot">
+  <div class="wrap foot-inner">
+    <a class="brand" href="#/" data-brand></a>
+    <nav id="foot-nav" aria-label="Footer"></nav>
+    <p>Praxis explains how money works. It is education, not financial advice. The tools give estimates only, and the examples are illustrations, not offers.</p>
+    <p>© 2026 Oakridge</p>
+  </div>
+</footer>
+
+<!-- =====================================================================
+     EMBEDDED PAGES
+     Each block below is a complete, self-contained HTML page (the calculator
+     and the PA001 paced animation). The site shows it full-height under
+     the site bar. Inside a block, "</script" is stored as "<\/script" and
+     "<!--" as "<\!--"; the site undoes that when it loads the page.
+     ===================================================================== -->
+<script type="text/plain" id="embed-calculator">
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Oakridge Calculator</title>
+<meta name="description" content="Loan, mortgage, savings and debt calculators that show where every payment goes.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* Oakridge palette (Artstyle & Visual Production Standard, section 3).
+   Black is the brand stage in every viewer theme, so the tokens are the same
+   under light and dark. Gold = interest. Blue = principal or deposits. */
+:root,
+:root[data-theme="dark"],
+:root[data-theme="light"] {
+  --black: #000000;
+  --surface: #12161D;
+  --hairline: #232A36;
+  --white: #F5F7FA;
+  --muted: #9AA3B2;
+  --gold: #D4AF37;
+  --blue: #3B82F6;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --black: #000000; --white: #F5F7FA; }
+}
+:root {
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+*, *::before, *::after { box-sizing: inherit; }
+html { height: 100%; scroll-padding-top: env(safe-area-inset-top, 0px); }
+body {
+  margin: 0;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: var(--black);
+  color: var(--white);
+  font-family: 'Geist', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-size: 15px;
+  line-height: 1.45;
+  font-variant-numeric: tabular-nums;
+  -webkit-font-smoothing: antialiased;
+  -webkit-text-size-adjust: 100%;
+}
+button, input, select { font: inherit; color: inherit; }
+h1, h2, p { margin: 0; }
+.muted { color: var(--muted); }
+.gold { color: var(--gold); }
+.blue { color: var(--blue); }
+:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+
+/* ---------- Frame ---------- */
+.app { flex: 1 0 auto; display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: auto 1fr; }
+.rail {
+  position: sticky;
+  top: env(safe-area-inset-top, 0px);
+  z-index: 5;
+  background: var(--black);
+  border-bottom: 1px solid var(--hairline);
+}
+.rail-inner { padding: 14px 20px 0; }
+.brand { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 16px; }
+.mark { display: flex; gap: 3px; }
+.mark i { width: 12px; height: 12px; border-radius: 3px; box-shadow: inset 0 2px 0 rgba(255,255,255,.35), inset 0 -2px 0 rgba(0,0,0,.25); }
+.mark .g { background: var(--gold); }
+.mark .b { background: var(--blue); }
+.mark .w { background: var(--white); box-shadow: inset 0 -2px 0 rgba(0,0,0,.2); }
+.nav { display: flex; gap: 6px; margin: 12px -20px 0; padding: 0 20px 12px; overflow-x: auto; scrollbar-width: none; }
+.nav::-webkit-scrollbar { display: none; }
+.nav button {
+  flex: none;
+  display: flex; align-items: center; gap: 10px;
+  height: 44px; padding: 0 16px;
+  border: 1px solid var(--hairline); border-radius: 22px;
+  background: transparent; color: var(--muted);
+  font-size: 15px; font-weight: 500; white-space: nowrap; cursor: pointer;
+}
+.nav button svg { display: none; flex: none; }
+.nav button[aria-current="page"] { background: var(--white); border-color: var(--white); color: var(--black); font-weight: 600; }
+.rail .fine { display: none; }
+
+main {
+  width: 100%; max-width: 560px; margin: 0 auto;
+  padding: 26px 20px 40px;
+  display: grid; grid-template-columns: minmax(0, 1fr); gap: 44px;
+  align-content: start;
+}
+.fine { font-size: 12px; line-height: 18px; color: var(--muted); }
+
+/* ---------- Calculator ---------- */
+.calc h1 { font-size: 30px; line-height: 36px; font-weight: 600; letter-spacing: -0.01em; }
+.calc .blurb { margin-top: 6px; color: var(--muted); max-width: 44ch; }
+.fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 22px; }
+.field {
+  display: flex; flex-direction: column; gap: 4px;
+  padding: 10px 14px; min-height: 64px;
+  background: var(--surface); border-radius: 12px; cursor: text;
+}
+.field.wide { grid-column: 1 / -1; }
+.field:focus-within { outline: 2px solid var(--blue); outline-offset: 0; }
+.field > span:first-child { font-size: 12px; line-height: 16px; color: var(--muted); }
+.field .row { display: flex; align-items: baseline; gap: 4px; font-size: 18px; line-height: 24px; font-weight: 500; }
+.field .unit { color: var(--muted); flex: none; }
+.field input, .field select {
+  flex: 1 1 auto; min-width: 0; width: 100%;
+  padding: 0; border: 0; border-radius: 0; background: transparent; outline: none;
+  font-size: 18px; line-height: 24px; font-weight: 500;
+}
+@supports (field-sizing: content) {
+  .field input { field-sizing: content; flex: 0 1 auto; width: auto; min-width: 1ch; max-width: 100%; }
+}
+.field select {
+  appearance: none; -webkit-appearance: none; cursor: pointer; padding-right: 22px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%239AA3B2' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 9l7 7 7-7'/%3E%3C/svg%3E") no-repeat right center;
+  font-size: 16px;
+}
+.field select option { background: var(--surface); color: var(--white); }
+
+.result { margin-top: 26px; display: grid; gap: 24px; }
+.problem { color: var(--muted); max-width: 40ch; }
+.label { font-size: 13px; line-height: 18px; color: var(--muted); }
+.hero { font-size: clamp(38px, 11vw, 52px); line-height: 1.1; font-weight: 600; letter-spacing: -0.02em; margin: 4px 0; overflow-wrap: anywhere; }
+.hero.small { font-size: clamp(30px, 8.5vw, 42px); }
+.sub { font-size: 13px; line-height: 18px; color: var(--muted); }
+
+.blocks { display: grid; grid-template-columns: repeat(var(--cols, 25), minmax(0, 1fr)); gap: 2px; }
+.blk { aspect-ratio: 1 / 1; border-radius: 22%; box-shadow: inset 0 2px 0 rgba(255,255,255,.35), inset 0 -2px 0 rgba(0,0,0,.25); }
+.blk.b { background: var(--blue); }
+.blk.g { background: var(--gold); }
+.blocks.chunky { gap: 3px; }
+.blocks.chunky .blk { box-shadow: inset 0 3px 0 rgba(255,255,255,.35), inset 0 -3px 0 rgba(0,0,0,.25); }
+.legend { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 16px; margin-top: 12px; font-size: 13px; line-height: 18px; }
+.legend span { display: inline-flex; align-items: center; gap: 8px; }
+.dot { display: inline-block; width: 10px; height: 10px; border-radius: 2px; flex: none; }
+.dot.b { background: var(--blue); }
+.dot.g { background: var(--gold); }
+
+.stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 12px; }
+.stat b { display: block; font-size: 20px; line-height: 26px; font-weight: 600; overflow-wrap: anywhere; }
+.note { padding: 12px 14px; background: var(--surface); border-radius: 12px; font-size: 14px; line-height: 20px; }
+
+.chart { display: flex; align-items: flex-end; gap: 3px; height: 190px; }
+.chart .col { flex: 1 1 0; min-width: 0; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; gap: 2px; }
+.chart .col i { display: block; min-height: 2px; border-radius: 3px; box-shadow: inset 0 2px 0 rgba(255,255,255,.3); }
+.chart .col .g { background: var(--gold); }
+.chart .col .b { background: var(--blue); }
+.axis { display: flex; justify-content: space-between; margin-top: 8px; font-size: 12px; line-height: 16px; color: var(--muted); }
+
+.versus { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+.versus .side { display: grid; gap: 14px; align-content: start; }
+.versus .rate { font-size: 34px; line-height: 40px; font-weight: 600; letter-spacing: -0.02em; }
+.versus .stack { display: flex; align-items: flex-end; aspect-ratio: 10 / var(--rows, 1); }
+.versus .stack .blocks { width: 100%; }
+
+/* ---------- Breakdown ---------- */
+.breakdown h2 { font-size: 20px; line-height: 26px; font-weight: 600; }
+.bd-head { display: grid; gap: 14px; }
+.seg { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px; padding: 4px; background: var(--surface); border-radius: 12px; }
+.seg button { height: 44px; border: 0; border-radius: 9px; background: transparent; color: var(--muted); font-size: 15px; font-weight: 500; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--white); color: var(--black); font-weight: 600; }
+.years { list-style: none; margin: 14px 0 0; padding: 0; }
+.yr { border-top: 1px solid var(--hairline); }
+.yr-btn { display: grid; gap: 6px; width: 100%; padding: 11px 0; border: 0; background: transparent; text-align: left; cursor: pointer; }
+.yr-top { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.yr-top b { font-size: 15px; line-height: 20px; font-weight: 600; }
+.yr-top .muted { font-size: 13px; line-height: 18px; display: inline-flex; align-items: center; gap: 6px; }
+.yr-top svg { transition: transform .15s ease; }
+.yr-btn[aria-expanded="true"] .yr-top svg { transform: rotate(180deg); }
+.bar { display: flex; gap: 2px; height: 10px; min-width: 6px; }
+.bar i { display: block; border-radius: 3px; min-width: 2px; }
+.bar .g { background: var(--gold); }
+.bar .b { background: var(--blue); }
+.yr-nums { display: flex; justify-content: space-between; gap: 12px; font-size: 13px; line-height: 18px; }
+.yr-rows { margin: 0 0 12px; padding: 6px 12px 4px; background: var(--surface); border-radius: 12px; }
+.scroll { margin-top: 14px; max-height: 70vh; overflow: auto; overscroll-behavior: contain; border-top: 1px solid var(--hairline); }
+table { width: 100%; border-collapse: collapse; font-size: 13px; line-height: 18px; }
+th, td { padding: 7px 0 7px 10px; text-align: right; white-space: nowrap; }
+th:first-child, td:first-child { padding-left: 0; text-align: left; }
+th { font-size: 12px; font-weight: 400; color: var(--muted); }
+.scroll th { position: sticky; top: 0; background: var(--black); }
+tbody tr + tr td, .scroll tbody tr td { border-top: 1px solid var(--hairline); }
+
+/* ---------- Number pad (touch screens) ---------- */
+body { padding-bottom: var(--pad, 0px); }
+html { scroll-padding-bottom: calc(var(--pad, 0px) + 16px); }
+.pad {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 10;
+  background: var(--black); border-top: 1px solid var(--hairline);
+  padding: 8px 8px calc(8px + env(safe-area-inset-bottom, 0px));
+  -webkit-user-select: none; user-select: none; touch-action: manipulation;
+}
+.pad[hidden] { display: none; }
+.pad-keys { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; max-width: 520px; margin: 0 auto; }
+.pad button {
+  height: 52px; border: 0; border-radius: 12px;
+  background: var(--surface); color: var(--white);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.07);
+  font-size: 22px; font-weight: 500; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  -webkit-tap-highlight-color: transparent;
+}
+.pad button:active { background: #232A36; }
+.pad button:disabled { color: #4A5262; cursor: default; }
+.pad button:disabled:active { background: var(--surface); }
+.pad .word { font-size: 16px; font-weight: 600; }
+.pad .next { grid-row: span 2; height: auto; background: var(--white); color: var(--black); box-shadow: none; }
+.pad .next:active { background: #C9CED6; }
+
+/* One purposeful motion: when a calculator opens, the interest blocks stack
+   up after the amount borrowed is already on screen. */
+@keyframes stack { from { opacity: 0; transform: translateY(-6px) scale(.6); } to { opacity: 1; transform: none; } }
+.intro .blk.g { animation: stack .28s cubic-bezier(.2,.8,.3,1) both; animation-delay: calc(120ms + min(var(--i, 0), 40) * 16ms); }
+@media (prefers-reduced-motion: reduce) {
+  .intro .blk.g { animation: none; }
+  .yr-top svg { transition: none; }
+}
+
+/* ---------- Tablet: calculator and breakdown side by side ---------- */
+@media (min-width: 860px) {
+  .rail-inner { display: flex; align-items: center; gap: 28px; padding: 12px 32px; }
+  .nav { margin: 0; padding: 0; overflow: visible; flex-wrap: wrap; }
+  main { max-width: 1120px; padding: 40px 32px 56px; grid-template-columns: minmax(0, 420px) minmax(0, 1fr); gap: 32px 56px; }
+  main.solo { grid-template-columns: minmax(0, 640px); }
+  main > .fine { grid-column: 1 / -1; }
+  .calc h1 { font-size: 36px; line-height: 42px; }
+  .hero { font-size: 54px; }
+  .hero.small { font-size: 42px; }
+  .breakdown { padding-top: 6px; }
+}
+
+/* ---------- Desktop: calculators move into a side rail ---------- */
+@media (min-width: 1200px) {
+  .app { grid-template-columns: 248px minmax(0, 1fr); grid-template-rows: 1fr; }
+  .rail { position: static; border-bottom: 0; border-right: 1px solid var(--hairline); }
+  .rail-inner { position: sticky; top: 0; display: flex; flex-direction: column; align-items: stretch; gap: 28px; padding: 32px 16px 24px; }
+  .brand { padding: 0 12px; font-size: 17px; }
+  .nav { flex-direction: column; flex-wrap: nowrap; gap: 2px; }
+  .nav button { width: 100%; height: 48px; padding: 0 12px; border: 0; border-radius: 12px; }
+  .nav button svg { display: block; }
+  .nav button:hover { color: var(--white); }
+  .nav button[aria-current="page"] { background: var(--surface); color: var(--white); }
+  .rail .fine { display: block; padding: 0 12px; }
+  main > .fine { display: none; }
+  main { margin: 0; max-width: 1240px; padding: 48px 56px 64px; grid-template-columns: minmax(0, 440px) minmax(0, 1fr); gap: 32px 72px; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="rail">
+    <div class="rail-inner">
+      <div class="brand"><span class="mark" aria-hidden="true"><i class="g"></i><i class="b"></i><i class="w"></i></span>Oakridge</div>
+      <nav class="nav" id="nav" aria-label="Calculators"></nav>
+      <p class="fine">Estimates only. Not financial advice.</p>
+    </div>
+  </header>
+  <main id="main">
+    <section class="calc" aria-labelledby="calc-title">
+      <h1 id="calc-title"></h1>
+      <p class="blurb" id="calc-blurb"></p>
+      <div class="fields" id="fields"></div>
+      <div class="result" id="result" aria-live="polite"></div>
+    </section>
+    <section class="breakdown" id="breakdown" aria-labelledby="bd-title"></section>
+    <p class="fine">Estimates only. Not financial advice.</p>
+  </main>
+</div>
+
+<div class="pad" id="pad" role="group" aria-label="Number pad" hidden>
+  <div class="pad-keys">
+    <button type="button" data-key="1">1</button>
+    <button type="button" data-key="2">2</button>
+    <button type="button" data-key="3">3</button>
+    <button type="button" data-key="del" aria-label="Delete"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5h10a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H9l-6-7z"/><path d="M12 9.5l5 5M17 9.5l-5 5"/></svg></button>
+    <button type="button" data-key="4">4</button>
+    <button type="button" data-key="5">5</button>
+    <button type="button" data-key="6">6</button>
+    <button type="button" data-key="next" class="word next" id="pad-next">Next</button>
+    <button type="button" data-key="7">7</button>
+    <button type="button" data-key="8">8</button>
+    <button type="button" data-key="9">9</button>
+    <button type="button" data-key="." aria-label="Decimal point">.</button>
+    <button type="button" data-key="0">0</button>
+    <button type="button" data-key="000" aria-label="Three zeros">000</button>
+    <button type="button" data-key="done" aria-label="Hide number pad"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="11" rx="2"/><path d="M7 8h.01M11 8h.01M15 8h.01M8 11.5h8M9 19l3 2.5 3-2.5"/></svg></button>
+  </div>
+</div>
+
+<script>
+/* Oakridge calculation engine (JavaScript port of the Dart engine).
+   Money is whole cents in a Number. Rates are exact fractions (BigInt).
+   Interest is rounded half up to the cent every period. */
+const CalcEngine = (() => {
+  'use strict';
+
+  const Compounding = { annually: 1, semiAnnually: 2, quarterly: 4, monthly: 12, daily: 365 };
+
+  const Frequency = {
+    monthly: { perYear: 12, label: 'Monthly', noun: 'month' },
+    semiMonthly: { perYear: 24, label: 'Twice a month', noun: 'payment' },
+    biWeekly: { perYear: 26, label: 'Every 2 weeks', noun: 'payment' },
+    acceleratedBiWeekly: { perYear: 26, monthlyDivisor: 2, label: 'Every 2 weeks, accelerated', noun: 'payment' },
+    weekly: { perYear: 52, label: 'Weekly', noun: 'payment' },
+    acceleratedWeekly: { perYear: 52, monthlyDivisor: 4, label: 'Weekly, accelerated', noun: 'payment' },
+  };
+
+  class PaymentTooSmallError extends Error {
+    constructor(paymentCents, interestCents) {
+      super('Payment does not cover the interest');
+      this.name = 'PaymentTooSmallError';
+      this.paymentCents = paymentCents;
+      this.interestCents = interestCents;
+      this.minimumPaymentCents = interestCents + 1;
+    }
+  }
+
+  function fail(message) { throw new RangeError(message); }
+
+  /** "100000", "1,234.5", "$2,441.29" -> cents. Throws on anything else. */
+  function parseCents(text) {
+    const cleaned = String(text).trim().replace(/[,$\s]/g, '');
+    if (!/^\d+(\.\d{1,2})?$/.test(cleaned)) throw new SyntaxError('Not a valid amount');
+    const [dollars, cents = ''] = cleaned.split('.');
+    return Number(dollars) * 100 + Number(cents.padEnd(2, '0') || 0);
+  }
+
+  function roundHalfUp(numerator, denominator) {
+    return Number((numerator * 2n + denominator) / (denominator * 2n));
+  }
+
+  /** A nominal annual rate held as an exact fraction: "8" is exactly 8/100. */
+  function annualRate(percentText) {
+    const cleaned = String(percentText).trim().replace('%', '').trim();
+    if (!/^\d+(\.\d+)?$/.test(cleaned)) throw new SyntaxError('Not a valid rate');
+    const [whole, decimals = ''] = cleaned.split('.');
+    const numerator = BigInt(whole + decimals);
+    const denominator = 100n * 10n ** BigInt(decimals.length);
+    return { numerator, denominator, fraction: Number(numerator) / Number(denominator) };
+  }
+
+  /** The rate for one payment period. Exact when compounding matches the
+      payment frequency; otherwise the equivalent rate in floating point. */
+  function periodicRate(rate, periodsPerYear, compoundsPerYear) {
+    if (periodsPerYear === compoundsPerYear || rate.numerator === 0n) {
+      const numerator = rate.numerator;
+      const denominator = rate.denominator * BigInt(periodsPerYear);
+      return {
+        value: Number(numerator) / Number(denominator),
+        interestOn: (balanceCents) => roundHalfUp(BigInt(balanceCents) * numerator, denominator),
+      };
+    }
+    const value = Math.pow(1 + rate.fraction / compoundsPerYear, compoundsPerYear / periodsPerYear) - 1;
+    return { value, interestOn: (balanceCents) => Math.round(balanceCents * value) };
+  }
+
+  function levelPaymentCents(principalCents, rate, periods) {
+    if (rate.value === 0) return roundHalfUp(BigInt(principalCents), BigInt(periods));
+    return Math.round(principalCents * rate.value / (1 - Math.pow(1 + rate.value, -periods)));
+  }
+
+  function makeSchedule(rows, periodsPerYear) {
+    const last = rows[rows.length - 1];
+    return {
+      rows,
+      periodsPerYear,
+      periods: rows.length,
+      totalInterestCents: last ? last.cumulativeInterestCents : 0,
+      totalPaidCents: rows.reduce((sum, r) => sum + r.paymentCents, 0),
+      closingCents: last ? last.closingCents : 0,
+      byYear() {
+        const years = [];
+        for (let start = 0; start < rows.length; start += periodsPerYear) {
+          const slice = rows.slice(start, start + periodsPerYear);
+          const end = slice[slice.length - 1];
+          years.push({
+            period: years.length + 1,
+            openingCents: slice[0].openingCents,
+            interestCents: slice.reduce((s, r) => s + r.interestCents, 0),
+            paymentCents: slice.reduce((s, r) => s + r.paymentCents, 0),
+            principalCents: slice.reduce((s, r) => s + r.principalCents, 0),
+            closingCents: end.closingCents,
+            cumulativeInterestCents: end.cumulativeInterestCents,
+            firstRow: start,
+            rowCount: slice.length,
+          });
+        }
+        return years;
+      },
+    };
+  }
+
+  /** Period-by-period breakdown of a debt. The last scheduled payment (or the
+      last payment needed) clears whatever is still owing. */
+  function amortize({ principalCents, rate, paymentCents, periodsPerYear, interestOnlyPeriods = 0, scheduledPeriods = null, maxPeriods = 12000 }) {
+    if (!(principalCents > 0)) fail('principal must be > 0');
+    if (!(paymentCents > 0)) fail('payment must be > 0');
+    const lastScheduled = scheduledPeriods == null ? null : interestOnlyPeriods + scheduledPeriods;
+    const rows = [];
+    let balance = principalCents;
+    let cumulative = 0;
+    while (balance > 0) {
+      const period = rows.length + 1;
+      if (period > maxPeriods) fail('debt not repaid within ' + maxPeriods + ' periods');
+      const interest = rate.interestOn(balance);
+      const owing = balance + interest;
+      let payment;
+      if (period <= interestOnlyPeriods) payment = interest;
+      else if (period === lastScheduled || paymentCents >= owing) payment = owing;
+      else if (paymentCents <= interest) throw new PaymentTooSmallError(paymentCents, interest);
+      else payment = paymentCents;
+      cumulative += interest;
+      rows.push({
+        period,
+        openingCents: balance,
+        interestCents: interest,
+        paymentCents: payment,
+        principalCents: payment - interest,
+        closingCents: owing - payment,
+        cumulativeInterestCents: cumulative,
+      });
+      balance = owing - payment;
+    }
+    return makeSchedule(rows, periodsPerYear);
+  }
+
+  function calculateLoan({ principalCents, rate, termPeriods, paymentsPerYear = 12, compoundsPerYear = 12, interestOnlyPeriods = 0, extraPaymentCents = 0 }) {
+    if (!(termPeriods > 0)) fail('term must be > 0');
+    if (interestOnlyPeriods < 0 || interestOnlyPeriods >= termPeriods) fail('interest-only period must be shorter than the term');
+    if (!(principalCents > 0)) fail('principal must be > 0');
+    const periodic = periodicRate(rate, paymentsPerYear, compoundsPerYear);
+    const amortizing = termPeriods - interestOnlyPeriods;
+    const paymentCents = levelPaymentCents(principalCents, periodic, amortizing);
+    const schedule = amortize({
+      principalCents, rate: periodic, paymentCents: paymentCents + extraPaymentCents,
+      periodsPerYear: paymentsPerYear, interestOnlyPeriods, scheduledPeriods: amortizing,
+    });
+    return {
+      principalCents,
+      paymentCents,
+      interestOnlyPaymentCents: interestOnlyPeriods > 0 ? periodic.interestOn(principalCents) : null,
+      schedule,
+      totalInterestCents: schedule.totalInterestCents,
+      totalPaidCents: schedule.totalPaidCents,
+      interestShare: schedule.totalInterestCents / principalCents,
+    };
+  }
+
+  function calculateMortgage({ priceCents, downPaymentCents, rate, amortizationYears, compoundsPerYear, termYears = null, frequency = 'monthly' }) {
+    if (downPaymentCents < 0 || downPaymentCents >= priceCents) fail('down payment must be less than the price');
+    if (!(amortizationYears > 0)) fail('amortization must be > 0');
+    if (termYears != null && (termYears <= 0 || termYears > amortizationYears)) fail('term must be no longer than the amortization');
+    const freq = Frequency[frequency] || fail('unknown frequency');
+    const principalCents = priceCents - downPaymentCents;
+    const periodic = periodicRate(rate, freq.perYear, compoundsPerYear);
+    const scheduledPeriods = amortizationYears * freq.perYear;
+    let paymentCents;
+    if (freq.monthlyDivisor) {
+      const monthly = levelPaymentCents(principalCents, periodicRate(rate, 12, compoundsPerYear), amortizationYears * 12);
+      paymentCents = roundHalfUp(BigInt(monthly), BigInt(freq.monthlyDivisor));
+    } else {
+      paymentCents = levelPaymentCents(principalCents, periodic, scheduledPeriods);
+    }
+    const schedule = amortize({ principalCents, rate: periodic, paymentCents, periodsPerYear: freq.perYear, scheduledPeriods });
+    const termPeriods = termYears == null ? null : termYears * freq.perYear;
+    const termEnd = termPeriods == null ? null : schedule.rows[Math.min(termPeriods, schedule.periods) - 1];
+    return {
+      principalCents,
+      paymentCents,
+      schedule,
+      termPeriods,
+      payoffPeriods: schedule.periods,
+      totalInterestCents: schedule.totalInterestCents,
+      totalPaidCents: schedule.totalPaidCents,
+      interestShare: schedule.totalInterestCents / principalCents,
+      balanceAtTermEndCents: termEnd ? termEnd.closingCents : null,
+      interestOverTermCents: termEnd ? termEnd.cumulativeInterestCents : null,
+      principalOverTermCents: termEnd ? principalCents - termEnd.closingCents : null,
+    };
+  }
+
+  function calculateSavings({ initialCents, contributionCents, rate, years, contributionsPerYear = 12, compoundsPerYear = 12, contributeAtStart = false }) {
+    if (initialCents < 0 || contributionCents < 0) fail('amounts must be >= 0');
+    if (!(years > 0)) fail('years must be > 0');
+    const periodic = periodicRate(rate, contributionsPerYear, compoundsPerYear);
+    const rows = [];
+    let balance = initialCents;
+    let cumulative = 0;
+    const periods = years * contributionsPerYear;
+    for (let period = 1; period <= periods; period++) {
+      const interest = periodic.interestOn(contributeAtStart ? balance + contributionCents : balance);
+      const closing = balance + contributionCents + interest;
+      cumulative += interest;
+      rows.push({
+        period, openingCents: balance, interestCents: interest, paymentCents: contributionCents,
+        principalCents: contributionCents, closingCents: closing, cumulativeInterestCents: cumulative,
+      });
+      balance = closing;
+    }
+    const schedule = makeSchedule(rows, contributionsPerYear);
+    return {
+      initialCents,
+      schedule,
+      finalBalanceCents: balance,
+      totalContributedCents: initialCents + schedule.totalPaidCents,
+      totalInterestCents: schedule.totalInterestCents,
+    };
+  }
+
+  function calculateDebtPayoff({ balanceCents, rate, paymentCents, paymentsPerYear = 12, compoundsPerYear = 12, extraPaymentCents = 0 }) {
+    const schedule = amortize({
+      principalCents: balanceCents,
+      rate: periodicRate(rate, paymentsPerYear, compoundsPerYear),
+      paymentCents: paymentCents + extraPaymentCents,
+      periodsPerYear: paymentsPerYear,
+    });
+    return {
+      principalCents: balanceCents,
+      schedule,
+      periods: schedule.periods,
+      totalInterestCents: schedule.totalInterestCents,
+      totalPaidCents: schedule.totalPaidCents,
+      interestShare: schedule.totalInterestCents / balanceCents,
+    };
+  }
+
+  return {
+    Compounding, Frequency, PaymentTooSmallError,
+    parseCents, annualRate, periodicRate, levelPaymentCents, amortize,
+    calculateLoan, calculateMortgage, calculateSavings, calculateDebtPayoff,
+  };
+})();
+
+<\/script>
+<script>
+(() => {
+  'use strict';
+  const E = CalcEngine;
+  const $ = (id) => document.getElementById(id);
+
+  // ---------- Formatting ----------
+  const group = (n) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  const money = (cents) => (cents < 0 ? '-' : '') + '$' + group(Math.floor(Math.abs(cents) / 100)) + '.' + String(Math.abs(cents) % 100).padStart(2, '0');
+  const dollars = (cents) => '$' + group(Math.round(cents / 100));
+  const plural = (n, word) => n + ' ' + word + (n === 1 ? '' : 's');
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+  function duration(periods, perYear) {
+    if (perYear === 12) {
+      const years = Math.floor(periods / 12);
+      const months = periods % 12;
+      return [years ? plural(years, 'year') : '', months ? plural(months, 'month') : ''].filter(Boolean).join(' ') || '0 months';
+    }
+    const years = Math.round((periods / perYear) * 10) / 10;
+    return years + (years === 1 ? ' year' : ' years');
+  }
+
+  function moreText(share, interestCents) {
+    if (interestCents === 0) return 'Nothing extra';
+    if (share < 0.01) return 'Under 1% more';
+    return Math.round(share * 100) + '% more';
+  }
+
+  // ---------- Reading inputs ----------
+  class Problem extends Error {}
+
+  function readMoney(text, name, { optional = false } = {}) {
+    const t = text.trim();
+    if (!t) {
+      if (optional) return 0;
+      throw new Problem('Enter the ' + name + '.');
+    }
+    let cents;
+    try { cents = E.parseCents(t); } catch (e) { throw new Problem('The ' + name + ' should be a number, like 25000 or 2,500.50.'); }
+    if (cents > 100000000000) throw new Problem('The ' + name + ' can be up to $1,000,000,000.');
+    return cents;
+  }
+
+  function readInt(text, name, { min, max, optional = false, unit }) {
+    const t = text.trim();
+    if (!t) {
+      if (optional) return null;
+      throw new Problem('Enter the ' + name + '.');
+    }
+    if (!/^\d+$/.test(t)) throw new Problem('The ' + name + ' should be a whole number of ' + unit + '.');
+    const n = Number(t);
+    if (n < min || n > max) throw new Problem('The ' + name + ' can be from ' + min + ' to ' + max + ' ' + unit + '.');
+    return n;
+  }
+
+  function readRate(text, name = 'interest rate') {
+    const t = text.trim();
+    if (!t) throw new Problem('Enter the ' + name + '.');
+    let rate;
+    try { rate = E.annualRate(t); } catch (e) { throw new Problem('The ' + name + ' should be a number, like 8 or 5.49.'); }
+    if (rate.fraction > 1) throw new Problem('The ' + name + ' can be up to 100%.');
+    return rate;
+  }
+
+  // ---------- Shared result pieces ----------
+  function blocksHtml(groups, { cols = 25, chunky = false, label }) {
+    let cells = '';
+    for (const [count, kind] of groups) {
+      for (let i = 0; i < count; i++) cells += '<i class="blk ' + kind + '" style="--i:' + i + '"></i>';
+    }
+    return '<div class="blocks' + (chunky ? ' chunky' : '') + '" style="--cols:' + cols + '" role="img" aria-label="' + esc(label) + '">' + cells + '</div>';
+  }
+
+  // One gold block per 1% of the amount borrowed, capped so very long loans
+  // do not fill the screen.
+  const interestBlocks = (share, interestCents) => (interestCents === 0 ? 0 : Math.min(400, Math.max(1, Math.round(share * 100))));
+
+  function debtPicture(r, baseLabel, baseWord) {
+    const more = moreText(r.interestShare, r.totalInterestCents);
+    return '<div>' +
+      blocksHtml([[100, 'b'], [interestBlocks(r.interestShare, r.totalInterestCents), 'g']], { label: 'Blocks: 100 blue for the amount ' + baseWord + ', gold for the interest. ' + more + '.' }) +
+      '<div class="legend"><span><i class="dot b"></i>' + baseLabel + ' ' + dollars(r.principalCents) + '</span>' +
+      '<span><i class="dot g"></i>Interest ' + money(r.totalInterestCents) + '</span></div></div>';
+  }
+
+  const heroHtml = (label, value, sub, cls = '') =>
+    '<div><div class="label">' + label + '</div><div class="hero ' + cls + '">' + value + '</div>' + (sub ? '<div class="sub">' + sub + '</div>' : '') + '</div>';
+
+  const statHtml = (label, value, cls = '') => '<div class="stat"><span class="label">' + label + '</span><b class="' + cls + '">' + value + '</b></div>';
+
+  // ---------- The calculators ----------
+  const CALCS = {
+    loan: {
+      title: 'Loan',
+      blurb: 'What a fixed-rate loan costs you, payment by payment.',
+      icon: '<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9.5 15l5-6"/><circle cx="9.5" cy="9.5" r=".9"/><circle cx="14.5" cy="14.5" r=".9"/>',
+      fields: [
+        { id: 'amount', label: 'Amount', kind: 'money', value: '100,000' },
+        { id: 'rate', label: 'Interest rate', kind: 'number', unit: '%', value: '8' },
+        { id: 'years', label: 'Term', kind: 'int', unit: 'years', value: '5' },
+        { id: 'io', label: 'Interest-only first', kind: 'int', unit: 'months', value: '12' },
+      ],
+      compute(v) {
+        const principalCents = readMoney(v.amount, 'amount');
+        if (principalCents === 0) throw new Problem('Enter the amount you want to borrow.');
+        const rate = readRate(v.rate);
+        const years = readInt(v.years, 'term', { min: 1, max: 50, unit: 'years' });
+        const io = readInt(v.io, 'interest-only period', { min: 0, max: 600, optional: true, unit: 'months' }) || 0;
+        if (io >= years * 12) throw new Problem('The interest-only months must be shorter than the term.');
+        const r = E.calculateLoan({ principalCents, rate, termPeriods: years * 12, interestOnlyPeriods: io });
+        const sub = r.interestOnlyPaymentCents == null ? '' : 'after ' + io + ' interest-only ' + (io === 1 ? 'month' : 'months') + ' at ' + money(r.interestOnlyPaymentCents);
+        return {
+          html: heroHtml('Monthly payment', money(r.paymentCents), sub) +
+            debtPicture(r, 'Borrowed', 'borrowed') +
+            heroHtml('You pay back', '<span class="gold">' + moreText(r.interestShare, r.totalInterestCents) + '</span>', 'than you borrowed. ' + money(r.totalPaidCents) + ' in total.'),
+          breakdown: { schedule: r.schedule, baseLabel: 'Principal', baseTotal: r.principalCents, noun: 'Month' },
+        };
+      },
+    },
+
+    mortgage: {
+      title: 'Mortgage',
+      blurb: 'Your payment, what you still owe when the term ends, and the interest along the way.',
+      icon: '<path d="M3.5 11L12 4l8.5 7"/><path d="M6 9.5V20h12V9.5"/>',
+      fields: [
+        { id: 'price', label: 'Home price', kind: 'money', value: '400,000' },
+        { id: 'down', label: 'Down payment', kind: 'money', value: '100,000' },
+        { id: 'rate', label: 'Interest rate', kind: 'number', unit: '%', value: '5' },
+        { id: 'amort', label: 'Amortization', kind: 'int', unit: 'years', value: '25' },
+        { id: 'term', label: 'Term', kind: 'int', unit: 'years', value: '5' },
+        { id: 'freq', label: 'Payments', kind: 'select', value: 'monthly', options: Object.entries(E.Frequency).map(([k, f]) => [k, f.label]) },
+        { id: 'comp', label: 'Interest compounds', kind: 'select', wide: true, value: '2', options: [['2', 'Twice a year (Canada, fixed rate)'], ['12', 'Monthly (US and most others)']] },
+      ],
+      compute(v) {
+        const priceCents = readMoney(v.price, 'home price');
+        if (priceCents === 0) throw new Problem('Enter the home price.');
+        const downPaymentCents = readMoney(v.down, 'down payment', { optional: true });
+        if (downPaymentCents >= priceCents) throw new Problem('The down payment must be less than the home price.');
+        const rate = readRate(v.rate);
+        const amortizationYears = readInt(v.amort, 'amortization', { min: 1, max: 40, unit: 'years' });
+        const termYears = readInt(v.term, 'term', { min: 1, max: 40, optional: true, unit: 'years' });
+        if (termYears != null && termYears > amortizationYears) throw new Problem('The term cannot be longer than the amortization.');
+        const freq = E.Frequency[v.freq];
+        const r = E.calculateMortgage({ priceCents, downPaymentCents, rate, amortizationYears, termYears, frequency: v.freq, compoundsPerYear: Number(v.comp) });
+        const heroLabel = { monthly: 'Monthly payment', semiMonthly: 'Payment twice a month', biWeekly: 'Payment every 2 weeks', acceleratedBiWeekly: 'Payment every 2 weeks', weekly: 'Weekly payment', acceleratedWeekly: 'Weekly payment' }[v.freq];
+        let termStats = '';
+        if (termYears != null && r.balanceAtTermEndCents > 0) {
+          termStats = '<div class="stats">' +
+            statHtml('Still owing after ' + plural(termYears, 'year'), money(r.balanceAtTermEndCents)) +
+            statHtml('Interest in those ' + plural(termYears, 'year'), money(r.interestOverTermCents), 'gold') + '</div>';
+        }
+        return {
+          html: heroHtml(heroLabel, money(r.paymentCents), 'on a mortgage of ' + dollars(r.principalCents) + ', paid off in ' + duration(r.payoffPeriods, freq.perYear)) +
+            termStats +
+            debtPicture(r, 'Borrowed', 'borrowed') +
+            heroHtml('You pay back', '<span class="gold">' + moreText(r.interestShare, r.totalInterestCents) + '</span>', 'than you borrowed, if the rate never changes. ' + money(r.totalPaidCents) + ' in total.'),
+          breakdown: { schedule: r.schedule, baseLabel: 'Principal', baseTotal: r.principalCents, noun: freq.perYear === 12 ? 'Month' : 'Payment' },
+        };
+      },
+    },
+
+    savings: {
+      title: 'Savings',
+      blurb: 'How regular deposits grow, and how much of the total is interest.',
+      icon: '<rect x="5" y="15.5" width="14" height="4.5" rx="2"/><rect x="5" y="9.75" width="14" height="4.5" rx="2"/><rect x="5" y="4" width="14" height="4.5" rx="2"/>',
+      fields: [
+        { id: 'start', label: 'Starting amount', kind: 'money', value: '5,000' },
+        { id: 'deposit', label: 'Monthly deposit', kind: 'money', value: '200' },
+        { id: 'rate', label: 'Interest rate', kind: 'number', unit: '%', value: '4.5' },
+        { id: 'years', label: 'For', kind: 'int', unit: 'years', value: '20' },
+      ],
+      compute(v) {
+        const initialCents = readMoney(v.start, 'starting amount', { optional: true });
+        const contributionCents = readMoney(v.deposit, 'monthly deposit', { optional: true });
+        if (initialCents === 0 && contributionCents === 0) throw new Problem('Enter a starting amount or a monthly deposit.');
+        const rate = readRate(v.rate);
+        const years = readInt(v.years, 'number of years', { min: 1, max: 60, unit: 'years' });
+        const r = E.calculateSavings({ initialCents, contributionCents, rate, years });
+        const byYear = r.schedule.byYear();
+        const top = r.finalBalanceCents || 1;
+        let deposited = initialCents;
+        const cols = byYear.map((y) => {
+          deposited += y.paymentCents;
+          const interestPct = (y.cumulativeInterestCents / top) * 100;
+          const depositPct = (deposited / top) * 100;
+          return '<div class="col" title="Year ' + y.period + ': ' + money(y.closingCents) + '">' +
+            (y.cumulativeInterestCents > 0 ? '<i class="g" style="height:' + interestPct.toFixed(2) + '%"></i>' : '') +
+            '<i class="b" style="height:' + depositPct.toFixed(2) + '%"></i></div>';
+        }).join('');
+        return {
+          html: heroHtml('After ' + plural(years, 'year'), money(r.finalBalanceCents), '') +
+            '<div><div class="chart" role="img" aria-label="Balance at the end of each year. Deposits in blue, interest in gold.">' + cols + '</div>' +
+            '<div class="axis"><span>Year 1</span><span>Year ' + years + '</span></div></div>' +
+            '<div class="stats">' + statHtml('<i class="dot b"></i> You put in', money(r.totalContributedCents), 'blue') +
+            statHtml('<i class="dot g"></i> Interest earned', money(r.totalInterestCents), 'gold') + '</div>',
+          breakdown: { schedule: r.schedule, baseLabel: 'Deposits', baseTotalLabel: 'Monthly deposits', baseTotal: r.schedule.totalPaidCents, noun: 'Month', savings: true },
+        };
+      },
+    },
+
+    payoff: {
+      title: 'Debt payoff',
+      blurb: 'How long a fixed payment takes to clear a balance, and what paying extra saves.',
+      icon: '<path d="M4 6h5v5h5v5h6"/><path d="M4 20h16"/>',
+      fields: [
+        { id: 'balance', label: 'Balance', kind: 'money', value: '5,000' },
+        { id: 'rate', label: 'Interest rate', kind: 'number', unit: '%', value: '19.99' },
+        { id: 'payment', label: 'Monthly payment', kind: 'money', value: '150' },
+        { id: 'extra', label: 'Extra each month', kind: 'money', value: '50' },
+        { id: 'comp', label: 'Interest compounds', kind: 'select', wide: true, value: '365', options: [['365', 'Daily (credit cards)'], ['12', 'Monthly (most loans)']] },
+      ],
+      compute(v) {
+        const balanceCents = readMoney(v.balance, 'balance');
+        if (balanceCents === 0) throw new Problem('Enter the balance you owe.');
+        const rate = readRate(v.rate);
+        const paymentCents = readMoney(v.payment, 'monthly payment');
+        if (paymentCents === 0) throw new Problem('Enter the monthly payment.');
+        const extraPaymentCents = readMoney(v.extra, 'extra payment', { optional: true });
+        const input = { balanceCents, rate, paymentCents, compoundsPerYear: Number(v.comp) };
+        let r;
+        try {
+          r = E.calculateDebtPayoff({ ...input, extraPaymentCents });
+        } catch (e) {
+          if (!(e instanceof E.PaymentTooSmallError)) throw e;
+          throw new Problem('A payment of ' + money(e.paymentCents) + ' never clears this debt, because one month of interest is ' + money(e.interestCents) + '. Pay at least ' + money(e.minimumPaymentCents) + ' a month.');
+        }
+        let saving = '';
+        if (extraPaymentCents > 0) {
+          try {
+            const base = E.calculateDebtPayoff(input);
+            const months = base.periods - r.periods;
+            saving = '<p class="note">The extra ' + money(extraPaymentCents) + ' a month saves <span class="gold">' + money(base.totalInterestCents - r.totalInterestCents) + '</span> of interest and clears the debt ' + (months > 0 ? duration(months, 12) + ' sooner' : 'in the same number of months') + '.</p>';
+          } catch (e) {
+            if (!(e instanceof E.PaymentTooSmallError)) throw e;
+            saving = '<p class="note">Without the extra ' + money(extraPaymentCents) + ', the ' + money(paymentCents) + ' payment would not cover the interest and the debt would never be cleared.</p>';
+          }
+        }
+        return {
+          html: heroHtml('Paid off in', duration(r.periods, 12), 'paying ' + money(paymentCents + extraPaymentCents) + ' a month', 'small') +
+            saving +
+            debtPicture(r, 'Balance', 'owed') +
+            heroHtml('You pay back', '<span class="gold">' + moreText(r.interestShare, r.totalInterestCents) + '</span>', 'than you owe today. ' + money(r.totalPaidCents) + ' in total.'),
+          breakdown: { schedule: r.schedule, baseLabel: 'Principal', baseTotal: r.principalCents, noun: 'Month' },
+        };
+      },
+    },
+
+    compare: {
+      title: 'Compare rates',
+      blurb: 'The same loan at two interest rates, side by side.',
+      icon: '<rect x="5" y="10" width="5" height="10" rx="1"/><rect x="14" y="4" width="5" height="16" rx="1"/>',
+      fields: [
+        { id: 'amount', label: 'Amount', kind: 'money', value: '100,000' },
+        { id: 'years', label: 'Term', kind: 'int', unit: 'years', value: '5' },
+        { id: 'rateA', label: 'Rate A', kind: 'number', unit: '%', value: '6' },
+        { id: 'rateB', label: 'Rate B', kind: 'number', unit: '%', value: '8' },
+      ],
+      compute(v) {
+        const principalCents = readMoney(v.amount, 'amount');
+        if (principalCents === 0) throw new Problem('Enter the amount you want to borrow.');
+        const years = readInt(v.years, 'term', { min: 1, max: 50, unit: 'years' });
+        const rateA = readRate(v.rateA, 'rate A');
+        const rateB = readRate(v.rateB, 'rate B');
+        const run = (rate) => E.calculateLoan({ principalCents, rate, termPeriods: years * 12 });
+        const a = run(rateA);
+        const b = run(rateB);
+        const rows = Math.max(1, Math.ceil(Math.max(interestBlocks(a.interestShare, a.totalInterestCents), interestBlocks(b.interestShare, b.totalInterestCents)) / 10));
+        const side = (r, text) =>
+          '<div class="side"><div class="rate">' + esc(text.trim().replace('%', '')) + '%</div>' +
+          '<div class="stack" style="--rows:' + rows + '">' + blocksHtml([[interestBlocks(r.interestShare, r.totalInterestCents), 'g']], { cols: 10, chunky: true, label: 'Interest is ' + Math.round(r.interestShare * 100) + '% of the amount borrowed.' }) + '</div>' +
+          statHtml('Interest', money(r.totalInterestCents), 'gold') +
+          statHtml('Monthly payment', money(r.paymentCents)) +
+          statHtml('Total repaid', money(r.totalPaidCents)) + '</div>';
+        const gap = Math.abs(b.totalInterestCents - a.totalInterestCents);
+        const payGap = Math.abs(b.paymentCents - a.paymentCents);
+        const verdict = gap === 0
+          ? heroHtml('The two rates cost', 'The same', '')
+          : heroHtml('The higher rate costs you', '<span class="gold">' + money(gap) + '</span>', 'more interest over ' + plural(years, 'year') + ', and ' + money(payGap) + ' more every month.');
+        return {
+          html: '<div class="versus">' + side(a, v.rateA) + side(b, v.rateB) + '</div>' +
+            '<p class="sub">Each block is interest worth 1% of the amount borrowed.</p>' + verdict,
+          breakdown: null,
+        };
+      },
+    },
+  };
+
+  // ---------- State ----------
+  const STORE = 'oakridge-calculator-v1';
+  const state = { active: 'loan', values: {}, byYear: true, openYear: null };
+  for (const [id, calc] of Object.entries(CALCS)) {
+    state.values[id] = Object.fromEntries(calc.fields.map((f) => [f.id, f.value]));
+  }
+  try {
+    const saved = JSON.parse(localStorage.getItem(STORE) || 'null');
+    if (saved && typeof saved === 'object') {
+      if (CALCS[saved.active]) state.active = saved.active;
+      if (typeof saved.byYear === 'boolean') state.byYear = saved.byYear;
+      for (const [id, calc] of Object.entries(CALCS)) {
+        for (const f of calc.fields) {
+          const value = saved.values && saved.values[id] && saved.values[id][f.id];
+          if (typeof value !== 'string') continue;
+          if (f.kind === 'select' && !f.options.some(([key]) => key === value)) continue;
+          state.values[id][f.id] = value.slice(0, 24);
+        }
+      }
+    }
+  } catch (e) { /* storage unavailable: start from the defaults */ }
+
+  function save() {
+    try { localStorage.setItem(STORE, JSON.stringify({ active: state.active, values: state.values, byYear: state.byYear })); } catch (e) { /* ignore */ }
+  }
+
+  // ---------- Number pad ----------
+  // On touch screens the page shows its own number pad and asks the system
+  // keyboard to stay closed (inputmode="none"). With a mouse or a physical
+  // keyboard nothing changes.
+  const coarse = window.matchMedia('(pointer: coarse)');
+  const usePad = () => coarse.matches;
+  const pad = $('pad');
+  let padInput = null;
+
+  function showPad(input) {
+    padInput = input;
+    pad.hidden = false;
+    pad.querySelector('[data-key="."]').disabled = input.dataset.kind === 'int';
+    const inputs = [...$('fields').querySelectorAll('input')];
+    $('pad-next').textContent = inputs.indexOf(input) === inputs.length - 1 ? 'Done' : 'Next';
+    document.documentElement.style.setProperty('--pad', pad.offsetHeight + 'px');
+    input.scrollIntoView({ block: 'nearest' });
+  }
+
+  function hidePad() {
+    padInput = null;
+    pad.hidden = true;
+    document.documentElement.style.removeProperty('--pad');
+  }
+
+  function padPress(key) {
+    const input = padInput;
+    if (!input) return;
+    if (key === 'next' || key === 'done') {
+      const inputs = [...$('fields').querySelectorAll('input')];
+      const next = key === 'next' ? inputs[inputs.indexOf(input) + 1] : null;
+      if (next) { next.focus(); next.select(); } else { input.blur(); hidePad(); }
+      return;
+    }
+    const start = input.selectionStart == null ? input.value.length : input.selectionStart;
+    const end = input.selectionEnd == null ? start : input.selectionEnd;
+    if (key === 'del') {
+      if (start === end && start === 0) return;
+      input.setRangeText('', start === end ? start - 1 : start, end, 'end');
+    } else {
+      const rest = input.value.slice(0, start) + input.value.slice(end);
+      if (key === '.' && (input.dataset.kind === 'int' || rest.includes('.'))) return;
+      if (rest.length + key.length > 24) return;
+      input.setRangeText(key, start, end, 'end');
+    }
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+  }
+
+  // Keys never take focus from the field, so the caret stays where it is.
+  let holdTimer = null;
+  let holdRepeat = null;
+  let heldDelete = false;
+  const stopHold = () => { clearTimeout(holdTimer); clearInterval(holdRepeat); holdTimer = holdRepeat = null; };
+  pad.addEventListener('pointerdown', (e) => {
+    e.preventDefault();
+    const button = e.target.closest('button[data-key="del"]');
+    if (!button) return;
+    heldDelete = false;
+    stopHold();
+    holdTimer = setTimeout(() => {
+      heldDelete = true;
+      holdRepeat = setInterval(() => padPress('del'), 70);
+    }, 450);
+  });
+  for (const type of ['pointerup', 'pointercancel', 'pointerleave']) pad.addEventListener(type, stopHold);
+  pad.addEventListener('click', (e) => {
+    const button = e.target.closest('button[data-key]');
+    if (!button || button.disabled) return;
+    if (button.dataset.key === 'del' && heldDelete) { heldDelete = false; return; }
+    padPress(button.dataset.key);
+  });
+
+  const padShouldStay = () => {
+    const active = document.activeElement;
+    return pad.contains(active) || (active && active.matches && active.matches('#fields input'));
+  };
+  $('fields').addEventListener('focusin', (e) => {
+    if (usePad() && e.target.matches('input')) showPad(e.target); else hidePad();
+  });
+  const maybeHide = () => setTimeout(() => { if (!padShouldStay()) hidePad(); }, 0);
+  $('fields').addEventListener('focusout', maybeHide);
+  pad.addEventListener('focusout', maybeHide);
+  // A tap anywhere outside the fields and the pad puts the pad away.
+  document.addEventListener('pointerdown', (e) => {
+    if (padInput && !pad.contains(e.target) && !e.target.closest('.field')) padInput.blur();
+  });
+  coarse.addEventListener('change', () => { hidePad(); renderFields(); });
+
+  // ---------- Rendering ----------
+  function renderNav() {
+    $('nav').innerHTML = Object.entries(CALCS).map(([id, calc]) =>
+      '<button type="button" data-calc="' + id + '"' + (id === state.active ? ' aria-current="page"' : '') + '>' +
+      '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + calc.icon + '</svg>' +
+      esc(calc.title) + '</button>').join('');
+    // On narrow screens the list scrolls sideways: keep the current one in view.
+    const nav = $('nav');
+    const current = nav.querySelector('[aria-current="page"]');
+    if (current && nav.scrollWidth > nav.clientWidth) {
+      nav.scrollLeft = current.offsetLeft - (nav.clientWidth - current.offsetWidth) / 2;
+    }
+  }
+
+  function renderFields() {
+    const calc = CALCS[state.active];
+    const values = state.values[state.active];
+    $('calc-title').textContent = calc.title;
+    $('calc-blurb').textContent = calc.blurb;
+    $('fields').innerHTML = calc.fields.map((f) => {
+      const id = 'f-' + f.id;
+      let control;
+      if (f.kind === 'select') {
+        control = '<select id="' + id + '" data-field="' + f.id + '">' + f.options.map(([key, text]) => '<option value="' + esc(key) + '"' + (values[f.id] === key ? ' selected' : '') + '>' + esc(text) + '</option>').join('') + '</select>';
+      } else {
+        control = '<span class="row">' + (f.kind === 'money' ? '<span class="unit">$</span>' : '') +
+          '<input id="' + id + '" data-field="' + f.id + '" data-kind="' + f.kind + '" type="text" inputmode="' + (usePad() ? 'none' : f.kind === 'int' ? 'numeric' : 'decimal') + '" autocomplete="off" maxlength="24" value="' + esc(values[f.id]) + '">' +
+          (f.unit ? '<span class="unit">' + f.unit + '</span>' : '') + '</span>';
+      }
+      return '<label class="field' + (f.wide ? ' wide' : '') + '" for="' + id + '"><span>' + esc(f.label) + '</span>' + control + '</label>';
+    }).join('');
+  }
+
+  let breakdown = null;
+
+  function renderResult({ intro = false } = {}) {
+    const calc = CALCS[state.active];
+    const result = $('result');
+    let view;
+    try {
+      view = calc.compute(state.values[state.active]);
+    } catch (e) {
+      if (!(e instanceof Problem)) console.error(e);
+      view = { html: '<p class="problem">' + esc(e instanceof Problem ? e.message : 'Those numbers do not work together. Check them and try again.') + '</p>', breakdown: null };
+    }
+    result.classList.toggle('intro', intro);
+    result.innerHTML = view.html;
+    breakdown = view.breakdown;
+    $('main').classList.toggle('solo', !breakdown);
+    renderBreakdown();
+  }
+
+  function rowsTable(bd, rows) {
+    return '<table><thead><tr><th scope="col">' + bd.noun + '</th><th scope="col">Interest</th><th scope="col">' + (bd.savings ? 'Deposit' : 'Principal') + '</th><th scope="col">Balance</th></tr></thead><tbody>' +
+      rows.map((r) => '<tr><td>' + r.period + '</td><td class="gold">' + money(r.interestCents) + '</td><td class="blue">' + money(r.principalCents) + '</td><td>' + money(r.closingCents) + '</td></tr>').join('') +
+      '</tbody></table>';
+  }
+
+  function renderBreakdown() {
+    const el = $('breakdown');
+    const bd = breakdown;
+    el.hidden = !bd;
+    if (!bd) { el.innerHTML = ''; return; }
+    const schedule = bd.schedule;
+    let body;
+    if (state.byYear) {
+      const years = schedule.byYear();
+      if (!years.some((y) => y.period === state.openYear)) state.openYear = null;
+      const largest = Math.max(1, ...years.map((y) => y.interestCents + y.principalCents));
+      body = '<ol class="years">' + years.map((y) => {
+        const open = y.period === state.openYear;
+        const width = Math.max(2, ((y.interestCents + y.principalCents) / largest) * 100);
+        const interest = y.interestCents > 0 ? '<i class="g" style="flex:' + y.interestCents + ' 1 0"></i>' : '';
+        const interestText = '<span class="gold">Interest ' + money(y.interestCents) + '</span>';
+        const baseText = '<span class="blue">' + bd.baseLabel + ' ' + money(y.principalCents) + '</span>';
+        const base = y.principalCents > 0 ? '<i class="b" style="flex:' + y.principalCents + ' 1 0"></i>' : '';
+        return '<li class="yr"><button type="button" class="yr-btn" data-year="' + y.period + '" aria-expanded="' + open + '">' +
+          '<span class="yr-top"><b>Year ' + y.period + '</b><span class="muted">Balance ' + money(y.closingCents) +
+          '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 9l7 7 7-7"/></svg></span></span>' +
+          '<span class="bar" style="width:' + width.toFixed(2) + '%">' +
+          (bd.savings ? base + interest : interest + base) + '</span>' +
+          '<span class="yr-nums">' + (bd.savings ? baseText + interestText : interestText + baseText) + '</span></button>' +
+          (open ? '<div class="yr-rows">' + rowsTable(bd, schedule.rows.slice(y.firstRow, y.firstRow + y.rowCount)) + '</div>' : '') + '</li>';
+      }).join('') + '</ol>';
+    } else {
+      body = '<div class="scroll" tabindex="0" role="region" aria-label="Every ' + bd.noun.toLowerCase() + '">' + rowsTable(bd, schedule.rows) + '</div>';
+    }
+    el.innerHTML = '<div class="bd-head"><h2 id="bd-title">Breakdown</h2>' +
+      '<div class="seg"><button type="button" data-view="period" aria-pressed="' + !state.byYear + '">By ' + bd.noun.toLowerCase() + '</button>' +
+      '<button type="button" data-view="year" aria-pressed="' + state.byYear + '">By year</button></div>' +
+      '<div class="stats">' + statHtml('Interest', money(schedule.totalInterestCents), 'gold') + statHtml(bd.baseTotalLabel || bd.baseLabel, money(bd.baseTotal), 'blue') + '</div></div>' + body;
+  }
+
+  function open(id) {
+    state.active = id;
+    state.openYear = null;
+    renderNav();
+    renderFields();
+    renderResult({ intro: true });
+    save();
+  }
+
+  // ---------- Events ----------
+  $('nav').addEventListener('click', (e) => {
+    const button = e.target.closest('button[data-calc]');
+    if (button && button.dataset.calc !== state.active) {
+      open(button.dataset.calc);
+      window.scrollTo(0, 0);
+    }
+  });
+
+  const onField = (e) => {
+    const field = e.target.dataset && e.target.dataset.field;
+    if (!field) return;
+    state.values[state.active][field] = e.target.value;
+    renderResult();
+    save();
+  };
+  $('fields').addEventListener('input', onField);
+  $('fields').addEventListener('change', onField);
+
+  // Tidy money fields when the user leaves them: 100000 becomes 100,000.
+  $('fields').addEventListener('focusout', (e) => {
+    if (!e.target.dataset || e.target.dataset.kind !== 'money') return;
+    try {
+      const cents = E.parseCents(e.target.value);
+      const tidy = group(Math.floor(cents / 100)) + (cents % 100 ? '.' + String(cents % 100).padStart(2, '0') : '');
+      if (tidy !== e.target.value) {
+        e.target.value = tidy;
+        state.values[state.active][e.target.dataset.field] = tidy;
+        save();
+      }
+    } catch (err) { /* leave what was typed */ }
+  });
+
+  $('breakdown').addEventListener('click', (e) => {
+    const view = e.target.closest('button[data-view]');
+    if (view) {
+      state.byYear = view.dataset.view === 'year';
+      renderBreakdown();
+      save();
+      const again = $('breakdown').querySelector('button[data-view="' + view.dataset.view + '"]');
+      if (again) again.focus();
+      return;
+    }
+    const year = e.target.closest('button[data-year]');
+    if (year) {
+      const n = Number(year.dataset.year);
+      state.openYear = state.openYear === n ? null : n;
+      renderBreakdown();
+      const again = $('breakdown').querySelector('button[data-year="' + n + '"]');
+      if (again) again.focus();
+    }
+  });
+
+  open(state.active);
+})();
+<\/script>
+</body>
+</html>
+
+</script>
+
+<script type="text/plain" id="embed-pa001">
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>PA001 Why Is Everything So Expensive?</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;700&family=IBM+Plex+Sans+Condensed:wght@500;600&family=IBM+Plex+Sans:wght@400;500&display=swap">
+<style>
+/* Layout: one screen. Black stage fills the top, a fixed-height caption and transport panel sits below it. Single dark look by choice: the black stage is the brand. */
+:root{
+  color-scheme:dark;
+  --void:#000000;
+  --surface:#12161D;
+  --line:#262d39;
+  --ink:#F5F7FA;
+  --dim:#98a2b1;
+  --gold:#D4AF37;
+  --blue:#3B82F6;
+  --ember:#FF7A33;
+  --f-label:"IBM Plex Sans Condensed","Arial Narrow",system-ui,sans-serif;
+  --f-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-num:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{margin:0;background:var(--void);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.45;overflow:hidden}
+#app{height:100%;display:flex;flex-direction:column;min-height:0}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+
+.bar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 16px;border-bottom:1px solid var(--line)}
+.bar .id{min-width:0;min-height:3.9em}
+@media (min-width:700px){.bar .id{min-height:0}}
+.tag{font-family:var(--f-label);font-weight:500;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);display:block}
+h1{font-family:var(--f-label);font-weight:600;font-size:1.15rem;letter-spacing:.02em;margin:0;text-wrap:balance}
+.bar-actions{display:flex;gap:6px;flex:none}
+.ghost{background:transparent;border:1px solid var(--line);border-radius:4px;padding:8px 10px;font-family:var(--f-label);font-weight:500;font-size:.85rem;letter-spacing:.06em;text-transform:uppercase}
+.ghost:hover{border-color:var(--dim)}
+.ghost[aria-pressed="true"]{border-color:var(--blue);color:var(--blue)}
+.ghost:disabled{opacity:.35;cursor:default}
+
+#stage{flex:1;min-height:0;position:relative;background:var(--void)}
+#c{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:grab}
+#hint{position:absolute;left:16px;bottom:10px;font-family:var(--f-label);font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);pointer-events:none;transition:opacity .6s}
+#nogl{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:16px;text-align:center;color:var(--dim)}
+
+.panel{border-top:1px solid var(--line);padding-block:12px 14px;padding-inline:16px;display:flex;flex-direction:column;gap:10px}
+.panel>*{width:100%;max-width:760px;margin-inline:auto}
+.hud{display:flex;flex-wrap:wrap;gap:6px 18px;min-height:1.5em;font-family:var(--f-label);font-size:.74rem;letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
+.hud b{font-family:var(--f-num);font-weight:500;font-size:.92rem;letter-spacing:0;color:var(--ink);font-variant-numeric:tabular-nums;margin-left:6px}
+.hud .gold b{color:var(--gold)}
+#cap{margin-block:0;font-size:clamp(1rem,2.4vw,1.2rem);min-height:5.8em}
+@media (min-width:700px){#cap{min-height:3.1em}}
+.pips{display:flex;gap:4px}
+.pips button{flex:1;height:22px;padding:0;border:0;background:transparent;position:relative;min-width:0;--f:0%}
+.pips button::after{content:"";position:absolute;left:0;right:0;top:9px;height:4px;background:linear-gradient(to right,var(--dim) var(--f),var(--line) var(--f))}
+.pips button.now::after{background:linear-gradient(to right,var(--ink) var(--f),var(--line) var(--f))}
+.controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.count{font-family:var(--f-num);font-size:.82rem;color:var(--dim);font-variant-numeric:tabular-nums;margin-left:4px}
+#next{flex:1 1 170px;min-width:0;margin-left:auto;background:var(--ink);color:#000;border:0;border-radius:4px;padding:11px 16px;font-family:var(--f-label);font-weight:600;font-size:.95rem;letter-spacing:.06em;text-transform:uppercase}
+#next.act{background:var(--blue)}
+#next:hover{filter:brightness(1.08)}
+
+.over{position:fixed;inset:0;z-index:5;background:rgba(0,0,0,.72);display:flex;justify-content:flex-end}
+.over .sheet{width:min(560px,100%);height:100%;overflow-y:auto;background:var(--surface);border-left:1px solid var(--line);padding-block:calc(16px + env(safe-area-inset-top,0px)) 32px;padding-inline:16px}
+.over header{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:6px}
+.over h2{font-family:var(--f-label);font-weight:600;font-size:1.2rem;margin:0}
+.over h3{font-family:var(--f-label);font-weight:600;font-size:.8rem;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);margin:22px 0 8px}
+.over p{margin:0 0 8px;color:var(--dim);font-size:.92rem}
+.over ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:12px}
+.over li{font-size:.92rem;border-top:1px solid var(--line);padding-top:10px}
+.over li b{display:block;font-weight:500;color:var(--ink)}
+.over li span{color:var(--dim)}
+.over kbd{font-family:var(--f-num);font-size:.8rem;border:1px solid var(--line);border-radius:3px;padding:1px 5px;color:var(--ink)}
+.over .foot{margin-top:26px;padding-top:14px;border-top:1px solid var(--line)}
+.over li i{font-style:normal;font-family:var(--f-label);font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);display:block;margin-bottom:2px}
+@media (prefers-reduced-motion:reduce){#hint{transition:none}}
+</style>
+
+<div id="app">
+  <header class="bar">
+    <div class="id">
+      <span class="tag">PA001 · Paced Animation</span>
+      <h1 id="seg">Something changed</h1>
+    </div>
+    <div class="bar-actions">
+      <button class="ghost" id="voiceBtn" aria-pressed="false" hidden>Voice</button>
+      <button class="ghost" id="mapBtn" aria-pressed="false">Map</button>
+      <button class="ghost" id="helpBtn">Help</button>
+    </div>
+  </header>
+
+  <main id="stage">
+    <canvas id="c" aria-label="3D miniature model of an economy: a bread supply chain, a town of six sellers, and a restaurant"></canvas>
+    <div id="hint">Drag to look around · Tap anything to look closer</div>
+    <div id="nogl" hidden>This prototype needs WebGL, which this browser or view has switched off.</div>
+  </main>
+
+  <section class="panel">
+    <div class="hud" id="hud"></div>
+    <p id="cap" aria-live="polite"></p>
+    <div class="pips" id="pips"></div>
+    <div class="controls">
+      <button class="ghost" id="back">Back</button>
+      <button class="ghost" id="pause" aria-pressed="false">Pause</button>
+      <button class="ghost" id="replay">Replay</button>
+      <span class="count" id="count"></span>
+      <button id="next">Next</button>
+    </div>
+  </section>
+</div>
+
+<div id="help" class="over" hidden>
+  <div class="sheet" role="dialog" aria-labelledby="helpTitle">
+    <header><h2 id="helpTitle">How to use this</h2><button class="ghost" id="helpClose">Close</button></header>
+    <p>This is a model you can move through at your own speed. Nothing plays until you ask it to.</p>
+    <h3>Moving through the story</h3>
+    <ul>
+      <li><b>Next and Back</b><span>Move one step at a time. On a keyboard use <kbd>→</kbd> and <kbd>←</kbd>.</span></li>
+      <li><b>The chapter bar</b><span>The ten segments above the buttons are the ten chapters. Tap any segment to jump to the start of that chapter.</span></li>
+      <li><b>Pause and Replay</b><span>Pause freezes the scene where it is. Replay runs the current step again from the start. <kbd>Space</kbd> also pauses.</span></li>
+    </ul>
+    <h3>Exploring the scene</h3>
+    <ul>
+      <li><b>Drag to look around</b><span>Drag anywhere on the scene with a finger or the mouse to swing the camera around what you are looking at. It settles back when you move to the next step.</span></li>
+      <li><b>Tap anything to look closer</b><span>Tap a building, a stack of blocks or a group of people to fly to it and read what it is. Press Return to the story to pick up where you left off.</span></li>
+      <li><b>Map</b><span>Shows the whole world you are in, with every station named. <kbd>M</kbd> on a keyboard.</span></li>
+    </ul>
+    <h3>Making changes yourself</h3>
+    <ul>
+      <li><b>The blue ring and the blue button</b><span>When a blue ring appears in the scene, the next change is yours to make. Tap inside the ring, or press the blue button below. Both do the same thing.</span></li>
+    </ul>
+    <h3>Reading the model</h3>
+    <ul>
+      <li><b>Gold is money</b><span>Gold plates show prices. In the gold stacks, one block is fifty cents.</span></li>
+      <li><b>Blue is information</b><span>Blue lines show what is connected. In the town, each blue column shows how far a price has moved from where it started. The white square marks the starting level.</span></li>
+      <li><b>Orange means in use</b><span>A lit oven or stove is working. A dark one is spare.</span></li>
+      <li><b>Voice</b><span>Reads each caption aloud using your device's built-in voice, where the device allows it.</span></li>
+    </ul>
+    <div class="foot"><button class="ghost" id="logBtn">Production standards log</button></div>
+  </div>
+</div>
+
+<div id="log" class="over" hidden>
+  <div class="sheet" role="dialog" aria-labelledby="logTitle">
+    <header><h2 id="logTitle">Standards log</h2><button class="ghost" id="logClose">Close</button></header>
+    <p>What this piece does against the current Praxis standards and SOPs, as read on 2026-10-08. For the production team, not for learners.</p>
+
+    <h3>Standards this prototype breaks</h3>
+    <ul>
+      <li><i>Artstyle Standard §14 · Content-to-Blender SOP</i><b>No Blender in the pipeline.</b><span>The standard workflow is script, storyboard, production spec, Blender Python, preview, render. This piece is drawn live in the browser with WebGL. Nothing is rendered ahead of time, which is what makes back, forward, pause and replay possible.</span></li>
+      <li><i>Visual Grammar §2, §14 · Artstyle §23.6</i><b>Assets are hand-built in web code, not taken from the Asset Library.</b><span>Every model here is a web-local rebuild with no PRX asset ID. The person is rebuilt to the measurements of the figure used in S001 to S003, which the CEO made the official Praxis person on 2026-10-08. The Asset Catalog and the PRX-CHAR-0001 spec do not record that yet.</span></li>
+      <li><i>Visual Grammar §12</i><b>Custom assets were not reviewed before use.</b><span>All geometry should be treated as CUSTOM_REQUIRED and unapproved: farm, bakery, ovens, energy tank, trucks, stores, shelf, loaf, price plates, block stacks, the six town stalls, the restaurant and the block-letter title.</span></li>
+      <li><i>Artstyle §13, §23.5 · Content-to-Blender core rule</i><b>No approved script, storyboard or production handoff.</b><span>All ten chapters of step copy, every camera pose and every layout were written during the build. All on-screen text is draft and is not approved content.</span></li>
+      <li><i>PA001 Activation Record, Required Redesign</i><b>Built before the interaction architecture was approved.</b><span>The record asks for the progression model, controls and reveal logic to be defined before implementation. This build is the proposal for that architecture, not an implementation of an approved one.</span></li>
+      <li><i>PA001 Activation Record, Preserved Inputs</i><b>The ten-act L001 story architecture was reused as the chapter structure.</b><span>The record keeps that document as historical input only. Its acts, its rewind and replay devices and its closing transfer were adapted here because no replacement exists yet.</span></li>
+      <li><i>L001 Story Architecture, Act 1 (locked direction)</i><b>The title reveal has no narrator cut-off and no music swell.</b><span>The pull-back and the physical title are kept. The title is built from blocks because the page cannot load a 3D typeface.</span></li>
+      <li><i>Artstyle §23.8 · Visual Grammar §15</i><b>No automated style validation.</b><span>No validator exists for web scenes, so none was run.</span></li>
+      <li><i>Artstyle §9, Sonic Identity extension</i><b>No recorded narration and no music.</b><span>The learner sets the timing and short on-screen text carries the explanation. The Voice button reads the captions with the browser's built-in voice as a stand-in. It is not the Praxis narrator.</span></li>
+      <li><i>Artstyle §9, camera direction</i><b>The camera is not fully authored.</b><span>The learner can drag to orbit and can jump to any station at any time.</span></li>
+    </ul>
+
+    <h3>Extensions that stay inside the rules</h3>
+    <ul>
+      <li><i>Artstyle §3</i><b>Three extra colours, each with one meaning.</b><span>Ember orange marks an oven or stove in use. Bread brown and wheat tan identify objects. None replaces gold, blue or white.</span></li>
+      <li><i>Cross-product semantics, block primitive</i><b>Gold blocks are money at a fixed scale.</b><span>In the cost, price and price-over-time stacks one block is $0.50. Blue columns in the town are information: each shows a price relative to where it started, exaggerated eight times so small changes are visible.</span></li>
+      <li><i>Artstyle §15</i><b>Interaction happens inside the 3D scene.</b><span>The standard allows 2D web UI for interactive blocks. The 3D requirement goes further and should be written in as a new rule for Paced Animation.</span></li>
+      <li><i>Research &amp; Scope Record</i><b>Every number is illustrative.</b><span>All prices, costs and percentage changes are model values chosen to make the mechanism visible. No historical or sourced claim is made. Interest rates, exchange rates, CPI construction and the other deferred topics are left out.</span></li>
+    </ul>
+
+    <h3>Followed</h3>
+    <ul>
+      <li><b>Black stage, semantic colour.</b><span>Pure black void and no ground plane. Gold appears only on money. Blue marks flows, information and things you can tap.</span></li>
+      <li><b>Praxis person.</b><span>The figure from S001, reused in S002 and S003: rounded-box torso 0.57 by 0.43 by 0.95, sphere head of radius 0.32 seated into it, all white, no limbs or face. Drawn at 0.85 scale. Official Praxis person by CEO decision, 2026-10-08.</span></li>
+      <li><b>Miniature model look.</b><span>Shiny plastic, primitive-led geometry, cutaway buildings with front walls and roofs removed.</span></li>
+      <li><b>Spatial narrative.</b><span>Persistent worlds that are revisited. System, story and detail views. The camera does most of the moving, and objects move only when the motion carries meaning.</span></li>
+    </ul>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"><\/script>
+<script>
+(function(){
+'use strict';
+const $=id=>document.getElementById(id);
+const stage=$('stage'), canvas=$('c');
+const T=window.THREE;
+function fail(){ $('nogl').hidden=false; canvas.hidden=true; $('hint').hidden=true; }
+let renderer=null;
+if(T){ try{ renderer=new T.WebGLRenderer({canvas,antialias:true}); }catch(e){ renderer=null; } }
+const reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ---------- content: every step is a complete world state; each chapter starts from D ---------- */
+const D={world:'bread',view:'shelf',labels:0,hud:null,shoppers:3,rival:0,stock:12,price:3,ovens:2,truck:.07,wheat:1,flour:6,energy:1,cost:2,
+  ledger:0,rivalOn:0,stairOn:0,title:0,s:[3,0,0],ti:[1,1,1,1,1,1],tp:1,tEnergy:1};
+const ONE=[1,1,1,1,1,1], Y1=[1.1333,1.075,1.2,1.025,.97,1.04], Y2=[1.156,1.0965,1.2,1.035,.96,1.06];
+const CH=[
+{t:'Something changed',s:[
+ {view:'shelf',price:3.4,stock:6,ovens:3,cap:'A loaf of bread. It used to be $3.00. Today the tag says $3.40.'},
+ {view:'store',cap:'You probably already have a theory about why.'},
+ {view:'behind',cap:'But this shelf is the last stop on a long road.'},
+ {view:'title',title:1,cap:'Which leaves you asking…'}]},
+{t:'Follow the product',s:[
+ {view:'store',price:3.4,stock:6,ovens:3,cap:'The store printed the tag. But the loaf did not start here.'},
+ {view:'road',cap:'It came in on a truck.'},
+ {view:'bakery',cap:'Before that, a bakery baked it. This bakery has four ovens. Remember that number.'},
+ {view:'farm',cap:'And before that, someone grew the wheat.'},
+ {view:'system',labels:1,cap:'All of this had to work before the loaf reached the shelf. So where could something have changed? Tap a station to look closer.'}]},
+{t:'More people want it',s:[
+ {view:'system',labels:1,hud:['price','shoppers','shelf','ovens'],cap:'Rewind to when the loaf cost $3.00. Three shoppers, a full shelf, and the bakery using two of its four ovens.'},
+ {view:'store',labels:0,hot:'shoppers',cta:'Send more shoppers',cap:'Change one thing. Send more shoppers to the store.'},
+ {shoppers:9,stock:3,cap:'Nine shoppers now. Loaves leave the shelf faster than the truck brings them.'},
+ {view:'bakery',ovens:4,truck:.16,cap:'The bakery had two ovens sitting idle. It switches them on and bakes more.'},
+ {view:'store',stock:11,cap:'The shelf refills. More people wanted bread, the system kept up, and the price stayed at $3.00.'},
+ {view:'bakery',shoppers:3,stock:12,ovens:4,truck:.1,cap:'Rewind again. Same three shoppers, same $3.00. One difference: on a normal day this bakery already needs all four ovens.'},
+ {view:'store',hot:'shoppers',cta:'Send the same shoppers',cap:'Now send the same extra shoppers.'},
+ {shoppers:9,stock:2,price:3.4,cap:'The shelf empties and stays thin. The bakery has no oven left to switch on. With more buyers than loaves, the price climbs to $3.40.'},
+ {view:'shelf',cap:'The same $3.40 tag you started with. More shoppers pushed it up only because the bakery could not keep up.'}]},
+{t:'There is less',s:[
+ {view:'system',labels:1,hud:['price','shoppers','shelf','harvest'],cap:'Rewind again. $3.00, a full shelf, three shoppers. This time the shoppers never change.'},
+ {view:'farm',labels:0,hot:'farm',cta:'Shrink the harvest',cap:'Go back to the start of the road. Give the farm a bad season.'},
+ {wheat:.4,cap:'Less wheat comes off the field.'},
+ {view:'bakery',flour:2,ovens:1,truck:.04,cap:'Less flour reaches the bakery. The ovens are fine. There is just less to bake.'},
+ {view:'store',stock:2,price:3.4,cap:'Fewer loaves reach the shelf. The same three shoppers want them, and the tag reads $3.40.'},
+ {view:'shelf',cap:'The same tag again. Last time the cause stood at the front of the store. This time it started in a field.'}]},
+{t:'Something costs more',s:[
+ {view:'system',labels:1,hud:['price','cost','shoppers','away'],cap:'Rewind once more. Shoppers are normal. The harvest is normal. Nothing is missing.'},
+ {view:'ledger',labels:0,ledger:1,cap:'So follow the money. Each loaf costs about $2.00 to make and deliver. It sells for $3.00.'},
+ {view:'bakeryE',hot:'energy',cta:'Raise the energy bill',cap:'The ovens run on energy. Raise its price.'},
+ {view:'ledger',energy:1.4,cost:2.4,cta:'Choice one: absorb it',cap:'Now each loaf costs $2.40. The pressure moves down the chain and stops at the business. It has choices.'},
+ {cta:'Choice two: adapt',cap:'Absorb it. The price stays at $3.00 and the business keeps less from every loaf.'},
+ {cost:2.2,cta:'Choice three: pass it on',cap:'Adapt. Bake at cheaper hours, waste less. The cost falls to $2.20, and some of the pressure is gone before it reaches you.'},
+ {view:'street',cost:2.4,price:3.4,rivalOn:1,cap:'Pass it on. The tag goes to $3.40. But there is another store down the street.'},
+ {shoppers:1,rival:2,cap:'It charges $3.10. Two of the three shoppers walk.'},
+ {price:3.2,shoppers:3,rival:0,cap:'So the business settles at $3.20. Part of the cost is absorbed and part is passed on.'},
+ {view:'ledger',cap:'A higher cost creates pressure. It does not decide the price. Customers and competitors get a say.'}]},
+{t:'The reveal',s:[
+ {view:'shelf',price:3.4,stock:4,cap:'Back to the shelf where you started. $3.40.'},
+ {view:'store',shoppers:9,ovens:4,stock:2,cap:'Maybe more people wanted bread than the bakery could bake.'},
+ {view:'farm',shoppers:3,wheat:.4,flour:2,ovens:1,cap:'Maybe it was a bad harvest.'},
+ {view:'ledger',wheat:1,flour:6,ovens:2,ledger:1,energy:1.4,cost:2.4,cap:'Maybe it was a bill somewhere up the chain.'},
+ {view:'shelf',ledger:0,cap:'The price tells you something changed. It does not tell you where, or why.'},
+ {world:'town',view:'town',labels:1,ti:Y1,cap:'And look around. Other prices are moving too. What if this is not about bread anymore?'}]},
+{t:'The mystery gets bigger',s:[
+ {world:'town',view:'town',labels:1,cta:'Let a year pass',cap:'A small economy. Six things people buy. Start every price where it was. The blue columns will show how far each one moves.'},
+ {ti:Y1,cap:'A year passes. Fuel jumps. Bread and meals climb. The chair barely moves. The TV got cheaper.'},
+ {cap:'Prices are not marching together. But most of them are rising.'},
+ {cap:'That broad rise has a name: inflation.'},
+ {cap:'Notice what the word does. It describes the pattern. It still does not tell you the cause.'}]},
+{t:'The whole economy',s:[
+ {world:'town',view:'town',labels:1,cta:'Send more spending',cap:'Rewind the whole town. You have already seen what moves one price. Now run it everywhere.'},
+ {tp:3,ti:[1.08,1.1,1.05,1.03,1,1.08],cap:'More spending arrives at every counter at once. Where sellers cannot keep up, prices rise.'},
+ {view:'tenergy',tp:1,ti:ONE,hot:'tenergy',cta:'Raise the price of energy',cap:'Rewind. Now pick one cost that touches almost everything: energy.'},
+ {view:'town',tEnergy:1.4,ti:[1.08,1.05,1.2,1.02,1,1.04],cap:'It reaches ovens, kitchens, trucks and fuel pumps. But not equally. Some sellers absorb it. Some barely use it.'},
+ {tp:3,ti:[1.16,1.15,1.25,1.05,1,1.12],cap:'And nothing says only one thing happens at a time. More spending and a cost shock can arrive together.'},
+ {cap:'The whole economy feels the same kinds of pressure you saw in one loaf, across many sellers at once.'}]},
+{t:'Still high',s:[
+ {world:'town',view:'town',labels:1,ti:Y1,cta:'Let another year pass',cap:'Go back to the year prices jumped.'},
+ {ti:Y2,cap:'The next year is calmer. Most prices rise only a little. Fuel does not move at all.'},
+ {world:'bread',view:'shelf',labels:0,price:3.47,stock:8,cap:'The news says inflation is down. So you go back to the shelf. $3.47. Not $3.00.'},
+ {view:'stair',stairOn:1,s:[3,3.4,0],cap:'Here is the same loaf over time. $3.00, then $3.40.'},
+ {s:[3,3.4,3.47],cap:'Then $3.47.'},
+ {cap:'The second step up was smaller. That is what lower inflation means. Nobody took the first step back down.'}]},
+{t:'Your turn',s:[
+ {world:'rest',view:'rest',labels:1,cap:'A different price. Dinner at a restaurant near you was $20.00. Now it is $21.50.'},
+ {labels:0,cap:'This time nobody is going to tell you why. But you know what to ask.'},
+ {view:'rdiners',cap:'Did more people want it?'},
+ {view:'rkitchen',cap:'Could the kitchen keep up?'},
+ {view:'rsupplier',cap:'Did something upstream get more expensive?'},
+ {view:'rmenu',cap:'How much of that reached the menu?'},
+ {view:'rcafe',cap:'Was there somewhere else to eat?'},
+ {world:'town',view:'town',labels:1,ti:Y1,cap:'Are many other prices moving too?'},
+ {world:'rest',view:'rmenu',labels:0,cap:'A higher price is not the explanation. It is where the investigation begins.'}]}
+];
+const S=[],CHS=[];
+CH.forEach((c,ci)=>{let p=D;CHS.push(S.length);c.s.forEach(r=>{p=Object.assign({},p,{cta:null,hot:null},r,{ch:ci});S.push(p);});});
+const MAPV={bread:'system',town:'town',rest:'rest'};
+const INFO={
+ store:{view:'store',cap:'Store. It sets the shelf price, and it can only sell what arrives.'},
+ shoppers:{view:'store',cap:'Shoppers. Each one wants a loaf.'},
+ road:{view:'road',cap:'Delivery. A truck moves loaves from the bakery to the store.'},
+ bakery:{view:'bakery',cap:'Bakery. Four ovens. A lit oven is in use. A dark oven is spare capacity.'},
+ farm:{view:'farm',cap:'Farm. It grows the wheat the bakery turns into bread.'},
+ energy:{view:'bakeryE',cap:'Energy. The ovens cannot run without it, so its price is part of every loaf.'},
+ ledger:{view:'ledger',cap:'Cost and price. One gold block is fifty cents. The gap between the stacks is what the business keeps.'},
+ rival:{view:'street',cap:'The other store. It sells the same loaf, which limits how far this price can rise.'},
+ stair:{view:'stair',cap:'The same loaf over time. One gold block is fifty cents.'},
+ t0:{view:'t0',cap:'Bread. Started at $3.00.'},t1:{view:'t1',cap:'A restaurant meal. Started at $20.00.'},
+ t2:{view:'t2',cap:'Fuel. Started at $1.50 a litre.'},t3:{view:'t3',cap:'A chair. Started at $80.00.'},
+ t4:{view:'t4',cap:'A television. Started at $400.'},t5:{view:'t5',cap:'A cup of coffee. Started at $2.50.'},
+ tenergy:{view:'tenergy',cap:'Energy. A blue line runs from here to every seller in town.'},
+ rdiners:{view:'rdiners',cap:'The dining room.'},rkitchen:{view:'rkitchen',cap:'The kitchen. Two stoves.'},
+ rsupplier:{view:'rsupplier',cap:'The supplier who delivers the ingredients.'},rmenu:{view:'rmenu',cap:'The menu price.'},
+ rcafe:{view:'rcafe',cap:'Another place to eat, just down the street.'}
+};
+const V={
+ shelf:{t:[0,1.45,6.2],hw:1.9,hh:1.5,az:.3,el:.12},
+ store:{t:[0,1,11.5],hw:4.4,hh:5.2,az:.42,el:.55},
+ road:{t:[7,.6,-2],hw:3,hh:7,az:.2,el:.6,wide:{hw:11.5,hh:3.8,az:1.15,el:.5}},
+ bakery:{t:[0,1.3,-12],hw:4.3,hh:3.1,az:.45,el:.35},
+ bakeryE:{t:[-1.7,1.3,-12],hw:5.9,hh:3.3,az:.3,el:.4},
+ farm:{t:[0,1.2,-30],hw:4.5,hh:3.3,az:.5,el:.4},
+ system:{t:[2.5,0,-5],hw:8.4,hh:23.5,az:.08,el:.8,wide:{hw:30,hh:13,az:1.05,el:.55}},
+ behind:{t:[3,0,-8],hw:9,hh:14,az:.35,el:.4,wide:{hw:22,hh:9,az:.9,el:.35}},
+ title:{t:[2.5,44,-8],hw:26,hh:11,az:0,el:.06},
+ ledger:{t:[-10,1.8,-2],hw:3.6,hh:2.9,az:.2,el:.22},
+ street:{t:[-4.5,1,13.5],hw:8.8,hh:5.8,az:.25,el:.6},
+ stair:{t:[-11,2.1,6.5],hw:5,hh:3.3,az:.15,el:.2},
+ town:{t:[90,0,0],hw:11,hh:14,az:.1,el:.8,wide:{hw:20,hh:11,az:1.05,el:.55}},
+ tenergy:{t:[90,1,0],hw:4.2,hh:3.2,az:.4,el:.45},
+ rest:{t:[89.5,1,70.5],hw:11,hh:6.8,az:.3,el:.55},
+ rdiners:{t:[88.4,.9,70.4],hw:3.9,hh:3,az:.35,el:.45},
+ rkitchen:{t:[92.6,1.1,67.2],hw:2.8,hh:2.2,az:.3,el:.35},
+ rsupplier:{t:[97.4,.8,70.4],hw:3,hh:4,az:.5,el:.5},
+ rmenu:{t:[88.4,1.9,66.2],hw:2.3,hh:1.5,az:.15,el:.1},
+ rcafe:{t:[81,1.2,71.5],hw:3.6,hh:3,az:.3,el:.4}
+};
+const STALL=[['BREAD',-6.5,-11,3],['MEAL',6.5,-11,20],['FUEL',-6.5,0,1.5],['CHAIR',6.5,0,80],['TV',-6.5,11,400],['COFFEE',6.5,11,2.5]];
+STALL.forEach((q,i)=>{V['t'+i]={t:[90+q[1],1.2,q[2]],hw:3.6,hh:3,az:.4,el:.4};});
+const money=v=>v>=100?'$'+Math.round(v):'$'+v.toFixed(2);
+
+/* ---------- UI state ---------- */
+let idx=0, inspect=null, paused=false, voice=false, lastCap='', hudKey='';
+const NUM=['stock','price','truck','wheat','flour','energy','cost','ledger','rivalOn','stairOn','title','labels','tp','tEnergy'], ARR=['s','ti'];
+const cur={};
+function setCur(s){NUM.forEach(k=>{cur[k]=s[k];});ARR.forEach(k=>{cur[k]=s[k].slice();});}
+setCur(S[0]);
+const HF={
+ price:['Price',()=>'$'+cur.price.toFixed(2),'gold'],shoppers:['Shoppers',()=>String(S[idx].shoppers)],
+ shelf:['On shelf',()=>String(Math.round(cur.stock))],ovens:['Ovens in use',()=>S[idx].ovens+'/4'],
+ harvest:['Harvest',()=>Math.round(cur.wheat*100)+'%'],cost:['Cost per loaf',()=>'$'+cur.cost.toFixed(2),'gold'],
+ away:['At other store',()=>String(S[idx].rival)]
+};
+function updateHud(){const h=S[idx].hud;if(!h)return;h.forEach(k=>{const el=$('h_'+k),t=HF[k][1]();if(el&&el.textContent!==t)el.textContent=t;});}
+const synth=window.speechSynthesis;
+function say(t){if(!voice||!synth)return;try{synth.cancel();const u=new SpeechSynthesisUtterance(t);u.rate=.95;synth.speak(u);}catch(e){}}
+if(synth&&window.SpeechSynthesisUtterance)$('voiceBtn').hidden=false;
+
+const pips=$('pips');
+CH.forEach((c,i)=>{const b=document.createElement('button');b.id='pip'+i;b.setAttribute('aria-label','Chapter '+(i+1)+': '+c.t);b.title=c.t;b.addEventListener('click',()=>go(CHS[i]));pips.appendChild(b);});
+function eff(){
+  const s=S[idx];
+  if(inspect==='map')return{view:MAPV[s.world],labels:1,cap:'The whole picture. Tap anything to look closer.'};
+  if(inspect){const n=INFO[inspect];return{view:n.view,labels:0,cap:n.cap};}
+  return s;
+}
+function render(){
+  const s=S[idx], e=eff();
+  $('seg').textContent=(s.ch+1)+' · '+CH[s.ch].t;
+  $('cap').textContent=e.cap;
+  if(e.cap!==lastCap){lastCap=e.cap;say(e.cap);}
+  $('count').textContent=(idx+1)+' / '+S.length;
+  const key=s.hud?s.hud.join():'';
+  if(key!==hudKey){hudKey=key;$('hud').innerHTML=s.hud?s.hud.map(k=>'<span class="'+(HF[k][2]||'')+'">'+HF[k][0]+'<b id="h_'+k+'"></b></span>').join(''):'';}
+  updateHud();
+  const nx=$('next');
+  nx.textContent=inspect?'Return to the story':(s.cta||(idx===S.length-1?'Start over':'Next'));
+  nx.className=(!inspect&&s.cta)?'act':'';
+  $('back').disabled=!inspect&&idx===0;
+  $('replay').disabled=!!inspect||idx===0;
+  $('pause').textContent=paused?'Play':'Pause';
+  $('pause').setAttribute('aria-pressed',String(paused));
+  $('mapBtn').setAttribute('aria-pressed',String(inspect==='map'));
+  $('voiceBtn').setAttribute('aria-pressed',String(voice));
+  CH.forEach((c,i)=>{const b=$('pip'+i),n=c.s.length,f=i<s.ch?1:(i===s.ch?(idx-CHS[i]+1)/n:0);b.style.setProperty('--f',(f*100)+'%');b.classList.toggle('now',i===s.ch);});
+}
+function unpause(){paused=false;if(synth){try{synth.resume();}catch(e){}}}
+function go(i){$('hint').style.opacity='0';idx=Math.max(0,Math.min(S.length-1,i));inspect=null;unpause();orbitHome=true;render();}
+function next(){ if(inspect){inspect=null;orbitHome=true;render();return;} go(idx===S.length-1?0:idx+1); }
+function back(){ if(inspect){inspect=null;orbitHome=true;render();return;} go(idx-1); }
+function look(id){inspect=id;unpause();orbitHome=true;render();}
+$('next').addEventListener('click',next);
+$('back').addEventListener('click',back);
+$('pause').addEventListener('click',togglePause);
+function togglePause(){paused=!paused;if(synth){try{paused?synth.pause():synth.resume();}catch(e){}}render();}
+$('replay').addEventListener('click',()=>{if(idx>0){setCur(S[idx-1]);if(world)world.snap(S[idx-1]);unpause();say(S[idx].cap);render();}});
+$('mapBtn').addEventListener('click',()=>{ inspect=inspect==='map'?null:'map'; unpause();orbitHome=true;render(); });
+$('voiceBtn').addEventListener('click',()=>{voice=!voice;if(!voice&&synth){try{synth.cancel();}catch(e){}}else say(eff().cap);render();});
+$('helpBtn').addEventListener('click',()=>{$('help').hidden=false;$('helpClose').focus();});
+$('helpClose').addEventListener('click',()=>{$('help').hidden=true;$('helpBtn').focus();});
+$('logBtn').addEventListener('click',()=>{$('help').hidden=true;$('log').hidden=false;$('logClose').focus();});
+$('logClose').addEventListener('click',()=>{$('log').hidden=true;$('helpBtn').focus();});
+['help','log'].forEach(id=>$(id).addEventListener('click',e=>{if(e.target===$(id))$(id).hidden=true;}));
+window.addEventListener('keydown',e=>{
+  if(!$('log').hidden||!$('help').hidden){if(e.key==='Escape'){$('log').hidden=true;$('help').hidden=true;}return;}
+  if(e.target&&e.target.tagName==='BUTTON'&&(e.key===' '||e.key==='Enter'))return;
+  if(e.key==='ArrowRight'){next();e.preventDefault();}
+  else if(e.key==='ArrowLeft'){back();e.preventDefault();}
+  else if(e.key===' '){togglePause();e.preventDefault();}
+  else if(e.key==='m'||e.key==='M'){$('mapBtn').click();}
+});
+
+let orbit={az:0,el:0}, orbitHome=false, world=null;
+
+/* ---------- 3D worlds ---------- */
+function build(){
+  const C={surf:0x12161D,gold:0xD4AF37,blue:0x3B82F6,white:0xF5F7FA,ember:0xFF7A33,bread:0xC98B4B,wheat:0xB9A77A,slate:0x2A313C,tyre:0x3A424E,soil:0x1c1a17};
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+  renderer.shadowMap.enabled=true; renderer.shadowMap.type=T.PCFSoftShadowMap;
+  const scene=new T.Scene(); scene.background=new T.Color(0x000000);
+  const cam=new T.PerspectiveCamera(38,1,.1,600);
+  const mats={};
+  function plastic(c,smooth){const k=c+(smooth?'s':'f');if(!mats[k])mats[k]=new T.MeshPhongMaterial({color:c,shininess:c===C.surf?12:90,specular:c===C.surf?0x0a0c10:0x4a4a4a,flatShading:!smooth});return mats[k];}
+  function add(p,geo,mat,x,y,z){const m=new T.Mesh(geo,mat);m.position.set(x||0,y||0,z||0);m.castShadow=true;m.receiveShadow=true;p.add(m);return m;}
+  function box(p,w,h,d,x,y,z,c){return add(p,new T.BoxGeometry(w,h,d),typeof c==='number'?plastic(c):c,x,y,z);}
+  function cyl(p,rt,rb,h,seg,x,y,z,c,smooth){return add(p,new T.CylinderGeometry(rt,rb,h,seg),plastic(c,smooth),x,y,z);}
+  function prism(p,w,h,d,x,y,z,c){const sh=new T.Shape();sh.moveTo(-w/2,0);sh.lineTo(w/2,0);sh.lineTo(0,h);sh.closePath();
+    const g=new T.ExtrudeGeometry(sh,{depth:d,bevelEnabled:false});g.translate(0,0,-d/2);return add(p,g,plastic(c),x,y,z);}
+  function grp(p,x,y,z){const g=new T.Group();g.position.set(x||0,y||0,z||0);(p||scene).add(g);return g;}
+  // Praxis person as used in S001-S003: rounded-box torso .57 x .43 x .95, sphere head r .32 seated at 1.25, all white.
+  function rbox(w,d,h,bs,cr){const x=(w-2*bs)/2,y=(d-2*bs)/2,sh=new T.Shape();
+    sh.moveTo(-x+cr,-y);sh.lineTo(x-cr,-y);sh.quadraticCurveTo(x,-y,x,-y+cr);sh.lineTo(x,y-cr);sh.quadraticCurveTo(x,y,x-cr,y);
+    sh.lineTo(-x+cr,y);sh.quadraticCurveTo(-x,y,-x,y-cr);sh.lineTo(-x,-y+cr);sh.quadraticCurveTo(-x,-y,-x+cr,-y);
+    const g=new T.ExtrudeGeometry(sh,{depth:h-2*bs,bevelEnabled:true,bevelThickness:bs,bevelSize:bs,bevelSegments:6,curveSegments:8});
+    g.translate(0,0,bs);g.rotateX(-Math.PI/2);return g;}
+  const PS=.85, headGeo=new T.SphereGeometry(.32,32,16), torsoGeo=rbox(.57,.43,.95,.08,.07);
+  function person(p,x,z,hat){const g=new T.Group(),b=new T.Group();b.scale.setScalar(PS);g.add(b);
+    add(b,torsoGeo,plastic(C.white,true),0,0,0);add(b,headGeo,plastic(C.white,true),0,1.25,0);
+    if(hat)cyl(g,.21,.18,.2,14,0,1.4,0,C.white,true);g.position.set(x,0,z);p.add(g);return g;}
+  const loafA=new T.BoxGeometry(.44,.16,.24), loafB=new T.CylinderGeometry(.12,.12,.44,10);
+  function loaf(p,x,y,z){const g=new T.Group();add(g,loafA,plastic(C.bread),0,.08,0);const t=add(g,loafB,plastic(C.bread,true),0,.16,0);t.rotation.z=Math.PI/2;g.position.set(x,y,z);p.add(g);return g;}
+
+  // lights follow the camera's focus, so any number of worlds costs the same
+  scene.add(new T.AmbientLight(0xbfc8d6,.34));
+  const key=new T.DirectionalLight(0xffffff,.6);scene.add(key,key.target);
+  key.castShadow=true;key.shadow.mapSize.set(2048,2048);key.shadow.bias=-.0006;key.shadow.camera.near=1;key.shadow.camera.far=160;
+  const focus=new T.PointLight(0xffffff,1.05,40,1);scene.add(focus);
+
+  const hits=[];
+  function hit(id,w,h,d,x,y,z){const m=new T.Mesh(new T.BoxGeometry(w,h,d),new T.MeshBasicMaterial());m.position.set(x,y,z);m.visible=false;m.userData.id=id;scene.add(m);hits.push(m);}
+  const flow=new T.MeshBasicMaterial({color:C.blue});
+  function line(p,w,d,x,z){const m=add(p,new T.BoxGeometry(w,.02,d),flow,x,.012,z);m.castShadow=false;return m;}
+
+  // gold price plates: every number shown in the world is drawn by one of these
+  function plate(p,w,x,y,z){const h=w*.44,pc=document.createElement('canvas');pc.width=384;pc.height=176;const tex=new T.CanvasTexture(pc);
+    box(p,w+.12,h+.12,.08,x,y,z-.05,C.gold);const m=new T.Mesh(new T.PlaneGeometry(w,h),new T.MeshBasicMaterial({map:tex}));m.position.set(x,y,z);p.add(m);
+    const o={txt:null,set(t){if(t===o.txt)return;o.txt=t;o.draw();},draw(){const g=pc.getContext('2d');g.fillStyle='#0b0d11';g.fillRect(0,0,384,176);
+      const px=Math.min(104,Math.floor(330/(Math.max(1,o.txt.length)*.62)));g.fillStyle='#D4AF37';g.font='700 '+px+'px "IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace';
+      g.textAlign='center';g.textBaseline='middle';g.fillText(o.txt,192,94);tex.needsUpdate=true;}};
+    plates.push(o);return o;}
+  const plates=[];
+  // quantitative gold blocks: one block is $0.50, the top block is cut to the remainder
+  function stack(p,x,z,size,max){const b=[];for(let i=0;i<max;i++)b.push(box(p,size,.46,size,x,0,z,C.gold));
+    return v=>{b.forEach((m,i)=>{const f=Math.max(0,Math.min(1,v/.5-i));m.visible=f>.02;m.scale.y=Math.max(f,.02);m.position.y=i*.5+f*.23;});};}
+  // labels live in the 3D scene
+  const labels=[];
+  function label(text,x,y,z,sc,src){const c=document.createElement('canvas');c.width=512;c.height=128;const tex=new T.CanvasTexture(c);
+    const draw=()=>{const g=c.getContext('2d');g.clearRect(0,0,512,128);g.fillStyle='#F5F7FA';try{g.letterSpacing='6px';}catch(e){}
+      let px=62;const ff='px "IBM Plex Sans Condensed","Arial Narrow",sans-serif';g.font='600 '+px+ff;while(px>26&&g.measureText(text).width>470){px-=3;g.font='600 '+px+ff;}
+      g.textAlign='center';g.textBaseline='middle';g.fillText(text,256,66);tex.needsUpdate=true;};
+    draw();const sp=new T.Sprite(new T.SpriteMaterial({map:tex,transparent:true,opacity:0,depthTest:false}));sp.scale.set(sc||8,(sc||8)/4,1);sp.position.set(x,y,z);sp.renderOrder=10;scene.add(sp);
+    labels.push({sp,draw,src:src||(()=>cur.labels)});}
+
+  /* ===== WORLD 1: the bread chain ===== */
+  box(scene,2.6,.1,41,7,-.05,-11,C.surf);
+  line(scene,.07,38.4,7,-11);[-30,-12,8].forEach(z=>line(scene,4,.07,5,z));
+  hit('road',2.6,1.6,20,7,.8,-2);
+
+  // FARM
+  const FZ=-30, farm=grp(scene,0,0,FZ);
+  box(farm,6.4,.3,6,0,-.15,0,C.surf);
+  const wheat=[];
+  for(let r=0;r<5;r++){box(farm,.56,.05,3.7,-2.4+r*.82,.025,.71,C.soil);for(let k=0;k<8;k++){const h=.4+((r*3+k*5)%4)*.06;wheat.push({m:box(farm,.5,h,.4,-2.4+r*.82,h/2,-.9+k*.46,C.wheat),v:1,o:(r*8+k)*17%40});}}
+  cyl(farm,.8,.8,2.6,14,2.2,1.3,-1.7,C.white,true);cyl(farm,.84,.84,.09,14,2.2,.9,-1.7,C.slate,true);cyl(farm,.84,.84,.09,14,2.2,1.9,-1.7,C.slate,true);
+  add(farm,new T.ConeGeometry(.88,.7,14),plastic(C.slate),2.2,2.95,-1.7);
+  box(farm,1.8,1.3,1.5,-.4,.65,-2.1,C.white);prism(farm,2.05,.7,1.65,-.4,1.3,-2.1,C.slate);box(farm,.5,.85,.06,-.4,.43,-1.33,C.slate);
+  person(farm,2.3,1.5);
+  hit('farm',6.4,4,6,0,2,FZ);
+
+  // BAKERY (cutaway: front wall and roof removed)
+  const BZ=-12, bak=grp(scene,0,0,BZ);
+  box(bak,6.4,.3,5.4,0,-.15,0,C.surf);
+  box(bak,6,2.8,.25,0,1.4,-2.45,C.white);box(bak,.25,2.8,4.6,-2.9,1.4,-.2,C.white);box(bak,6.1,.2,.45,0,2.9,-2.45,C.slate);
+  box(bak,.6,1.3,.6,1.9,3.6,-2.45,C.white);box(bak,.72,.14,.72,1.9,4.3,-2.45,C.slate);
+  const ovens=[];
+  for(let i=0;i<4;i++){const x=-2+i*1.25;box(bak,1,1.3,.9,x,.65,-1.8,C.slate);box(bak,1.06,.1,.96,x,1.35,-1.8,C.white);box(bak,.66,.06,.08,x,1.08,-1.31,C.white);
+    const m=new T.MeshPhongMaterial({color:0x15181d,emissive:C.ember,emissiveIntensity:0,shininess:30});box(bak,.66,.5,.06,x,.68,-1.33,m);ovens.push({m,v:0});}
+  box(bak,2.2,.12,.9,.2,.82,.8,C.white);[[-.8,.45],[1.2,.45],[-.8,1.15],[1.2,1.15]].forEach(q=>box(bak,.1,.76,.1,q[0],.38,q[1],C.white));
+  loaf(bak,-.3,.88,.8);loaf(bak,.3,.88,.8);loaf(bak,.9,.88,.8);
+  person(bak,-1.7,.9,true);
+  const sacks=[];[[2.1,.2,1.6],[2.6,.2,1.6],[2.1,.2,1.05],[2.6,.2,1.05],[2.35,.58,1.6],[2.35,.58,1.05]].forEach(q=>{const m=cyl(bak,.22,.22,.46,10,q[0],q[1],q[2],C.white,true);m.rotation.x=Math.PI/2;sacks.push({m,v:1});});
+  hit('bakery',6.4,4,5.4,0,2,BZ);
+  // energy supply for the ovens
+  const tank=grp(scene,-5.6,0,-12.5);
+  box(tank,3,.3,3,0,-.15,0,C.surf);cyl(tank,.75,.75,1.9,18,-.3,.95,-.4,C.white,true);cyl(tank,.5,.5,.18,18,-.3,1.99,-.4,C.slate,true);cyl(tank,.77,.77,.2,18,-.3,1.2,-.4,C.blue,true);
+  box(tank,2.4,.12,.12,1.4,.5,-.4,C.slate);
+  const tankPlate=plate(tank,1.15,.5,.42,1.1);
+  hit('energy',3,3,3,-5.6,1.5,-12.5);
+
+  // STORE (cutaway)
+  const SZ=8, store=grp(scene,0,0,SZ);
+  box(store,6.4,.3,5.4,0,-.15,0,C.surf);
+  box(store,6,2.8,.25,0,1.4,-2.45,C.white);box(store,.25,2.8,4.6,-2.9,1.4,-.2,C.white);box(store,6.1,.2,.45,0,2.9,-2.45,C.slate);
+  box(store,.1,2,.6,-1.3,1,-1.9,C.slate);box(store,.1,2,.6,1.3,1,-1.9,C.slate);
+  const tiers=[1.65,1.05,.45];tiers.forEach(y=>box(store,2.7,.08,.6,0,y,-1.9,C.slate));
+  const loaves=[];tiers.forEach(y=>{for(let j=0;j<4;j++)loaves.push({g:loaf(store,-.9+j*.6,y+.04,-1.85),v:1});});
+  const shelfPlate=plate(store,1.54,0,2.45,-1.8);
+  box(store,1.2,.9,.7,2.25,.45,1.4,C.slate);box(store,1.26,.08,.76,2.25,.94,1.4,C.white);box(store,.4,.3,.3,2.25,1.13,1.4,C.white);
+  add(store,new T.PlaneGeometry(.3,.18),flow,2.25,1.16,1.56).castShadow=false;
+  person(store,2.3,.6);
+  hit('store',6.4,4,5.4,0,2,SZ);
+
+  // pavement and shoppers
+  box(scene,6.4,.3,5,0,-.15,15.5,C.surf);hit('shoppers',6.4,2,5,0,1,15.5);
+  const slots=[[-2.1,7.4],[-1.5,14.2],[0,14.2],[1.5,14.2],[-1.5,15.5],[0,15.5],[1.5,15.5],[-.75,16.8],[.75,16.8]];
+  const rslots=[[-10.4,16.6],[-9.5,16.9],[-8.6,16.6]];
+  const people=slots.map(()=>{const g=person(scene,-9,22);g.scale.setScalar(.001);return g;});
+
+  // the other store down the street
+  const rival=grp(scene,-9.5,0,15.5);
+  box(rival,4.4,.3,4.4,0,-.15,0,C.surf);box(rival,4,2.4,.2,0,1.2,-2,C.white);box(rival,.2,2.4,3.6,-2,1.2,-.3,C.white);box(rival,4.1,.18,.4,0,2.49,-2,C.slate);
+  box(rival,2,.8,.6,.2,.4,-.9,C.slate);box(rival,2.06,.07,.66,.2,.83,-.9,C.white);loaf(rival,-.3,.87,-.9);loaf(rival,.3,.87,-.9);loaf(rival,.9,.87,-.9);
+  plate(rival,1.3,.2,1.8,-1.85).set('$3.10');person(rival,.2,-1.5);
+  hit('rival',4.4,3,4.4,-9.5,1.5,15.5);
+  label('OTHER STORE',-9.5,3.6,15.5,4.4,()=>cur.rivalOn);
+
+  // cost and price, in blocks
+  const ledger=grp(scene,-10,0,-2);
+  box(ledger,5.4,.3,3.6,0,-.15,0,C.surf);
+  const costStack=stack(ledger,-1.2,-.2,.9,8), priceStack=stack(ledger,1.2,-.2,.9,8);
+  const costPlate=plate(ledger,1.05,-1.2,.33,1.1), pricePlate=plate(ledger,1.05,1.2,.33,1.1);
+  hit('ledger',5.4,4,3.6,-10,2,-2);
+  label('COST',-11.2,4.5,-2.2,2.8,()=>cur.ledger);label('PRICE',-8.8,4.5,-2.2,2.8,()=>cur.ledger);
+
+  // the same loaf over time
+  const stair=grp(scene,-11,0,6.5);
+  box(stair,8,.3,3.6,0,-.15,0,C.surf);
+  const stairStacks=[-2.5,0,2.5].map(x=>stack(stair,x,-.2,1.1,8)), stairPlates=[-2.5,0,2.5].map(x=>plate(stair,1.15,x,.36,1.2));
+  box(stair,7.2,.05,.05,0,3,.42,C.white);
+  hit('stair',8,4.5,3.6,-11,2.2,6.5);
+  ['THEN','A YEAR ON','TWO YEARS ON'].forEach((t,i)=>label(t,-13.5+i*2.5,4.7,6.3,2.4,()=>cur.stairOn*(cur.s[i]>.1?1:.35)));
+
+  // trucks
+  function truck(cargo){const g=new T.Group();box(g,.9,.15,2,0,.3,0,C.slate);box(g,.86,.62,.62,0,.7,.68,C.white);box(g,.88,.2,.05,0,.82,1,C.slate);
+    box(g,.9,.3,1.3,0,.52,-.32,C.white);box(g,.92,.08,1.32,0,.5,-.32,C.blue);
+    [[-.48,.62],[.48,.62],[-.48,-.62],[.48,-.62]].forEach(q=>{const w=cyl(g,.2,.2,.14,14,q[0],.2,q[1],C.tyre,true);w.rotation.z=Math.PI/2;});
+    const load=new T.Group();load.position.y=.67;g.add(load);
+    if(cargo==='grain')box(load,.8,.34,1.2,0,.17,-.32,C.wheat);
+    else if(cargo==='crates'){box(load,.36,.3,.36,-.2,.15,-.05,C.wheat);box(load,.36,.3,.36,.2,.15,-.5,C.wheat);box(load,.36,.3,.36,-.2,.15,-.72,C.white);}
+    else{loaf(load,0,0,-.02).rotation.y=Math.PI/2;loaf(load,0,0,-.6).rotation.y=Math.PI/2;}
+    scene.add(g);return{g,load};}
+  const grainTruck=truck('grain');grainTruck.g.position.set(6.3,0,-21);
+  const van=truck('bread');let vanS=0;const L=20,R=.7,P=2*L+2*Math.PI*R;
+  function oval(s,o){s=((s%P)+P)%P;
+    if(s<L){o.x=6.3;o.z=-12+s;}
+    else if(s<L+Math.PI*R){const a=(s-L)/R;o.x=7-R*Math.cos(a);o.z=8+R*Math.sin(a);}
+    else if(s<2*L+Math.PI*R){o.x=7.7;o.z=8-(s-L-Math.PI*R);}
+    else{const a=(s-2*L-Math.PI*R)/R;o.x=7+R*Math.cos(a);o.z=-12-R*Math.sin(a);}
+    return o;}
+  const p1={},p2={};
+  label('FARM',-.4,4.3,FZ);label('BAKERY',-.4,5.2,BZ);label('DELIVERY',9.4,2.4,-2);label('STORE',-.4,5,SZ);label('SHOPPERS',0,2.8,16.4);label('ENERGY',-5.9,3.3,-12.9,4);
+
+  // the title, built from blocks
+  const GLY={W:'10001100011000110101101011101110001',H:'10001100011000111111100011000110001',Y:'10001100010101000100001000010000100',I:'11111001000010000100001000010011111',
+    S:'01111100001000001110000010000111110',E:'11111100001000011110100001000011111',V:'10001100011000110001100010101000100',R:'11110100011000111110101001001010001',
+    T:'11111001000010000100001000010000100',N:'10001110011010110011100011000110001',G:'01110100011000010111100011000101110',O:'01110100011000110001100011000101110',
+    X:'10001100010101000100010101000110001',P:'11110100011000111110100001000010000','?':'01110100010000100010001000000000100'};
+  const titleG=grp(scene,2.5,44,-8), cells=[], U=.62;
+  ['WHY IS','EVERYTHING','SO EXPENSIVE?'].forEach((ln,li)=>{const w=ln.length*6-1;[...ln].forEach((ch,ci)=>{const g=GLY[ch];if(!g)return;
+    for(let r=0;r<7;r++)for(let c=0;c<5;c++)if(g[r*5+c]==='1')cells.push([(ci*6+c-(w-1)/2)*U,(12-(li*9+r))*U]);});});
+  const titleM=new T.InstancedMesh(new T.BoxGeometry(U*.9,U*.9,U*1.6),plastic(C.white),cells.length), mx=new T.Matrix4();
+  cells.forEach((q,i)=>{mx.makeTranslation(q[0],q[1],0);titleM.setMatrixAt(i,mx);});titleM.frustumCulled=false;titleG.add(titleM);
+
+  /* ===== WORLD 2: a town of six sellers ===== */
+  const TX=90, town=grp(scene,TX,0,0);
+  const spoke=new T.MeshBasicMaterial({color:0x1f3e75}), c0=new T.Color(0x1f3e75), c1=new T.Color(0x7db6ff);
+  box(town,4.4,.3,4.4,0,-.15,0,C.surf);cyl(town,.7,.7,1.8,18,-.9,.9,-.6,C.white,true);cyl(town,.72,.72,.2,18,-.9,1.15,-.6,C.blue,true);
+  cyl(town,.7,.7,1.8,18,.8,.9,-.9,C.white,true);cyl(town,.72,.72,.2,18,.8,1.15,-.9,C.blue,true);box(town,1.5,.9,1,.4,.45,.9,C.slate);box(town,1.56,.08,1.06,.4,.94,.9,C.white);
+  const tEnergyPlate=plate(town,1.15,-1,.42,1.7);
+  hit('tenergy',4.4,3,4.4,TX,1.5,0);label('ENERGY',TX,3.4,-.6,4.2);
+  const stalls=STALL.map((q,i)=>{const g=grp(town,q[1],0,q[2]);
+    const len=Math.hypot(q[1],q[2])-4,sp=add(town,new T.BoxGeometry(len,.03,.1),spoke,q[1]/2,.02,q[2]/2);sp.rotation.y=-Math.atan2(q[2],q[1]);sp.castShadow=false;
+    box(g,5,.3,4.4,0,-.15,0,C.surf);box(g,4.4,2.4,.2,0,1.2,-2,C.white);box(g,.2,2.4,3.4,-2.1,1.2,-.4,C.white);box(g,4.5,.18,.4,0,2.49,-2,C.slate);
+    box(g,2.4,.8,.7,-.4,.4,-.4,C.slate);box(g,2.46,.07,.76,-.4,.83,-.4,C.white);
+    const py=.87,px=-.4,pz=-.4;
+    if(i===0){loaf(g,px-.3,py,pz);loaf(g,px+.3,py,pz);}
+    else if(i===1){cyl(g,.34,.34,.04,20,px,py+.02,pz,C.white,true);add(g,new T.SphereGeometry(.26,18,9,0,Math.PI*2,0,Math.PI/2),plastic(C.white,true),px,py+.04,pz);cyl(g,.05,.05,.07,10,px,py+.32,pz,C.slate,true);}
+    else if(i===2){box(g,.42,.8,.3,px,py+.4,pz,C.white);box(g,.44,.14,.32,px,py+.87,pz,C.slate);add(g,new T.PlaneGeometry(.26,.18),flow,px,py+.55,pz+.16).castShadow=false;box(g,.06,.5,.06,px+.28,py+.35,pz,C.slate);}
+    else if(i===3){box(g,.44,.07,.44,px,py+.3,pz,C.wheat);box(g,.44,.5,.07,px,py+.58,pz-.19,C.wheat);[[-.18,-.18],[.18,-.18],[-.18,.18],[.18,.18]].forEach(l=>box(g,.06,.3,.06,px+l[0],py+.15,pz+l[1],C.wheat));}
+    else if(i===4){box(g,.9,.54,.06,px,py+.42,pz,C.slate);add(g,new T.PlaneGeometry(.8,.44),flow,px,py+.42,pz+.035).castShadow=false;box(g,.08,.14,.08,px,py+.08,pz,C.slate);box(g,.4,.03,.2,px,py+.015,pz,C.slate);}
+    else{cyl(g,.26,.26,.03,18,px,py+.015,pz,C.white,true);cyl(g,.15,.11,.26,16,px,py+.16,pz,C.white,true);cyl(g,.13,.13,.02,16,px,py+.29,pz,C.bread,true);}
+    person(g,-.4,-1.3);
+    const pl=plate(g,1.5,-.4,1.85,-1.85);
+    box(g,.9,.05,.9,1.7,1,1.2,C.white);const col=add(g,new T.BoxGeometry(.6,1,.6),plastic(C.blue),1.7,.5,1.2);
+    const ppl=[[-1.3,1.4],[-.4,1.6],[.5,1.4]].map(s=>{const m=person(g,s[0],s[1]);return{m,v:1};});
+    hit('t'+i,5,3,4.4,TX+q[1],1.5,q[2]);label(q[0],TX+q[1]-.3,3.5,q[2]-1.6,4.6);
+    return{pl,col,ppl,base:q[3]};});
+
+  /* ===== WORLD 3: the restaurant ===== */
+  const RX=90,RZ=70, rest=grp(scene,RX,0,RZ);
+  box(rest,10,.3,8.4,0,-.15,0,C.surf);box(rest,9.6,2.8,.25,0,1.4,-4,C.white);box(rest,.25,2.8,7.6,-4.7,1.4,-.2,C.white);box(rest,9.7,.2,.45,0,2.9,-4,C.slate);
+  [[-2.6,.8],[-.2,2.3],[-2.3,-1.6]].forEach(q=>{cyl(rest,.6,.6,.07,20,q[0],.72,q[1],C.white,true);cyl(rest,.08,.08,.7,10,q[0],.35,q[1],C.slate,true);cyl(rest,.3,.3,.04,14,q[0],.02,q[1],C.slate,true);
+    person(rest,q[0]-1,q[1]);person(rest,q[0]+1,q[1]);});
+  [2,3.2].forEach(x=>{box(rest,.95,.95,.8,x,.475,-3.3,C.slate);const m=new T.MeshPhongMaterial({color:0x15181d,emissive:C.ember,emissiveIntensity:1.2,shininess:30});box(rest,.62,.04,.5,x,.97,-3.3,m);});
+  box(rest,3,.9,.5,2.6,.45,-1.7,C.slate);box(rest,3.06,.08,.56,2.6,.94,-1.7,C.white);cyl(rest,.3,.3,.04,18,2.2,1,-1.7,C.white,true);
+  person(rest,2.6,-2.5,true);
+  plate(rest,2.2,-1.6,2,-3.85).set('$21.50');
+  box(rest,3,.1,7.4,7.4,-.05,.4,C.surf);line(rest,.07,6.6,7.4,.4);const sup=truck('crates');sup.g.position.set(RX+7.4,0,RZ+.6);
+  const cafe=grp(rest,-9,0,1.5);
+  box(cafe,4.4,.3,4.4,0,-.15,0,C.surf);box(cafe,4,2.4,.2,0,1.2,-2,C.white);box(cafe,.2,2.4,3.6,-2,1.2,-.3,C.white);box(cafe,4.1,.18,.4,0,2.49,-2,C.slate);
+  box(cafe,2,.8,.6,.2,.4,-.9,C.slate);box(cafe,2.06,.07,.66,.2,.83,-.9,C.white);cyl(cafe,.3,.3,.04,18,.2,.89,-.9,C.white,true);
+  plate(cafe,1.3,.2,1.8,-1.85).set('$20.00');person(cafe,.2,-1.5);person(cafe,.6,.9);
+  hit('rmenu',2.5,1.3,.6,RX-1.6,2,RZ-3.7);hit('rkitchen',3.6,2.4,2.8,RX+2.6,1.2,RZ-2.6);hit('rdiners',5.4,2,5.6,RX-1.7,1,RZ+.5);
+  hit('rsupplier',3,2,7.4,RX+7.4,1,RZ+.4);hit('rcafe',4.4,3,4.4,RX-9,1.5,RZ+1.5);
+  label('RESTAURANT',RX-.4,4.6,RZ-4,5);label('SUPPLIER',RX+7.6,2.6,RZ+.4,4.4);label('ANOTHER PLACE',RX-9,3.7,RZ+1.5,4.6);
+
+  if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>{labels.forEach(l=>l.draw());plates.forEach(p=>{if(p.txt)p.draw();});});
+
+  // tap target marker
+  const HOT={shoppers:[0,15.5,2.3],farm:[0,-30,3.8],energy:[-5.6,-12.5,2],tenergy:[TX,0,2.9]};
+  const ring=new T.Mesh(new T.RingGeometry(.96,1.03,64),new T.MeshBasicMaterial({color:C.blue,transparent:true,opacity:.9,side:T.DoubleSide}));
+  ring.rotation.x=-Math.PI/2;ring.position.y=.03;scene.add(ring);
+
+  /* ---------- per-frame ---------- */
+  const cv={tx:0,ty:0,tz:0,hw:2,hh:2,az:0,el:.3}; let camInit=false;
+  function viewOf(name){const v=V[name],w=(cam.aspect>1.15&&v.wide)?v.wide:{};return{tx:v.t[0],ty:v.t[1],tz:v.t[2],hw:w.hw||v.hw,hh:w.hh||v.hh,az:w.az!==undefined?w.az:v.az,el:w.el!==undefined?w.el:v.el};}
+  function place(s,k){people.forEach((g,i)=>{let tx=-9,tz=22,ts=.001;
+    if(i<s.shoppers){tx=slots[i][0];tz=slots[i][1];ts=1;}else if(i<s.shoppers+s.rival){const q=rslots[i-s.shoppers];tx=q[0];tz=q[1];ts=1;}
+    g.position.x+=(tx-g.position.x)*k;g.position.z+=(tz-g.position.z)*k;g.scale.setScalar(g.scale.x+(ts-g.scale.x)*k);});}
+  function snap(s){place(s,1);ovens.forEach((o,i)=>{o.v=i<s.ovens?1:0;});}
+  snap(S[idx]);
+  function onoff(g,v){g.visible=v>.01;g.scale.setScalar(Math.max(.001,v));}
+  function pop(o,on,k){o.v+=((on?1:.001)-o.v)*Math.min(1,k*3);o.m.scale.setScalar(o.v);o.m.visible=o.v>.02;}
+
+  function resize(){const w=stage.clientWidth,h=stage.clientHeight;if(!w||!h)return;renderer.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix();}
+  if(window.ResizeObserver)new ResizeObserver(resize).observe(stage);else window.addEventListener('resize',resize);
+  resize();
+
+  let last=performance.now(),clock=0,shHalf=0;
+  function frame(now){
+    requestAnimationFrame(frame);
+    const dt=Math.min(.1,(now-last)/1000);last=now;
+    const s=S[idx],e=eff(),run=paused?0:dt;clock+=run;
+    const k=reduce?(paused?0:1):1-Math.exp(-run*2.4),kc=reduce?(paused?0:1):1-Math.exp(-run*2);
+    NUM.forEach(n=>{const t=n==='labels'?e.labels:s[n];cur[n]+=(t-cur[n])*k;if(Math.abs(t-cur[n])<.004)cur[n]=t;});
+    ARR.forEach(n=>{for(let i=0;i<cur[n].length;i++){cur[n][i]+=(s[n][i]-cur[n][i])*k;if(Math.abs(s[n][i]-cur[n][i])<.004)cur[n][i]=s[n][i];}});
+    // bread chain
+    place(s,k*.8);
+    loaves.forEach((l,i)=>{const t=i<Math.round(cur.stock)?1:.001;l.v+=(t-l.v)*Math.min(1,k*3);l.g.scale.setScalar(l.v);l.g.visible=l.v>.02;});
+    ovens.forEach((o,i)=>{o.v+=((i<s.ovens?1:0)-o.v)*k;o.m.emissiveIntensity=o.v*1.25;});
+    wheat.forEach(w=>pop(w,w.o<Math.round(cur.wheat*40),k));
+    sacks.forEach((o,i)=>pop(o,i<Math.round(cur.flour),k));
+    grainTruck.load.scale.setScalar(.35+.65*cur.wheat);
+    shelfPlate.set('$'+cur.price.toFixed(2));tankPlate.set('$'+cur.energy.toFixed(2));
+    costStack(cur.cost);priceStack(cur.price);costPlate.set('$'+cur.cost.toFixed(2));pricePlate.set('$'+cur.price.toFixed(2));
+    stairStacks.forEach((f,i)=>{f(cur.s[i]);stairPlates[i].set(cur.s[i]>.1?'$'+cur.s[i].toFixed(2):'');});
+    onoff(ledger,cur.ledger);onoff(rival,cur.rivalOn);onoff(stair,cur.stairOn);onoff(titleG,cur.title);
+    if(!reduce)vanS+=run*cur.truck*P;
+    oval(vanS,p1);oval(vanS+.08,p2);van.g.position.set(p1.x,0,p1.z);van.g.rotation.y=Math.atan2(p2.x-p1.x,p2.z-p1.z);
+    van.load.visible=(((vanS%P)+P)%P)<L+1;
+    // town
+    stalls.forEach((st,i)=>{const h=Math.max(.05,1+(cur.ti[i]-1)*8);st.col.scale.y=h;st.col.position.y=h/2;st.pl.set(money(st.base*cur.ti[i]));
+      st.ppl.forEach((p,j)=>pop(p,j<Math.round(cur.tp),k));});
+    tEnergyPlate.set('$'+cur.tEnergy.toFixed(2));
+    const ef=Math.max(0,Math.min(1,(cur.tEnergy-1)/.4));spoke.color.copy(c0).lerp(c1,ef*(reduce?1:.75+.25*Math.sin(clock*4)));
+    labels.forEach(l=>{const o=l.src();l.sp.material.opacity=o;l.sp.visible=o>.02;});
+    // tap target
+    const hp=!inspect&&s.hot?HOT[s.hot]:null;ring.visible=!!hp;
+    if(hp){const q=hp[2]*(reduce?1:1+.05*Math.sin(clock*3.2));ring.position.x=hp[0];ring.position.z=hp[1];ring.scale.set(q,q,1);ring.material.opacity=reduce?.9:.6+.3*Math.sin(clock*3.2);}
+    updateHud();
+    // camera
+    const tv=viewOf(e.view);
+    if(!camInit){Object.assign(cv,tv);camInit=true;}else for(const a in cv)cv[a]+=(tv[a]-cv[a])*kc;
+    if(orbitHome&&!paused){orbit.az+=(0-orbit.az)*kc;orbit.el+=(0-orbit.el)*kc;}
+    const th=Math.tan(cam.fov*Math.PI/360),dist=1.1*Math.max(cv.hh/th,cv.hw/(th*cam.aspect));
+    const az=cv.az+orbit.az,el=Math.max(.05,Math.min(1.45,cv.el+orbit.el));
+    cam.position.set(cv.tx+dist*Math.sin(az)*Math.cos(el),cv.ty+dist*Math.sin(el),cv.tz+dist*Math.cos(az)*Math.cos(el));
+    cam.lookAt(cv.tx,cv.ty,cv.tz);
+    // lights and shadows follow the focus
+    const ext=Math.max(cv.hw,cv.hh);
+    focus.position.set(cv.tx,cv.ty+5+ext*.5,cv.tz+2.5+ext*.25);focus.distance=18+ext*2.6;
+    key.target.position.set(cv.tx,cv.ty,cv.tz);key.position.set(cv.tx+16,cv.ty+34,cv.tz+12);
+    const half=Math.max(14,Math.min(48,ext*1.5));
+    if(Math.abs(half-shHalf)>.5){shHalf=half;const sc=key.shadow.camera;sc.left=-half;sc.right=half;sc.top=half;sc.bottom=-half;sc.updateProjectionMatrix();}
+    renderer.render(scene,cam);
+  }
+  requestAnimationFrame(frame);
+
+  /* pointer: drag orbits, tap picks */
+  const ray=new T.Raycaster(),ndc=new T.Vector2();
+  function pick(ev){const r=canvas.getBoundingClientRect();ndc.set(((ev.clientX-r.left)/r.width)*2-1,-((ev.clientY-r.top)/r.height)*2+1);ray.setFromCamera(ndc,cam);
+    const h=ray.intersectObjects(hits,false);for(let i=0;i<h.length;i++){const id=h[i].object.userData.id;
+      if((id==='ledger'&&cur.ledger<.5)||(id==='rival'&&cur.rivalOn<.5)||(id==='stair'&&cur.stairOn<.5))continue;return id;}return null;}
+  let down=null;
+  canvas.addEventListener('pointerdown',ev=>{down={x:ev.clientX,y:ev.clientY,az:orbit.az,el:orbit.el,moved:false};try{canvas.setPointerCapture(ev.pointerId);}catch(e){}$('hint').style.opacity='0';});
+  canvas.addEventListener('pointermove',ev=>{
+    if(!down){if(ev.pointerType==='mouse')canvas.style.cursor=pick(ev)?'pointer':'grab';return;}
+    const dx=ev.clientX-down.x,dy=ev.clientY-down.y;if(Math.abs(dx)+Math.abs(dy)>7)down.moved=true;
+    if(down.moved){orbitHome=false;orbit.az=Math.max(-1.1,Math.min(1.1,down.az-dx*.006));orbit.el=Math.max(-.4,Math.min(.5,down.el+dy*.004));}});
+  canvas.addEventListener('pointerup',ev=>{const d=down;down=null;if(!d||d.moved)return;const id=pick(ev);if(!id)return;
+    if(!inspect&&S[idx].hot===id){next();return;}look(id);});
+  canvas.addEventListener('pointercancel',()=>{down=null;});
+
+  return{snap};
+}
+
+function start(data){
+  if(data&&typeof data.i==='number'){idx=Math.max(0,Math.min(S.length-1,data.i));setCur(S[idx]);}
+  if(renderer){try{world=build();}catch(e){world=null;fail();if(window.console)console.error(e);}}else fail();
+  render();
+  try{if(!localStorage.getItem('pa001-help-seen')){localStorage.setItem('pa001-help-seen','1');$('help').hidden=false;}}catch(e){}
+}
+const hot=window.claude&&window.claude.hot;
+if(hot&&hot.snapshot)hot.snapshot(()=>({i:idx}));
+if(hot&&hot.ready)hot.ready(start);else start((hot&&hot.data)||{});
+})();
+<\/script>
+
+</body></html>
+</script>
+
+<script>
+'use strict';
+
+/* =======================================================================
+   PRAXIS SITE — WHAT TO EDIT
+
+   1. LINKS    Channel links. Leave a link empty and its button stays hidden.
+   2. VIDEOS   The library. One entry per video. To publish one, set
+               status: 'published', the date, and (when you have it) the url.
+   3. PAGES    The site's pages. The order here is the order in the nav.
+
+   ADDING A PAGE
+   A page written for this site:
+       { id: 'about', label: 'About', title: 'About', render: () => `<div class="wrap">…</div>` }
+   A self-contained HTML piece (a tool, a simulator):
+       paste it into a new text/plain block with id="embed-NAME"
+       above, then add
+       { id: 'NAME', label: 'Name', title: 'Name', embed: 'embed-NAME' }
+   Either way the page gets a nav link, a footer link and the address #/id.
+   Add  soon: true  to show a "Soon" tag beside the nav link.
+   ======================================================================= */
+
+const LINKS = {
+  youtube: '',      // e.g. 'https://www.youtube.com/@yourchannel'
+};
+
+const VIDEOS = [
+  {
+    id: 's002',
+    code: 'S002',
+    title: 'Why can someone with a high income still be broke?',
+    format: 'short',
+    status: 'published',
+    date: '2026-10-03',
+    url: '',
+    poster: { fig: '$0', line: 'left at month end', cols: 10, groups: [[['g', 20]], [['w', 20]]] },
+    summary: 'You get a big promotion. You make more, so you spend more: the nicer car, the bigger place, the better restaurants. None of it looks like a problem on its own, because you can afford it. But if your spending rises every time your income does, you end up right back where you started.',
+    takeaway: 'If you spend everything you make, it doesn’t matter how high your income is. You can still end the month with nothing left.',
+  },
+  {
+    id: 's001',
+    code: 'S001',
+    title: 'Why is 8% interest high?',
+    format: 'short',
+    status: 'published',
+    date: '2026-10-02',
+    url: '',
+    poster: { fig: '8%', line: 'became 25% more', cols: 10, groups: [[['b', 8]], [['g', 25]]] },
+    summary: 'You borrow $100,000 at 8% to open your business. For the first year you only pay the interest, about $667 a month. A year in, you check your balance and you still owe $100,000. Then the real payments start: about $2,441 a month for four years, each one finally chipping away at the debt.',
+    takeaway: '8% interest made you pay back 25% more than you borrowed.',
+    numbers: [
+      ['Borrowed', '$100,000'],
+      ['Interest rate', '8% a year'],
+      ['Year 1, interest only', 'about $667 a month'],
+      ['Years 2 to 5', 'about $2,441 a month'],
+      ['Interest paid', 'about $25,182'],
+      ['Paid back in total', 'about $125,182'],
+    ],
+    tool: { page: 'calculator', label: 'Run your own loan' },
+  },
+  {
+    id: 's003',
+    code: 'S003',
+    title: 'Why a lower mortgage payment can cost more in the long run',
+    format: 'short',
+    status: 'upcoming',
+    stage: 'In production',
+    date: '',
+    url: '',
+    poster: { fig: '30', line: 'years instead of 20', cols: 10, groups: [[['o', 30]]] },
+    // Shown once status is 'published'.
+    summary: 'Your broker recommends 30 years instead of 20. Borrowing $300,000 at 5%, that drops the payment from about $1,971 a month to $1,601, which frees up $370 every month. But you pay the debt down more slowly, and the bank collects interest for longer.',
+    takeaway: 'Saving $370 a month cost about $103,000 more in interest.',
+    numbers: [
+      ['Borrowed', '$300,000'],
+      ['Interest rate', '5%'],
+      ['Payment over 20 years', 'about $1,971 a month'],
+      ['Payment over 30 years', 'about $1,601 a month'],
+      ['Monthly difference', 'about $370'],
+      ['Extra interest over 30 years', 'about $103,000'],
+    ],
+    fine: 'Canadian dollars. 5% a year compounded twice a year, the same rate at every renewal, regular monthly payments, and no extra payments or fees.',
+    source: { label: 'Financial Consumer Agency of Canada: mortgage relief options', url: 'https://www.canada.ca/en/financial-consumer-agency/services/mortgages/relief-options.html' },
+    tool: { page: 'calculator', label: 'Run your own mortgage' },
+  },
+];
+
+const FORMATS = { short: 'Short', long: 'Long-form' };
+
+/* What the calculator page contains (names and descriptions match the tool). */
+const CALCULATORS = [
+  ['Loan', 'What a fixed-rate loan costs you, payment by payment.'],
+  ['Mortgage', 'Your payment, what you still owe when the term ends, and the interest along the way.'],
+  ['Savings', 'How regular deposits grow, and how much of the total is interest.'],
+  ['Debt payoff', 'How long a fixed payment takes to clear a balance, and what paying extra saves.'],
+  ['Compare rates', 'The same loan at two interest rates, side by side.'],
+];
+
+const PAGES = [
+  { id: 'home', title: '', render: renderHome },
+  { id: 'library', label: 'Library', title: 'Library', render: renderLibrary },
+  {
+    id: 'calculator', label: 'Calculator', title: 'Calculator',
+    embed: 'embed-calculator',
+    // The site bar already carries the brand, so the tool's own wordmark is hidden.
+    embedCss: '.brand{display:none!important}',
+    standaloneUrl: 'https://calculator.oakridgepartners.ca',
+  },
+  {
+    // PA001, the first paced animation. To add another, paste it in as a new
+    // embed block and add an entry like this one.
+    id: 'interactive', label: 'Interactive', title: 'Why is everything so expensive?',
+    embed: 'embed-pa001',
+  },
+];
+
+/* =======================================================================
+   Helpers
+   ======================================================================= */
+const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const $ = (sel, root = document) => root.querySelector(sel);
+
+/* The Praxis coin: a P with a straight stem and a rounded bowl inside two rings. */
+const EMBLEM = '<svg viewBox="-1 -1 2 2" aria-hidden="true"><circle r="1" fill="#D4AF37"/><circle r=".865" fill="none" stroke="#000" stroke-opacity=".38" stroke-width=".035"/><circle r=".785" fill="none" stroke="#000" stroke-opacity=".28" stroke-width=".02"/><path fill="#000" fill-rule="evenodd" d="M-.48 .61H-.245V.165H.095A.375 .38 0 0 0 .095-.595H-.48ZM-.245-.378H.135V-.055H-.245Z"/></svg>';
+
+function formatDate(iso) {
+  const [y, m, d] = iso.split('-').map(Number);
+  return new Date(y, m - 1, d).toLocaleDateString('en-CA', { year: 'numeric', month: 'long', day: 'numeric' });
+}
+
+function blocks(spec) {
+  return spec.map(([kind, n]) => Array.from({ length: n }, () => `<i class="blk ${kind}"></i>`).join('')).join('');
+}
+
+function poster(v) {
+  const p = v.poster;
+  const cls = ['poster', v.format === 'long' ? 'wide' : '', v.status === 'upcoming' ? 'pending' : ''].join(' ').trim();
+  return `<div class="${cls}" aria-hidden="true"><div class="poster-in">
+    <div><div class="fig">${esc(p.fig)}</div><div class="line">${esc(p.line)}</div></div>
+    <div class="blockset">${p.groups.map((g) => `<div class="blocks" style="--cols:${p.cols}">${blocks(g)}</div>`).join('')}</div>
+  </div></div>`;
+}
+
+function card(v) {
+  const live = v.status === 'published';
+  const right = live ? formatDate(v.date) : v.stage;
+  const inner = `${poster(v)}
+    <div><h3>${esc(v.title)}</h3>
+    <div class="meta"><span>${FORMATS[v.format]}</span><span>${esc(right)}</span></div></div>`;
+  const cls = 'card' + (v.format === 'long' ? ' wide' : '');
+  return live
+    ? `<a class="${cls}" href="#/library/${v.id}">${inner}</a>`
+    : `<div class="${cls}">${inner}</div>`;
+}
+
+const published = () => VIDEOS.filter((v) => v.status === 'published').sort((a, b) => b.date.localeCompare(a.date));
+const upcoming = () => VIDEOS.filter((v) => v.status === 'upcoming');
+
+/* =======================================================================
+   Pages
+   ======================================================================= */
+function renderHome() {
+  const out = published();
+  const next = upcoming().filter((v) => v.format === 'short').slice(0, 1);
+  const interest = Array.from({ length: 25 }, (_, i) => `<i class="blk g" style="--i:${i}"></i>`).join('');
+  return `
+  <div class="wrap">
+    <section class="hero">
+      <div>
+        <h1>Start with<br>a question.</h1>
+        <p class="lede">Follow where it leads. Praxis makes short, visual explanations of how money actually works, and free tools to run the numbers yourself.</p>
+        <div class="actions">
+          <a class="btn primary" href="#/library">Browse the library</a>
+          <a class="btn" href="#/calculator">Open the calculator</a>
+        </div>
+      </div>
+      <a class="stage" href="#/library/s001" aria-label="Why is 8% interest high? Borrow $100,000 at 8%, pay back about $125,182. Open the video page.">
+        <p class="q">Why is 8% interest high?</p>
+        <div class="stack" aria-hidden="true">
+          <div class="interest">${interest}</div>
+          <div class="borrowed">${blocks([['b', 100]])}</div>
+        </div>
+        <div class="legend" aria-hidden="true">
+          <div><i class="dot b"></i>Borrowed<b>$100,000</b></div>
+          <div><i class="dot g"></i>Interest<b>$25,182</b></div>
+        </div>
+        <p class="cap" aria-hidden="true">Interest only for a year, then paid off over four. Each block is $1,000.</p>
+      </a>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <h2>Latest videos</h2>
+        <a class="text-link" href="#/library">See all videos</a>
+      </div>
+      <div class="shelf">${[...out, ...next].map(card).join('')}</div>
+    </section>
+
+    <section class="section">
+      <div class="split">
+        <div>
+          <h2>Then run your own numbers</h2>
+          <p class="lede">The calculator shows where every payment goes: what pays down the amount you borrowed, and what goes to interest.</p>
+          <div class="actions"><a class="btn primary" href="#/calculator">Open the calculator</a></div>
+        </div>
+        <ul class="calc-list">${CALCULATORS.map(([n, d]) => `<li><b>${esc(n)}</b><span>${esc(d)}</span></li>`).join('')}</ul>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="split">
+        <div>
+          <h2>Why is everything so expensive?</h2>
+          <p class="lede">A higher price is an outcome, not an explanation. This one isn’t a video. It’s a model you move through at your own speed: a loaf of bread, the chain that makes it, and what happens to the price when something changes.</p>
+          <div class="actions"><a class="btn primary" href="#/interactive">Start the interactive piece</a></div>
+        </div>
+      </div>
+    </section>
+  </div>`;
+}
+
+const libraryState = { filter: 'all' };
+
+function renderLibrary(rest) {
+  if (rest[0]) return renderVideo(rest[0]);
+  const f = libraryState.filter;
+  const match = (v) => f === 'all' || v.format === f;
+  const out = published().filter(match);
+  const next = upcoming().filter(match);
+  const used = Object.keys(FORMATS).filter((k) => VIDEOS.some((v) => v.format === k));
+  const chips = [['all', 'All'], ...used.map((k) => [k, k === 'short' ? 'Shorts' : FORMATS[k]])]
+    .map(([k, label]) => `<button type="button" data-filter="${k}" aria-pressed="${k === f}">${label}</button>`).join('');
+  return `
+  <div class="wrap">
+    <header class="page-head">
+      <h1>Library</h1>
+      <p class="lede">Every Praxis video, newest first. Each one starts with a single question.</p>
+      ${used.length > 1 ? `<div class="filters" role="group" aria-label="Show">${chips}</div>` : ''}
+    </header>
+    <section class="group">
+      <h2>Out now</h2>
+      ${out.length ? `<div class="shelf">${out.map(card).join('')}</div>` : `<p class="empty">Nothing published in this format yet. The first one is listed under “Coming up”.</p>`}
+    </section>
+    ${next.length ? `<section class="group"><h2>Coming up</h2><div class="shelf">${next.map(card).join('')}</div></section>` : ''}
+  </div>`;
+}
+
+function renderVideo(id) {
+  const v = VIDEOS.find((x) => x.id === id && x.status === 'published');
+  if (!v) return renderMissing();
+  const watch = v.url ? `<a class="btn primary" href="${esc(v.url)}" target="_blank" rel="noopener">Watch the video</a>` : '';
+  const tool = v.tool ? `<a class="btn${watch ? '' : ' primary'}" href="#/${v.tool.page}">${esc(v.tool.label)}</a>` : '';
+  return `
+  <div class="wrap">
+    <a class="back" href="#/library"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>Library</a>
+    <article class="video">
+      ${poster(v)}
+      <div>
+        <h1>${esc(v.title)}</h1>
+        <p class="when">${FORMATS[v.format]}, published ${formatDate(v.date)}</p>
+        <p class="summary">${esc(v.summary)}</p>
+        ${v.takeaway ? `<p class="takeaway">${esc(v.takeaway)}</p>` : ''}
+        ${watch || tool ? `<div class="actions">${watch}${tool}</div>` : ''}
+        ${v.numbers ? `<dl class="numbers">${v.numbers.map(([k, val]) => `<div><dt>${esc(k)}</dt><dd>${esc(val)}</dd></div>`).join('')}</dl>` : ''}
+        ${v.fine ? `<p class="fine">${esc(v.fine)}</p>` : ''}
+        ${v.source ? `<p class="fine">Source: <a href="${esc(v.source.url)}" target="_blank" rel="noopener">${esc(v.source.label)}</a></p>` : ''}
+      </div>
+    </article>
+  </div>`;
+}
+
+function renderMissing() {
+  return `
+  <div class="wrap">
+    <header class="page-head">
+      <h1>Page not found</h1>
+      <p class="lede">There’s nothing at this address. It may have moved, or the link may be mistyped.</p>
+      <div class="actions" style="margin-top:28px"><a class="btn primary" href="#/">Go to the home page</a><a class="btn" href="#/library">Browse the library</a></div>
+    </header>
+  </div>`;
+}
+
+/* =======================================================================
+   Embedded pages
+   ======================================================================= */
+const embedHosts = {};
+
+function mountEmbed(page) {
+  let host = embedHosts[page.id];
+  if (host) return host;
+  host = document.createElement('div');
+  host.className = 'embed';
+  $('#embeds').appendChild(host);
+  embedHosts[page.id] = host;
+
+  const fail = () => {
+    host.innerHTML = `<div class="fallback wrap">
+      <h1>This page couldn’t load here.</h1>
+      <p class="lede">${page.standaloneUrl ? 'It still works on its own page.' : 'Reload the page to try again.'}</p>
+      ${page.standaloneUrl ? `<a class="btn primary" href="${esc(page.standaloneUrl)}" target="_blank" rel="noopener">Open it on its own page</a>` : ''}
+    </div>`;
+  };
+
+  const source = document.getElementById(page.embed);
+  if (!source) { fail(); return host; }
+  const LT = '<';
+  let doc = source.textContent.replace(/<\\\/script/gi, LT + '/script').replace(/<\\!--/g, LT + '!--');
+  const ready = LT + 'script>try{parent.postMessage({praxisEmbed:"' + page.id + '"},"*")}catch(e){}' + LT + '/script>';
+  doc = doc.replace(LT + '/head>', '<style>' + (page.embedCss || '') + '</style>' + ready + LT + '/head>');
+
+  const frame = document.createElement('iframe');
+  frame.title = page.title;
+  host.appendChild(frame);
+  host.dataset.ready = '';
+  frame.srcdoc = doc;
+  setTimeout(() => { if (host.dataset.ready !== 'yes') fail(); }, 5000);
+  return host;
+}
+
+window.addEventListener('message', (e) => {
+  const id = e.data && e.data.praxisEmbed;
+  if (id && embedHosts[id]) embedHosts[id].dataset.ready = 'yes';
+});
+
+/* =======================================================================
+   Router
+   ======================================================================= */
+const state = { path: '' };
+
+function readHash() {
+  try { return decodeURIComponent((location.hash || '').replace(/^#\/?/, '')).replace(/\/+$/, ''); } catch (e) { return ''; }
+}
+
+function navigate(path, push = true) {
+  state.path = path;
+  if (push) {
+    try { history.pushState(null, '', '#/' + path); } catch (e) { /* address bar unavailable: the page still changes */ }
+  }
+  render(true);
+}
+
+function render(moved) {
+  const [first = '', ...rest] = state.path.split('/');
+  const id = first || 'home';
+  const page = PAGES.find((p) => p.id === id) || { id: '', title: 'Page not found', render: renderMissing };
+  const view = $('#view');
+  const isEmbed = Boolean(page.embed);
+
+  document.documentElement.classList.toggle('embed-mode', isEmbed);
+  view.hidden = isEmbed;
+  $('#foot').hidden = isEmbed;
+  $('#embeds').hidden = !isEmbed;
+  for (const host of Object.values(embedHosts)) host.hidden = true;
+
+  if (isEmbed) mountEmbed(page).hidden = false;
+  else view.innerHTML = page.render(rest);
+
+  for (const a of document.querySelectorAll('#site-nav a')) {
+    if (a.dataset.page === page.id) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
+  }
+  const video = id === 'library' && VIDEOS.find((v) => v.id === rest[0] && v.status === 'published');
+  const title = video ? video.title : page.title;
+  document.title = title ? title + ' | Praxis by Oakridge' : 'Praxis by Oakridge';
+  if (moved) {
+    window.scrollTo(0, 0);
+    if (!isEmbed) view.focus({ preventScroll: true });
+  }
+}
+
+document.addEventListener('click', (e) => {
+  const filter = e.target.closest('[data-filter]');
+  if (filter) { libraryState.filter = filter.dataset.filter; render(false); return; }
+  const a = e.target.closest('a[href^="#/"]');
+  if (!a || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+  e.preventDefault();
+  navigate(a.getAttribute('href').replace(/^#\/?/, '').replace(/\/+$/, ''));
+});
+const onAddressChange = () => { const p = readHash(); if (p !== state.path) navigate(p, false); };
+window.addEventListener('popstate', onAddressChange);
+window.addEventListener('hashchange', onAddressChange);
+
+/* =======================================================================
+   Start
+   ======================================================================= */
+for (const el of document.querySelectorAll('[data-brand]')) {
+  el.innerHTML = EMBLEM + '<b>Praxis</b><span>by Oakridge</span>';
+  el.setAttribute('aria-label', 'Praxis by Oakridge, home');
+}
+const navPages = PAGES.filter((p) => p.label);
+$('#site-nav').innerHTML = navPages
+  .map((p) => `<a href="#/${p.id}" data-page="${p.id}">${esc(p.label)}${p.soon ? '<span class="tag">Soon</span>' : ''}</a>`).join('');
+$('#foot-nav').innerHTML = navPages.map((p) => `<a href="#/${p.id}">${esc(p.label)}</a>`).join('')
+  + (LINKS.youtube ? `<a href="${esc(LINKS.youtube)}" target="_blank" rel="noopener">YouTube</a>` : '');
+
+state.path = readHash();
+render(false);
+</script>
+</body>
+</html>
