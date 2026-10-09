@@ -1,0 +1,1100 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Oakridge Calculator</title>
+<meta name="description" content="Loan, mortgage, savings and debt calculators that show where every payment goes.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* Oakridge palette (Artstyle & Visual Production Standard, section 3).
+   Black is the brand stage in every viewer theme, so the tokens are the same
+   under light and dark. Gold = interest. Blue = principal or deposits. */
+:root,
+:root[data-theme="dark"],
+:root[data-theme="light"] {
+  --black: #000000;
+  --surface: #12161D;
+  --hairline: #232A36;
+  --white: #F5F7FA;
+  --muted: #9AA3B2;
+  --gold: #D4AF37;
+  --blue: #3B82F6;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --black: #000000; --white: #F5F7FA; }
+}
+:root {
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+*, *::before, *::after { box-sizing: inherit; }
+html { height: 100%; scroll-padding-top: env(safe-area-inset-top, 0px); }
+body {
+  margin: 0;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: var(--black);
+  color: var(--white);
+  font-family: 'Geist', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-size: 15px;
+  line-height: 1.45;
+  font-variant-numeric: tabular-nums;
+  -webkit-font-smoothing: antialiased;
+  -webkit-text-size-adjust: 100%;
+}
+button, input, select { font: inherit; color: inherit; }
+h1, h2, p { margin: 0; }
+.muted { color: var(--muted); }
+.gold { color: var(--gold); }
+.blue { color: var(--blue); }
+:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+
+/* ---------- Frame ---------- */
+.app { flex: 1 0 auto; display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: auto 1fr; }
+.rail {
+  position: sticky;
+  top: env(safe-area-inset-top, 0px);
+  z-index: 5;
+  background: var(--black);
+  border-bottom: 1px solid var(--hairline);
+}
+.rail-inner { padding: 14px 20px 0; }
+.brand { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 16px; }
+.mark { display: flex; gap: 3px; }
+.mark i { width: 12px; height: 12px; border-radius: 3px; box-shadow: inset 0 2px 0 rgba(255,255,255,.35), inset 0 -2px 0 rgba(0,0,0,.25); }
+.mark .g { background: var(--gold); }
+.mark .b { background: var(--blue); }
+.mark .w { background: var(--white); box-shadow: inset 0 -2px 0 rgba(0,0,0,.2); }
+.nav { display: flex; gap: 6px; margin: 12px -20px 0; padding: 0 20px 12px; overflow-x: auto; scrollbar-width: none; }
+.nav::-webkit-scrollbar { display: none; }
+.nav button {
+  flex: none;
+  display: flex; align-items: center; gap: 10px;
+  height: 44px; padding: 0 16px;
+  border: 1px solid var(--hairline); border-radius: 22px;
+  background: transparent; color: var(--muted);
+  font-size: 15px; font-weight: 500; white-space: nowrap; cursor: pointer;
+}
+.nav button svg { display: none; flex: none; }
+.nav button[aria-current="page"] { background: var(--white); border-color: var(--white); color: var(--black); font-weight: 600; }
+.rail .fine { display: none; }
+
+main {
+  width: 100%; max-width: 560px; margin: 0 auto;
+  padding: 26px 20px 40px;
+  display: grid; grid-template-columns: minmax(0, 1fr); gap: 44px;
+  align-content: start;
+}
+.fine { font-size: 12px; line-height: 18px; color: var(--muted); }
+
+/* ---------- Calculator ---------- */
+.calc h1 { font-size: 30px; line-height: 36px; font-weight: 600; letter-spacing: -0.01em; }
+.calc .blurb { margin-top: 6px; color: var(--muted); max-width: 44ch; }
+.fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 22px; }
+.field {
+  display: flex; flex-direction: column; gap: 4px;
+  padding: 10px 14px; min-height: 64px;
+  background: var(--surface); border-radius: 12px; cursor: text;
+}
+.field.wide { grid-column: 1 / -1; }
+.field:focus-within { outline: 2px solid var(--blue); outline-offset: 0; }
+.field > span:first-child { font-size: 12px; line-height: 16px; color: var(--muted); }
+.field .row { display: flex; align-items: baseline; gap: 4px; font-size: 18px; line-height: 24px; font-weight: 500; }
+.field .unit { color: var(--muted); flex: none; }
+.field input, .field select {
+  flex: 1 1 auto; min-width: 0; width: 100%;
+  padding: 0; border: 0; border-radius: 0; background: transparent; outline: none;
+  font-size: 18px; line-height: 24px; font-weight: 500;
+}
+@supports (field-sizing: content) {
+  .field input { field-sizing: content; flex: 0 1 auto; width: auto; min-width: 1ch; max-width: 100%; }
+}
+.field select {
+  appearance: none; -webkit-appearance: none; cursor: pointer; padding-right: 22px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%239AA3B2' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 9l7 7 7-7'/%3E%3C/svg%3E") no-repeat right center;
+  font-size: 16px;
+}
+.field select option { background: var(--surface); color: var(--white); }
+
+.result { margin-top: 26px; display: grid; gap: 24px; }
+.problem { color: var(--muted); max-width: 40ch; }
+.label { font-size: 13px; line-height: 18px; color: var(--muted); }
+.hero { font-size: clamp(38px, 11vw, 52px); line-height: 1.1; font-weight: 600; letter-spacing: -0.02em; margin: 4px 0; overflow-wrap: anywhere; }
+.hero.small { font-size: clamp(30px, 8.5vw, 42px); }
+.sub { font-size: 13px; line-height: 18px; color: var(--muted); }
+
+.blocks { display: grid; grid-template-columns: repeat(var(--cols, 25), minmax(0, 1fr)); gap: 2px; }
+.blk { aspect-ratio: 1 / 1; border-radius: 22%; box-shadow: inset 0 2px 0 rgba(255,255,255,.35), inset 0 -2px 0 rgba(0,0,0,.25); }
+.blk.b { background: var(--blue); }
+.blk.g { background: var(--gold); }
+.blocks.chunky { gap: 3px; }
+.blocks.chunky .blk { box-shadow: inset 0 3px 0 rgba(255,255,255,.35), inset 0 -3px 0 rgba(0,0,0,.25); }
+.legend { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 16px; margin-top: 12px; font-size: 13px; line-height: 18px; }
+.legend span { display: inline-flex; align-items: center; gap: 8px; }
+.dot { display: inline-block; width: 10px; height: 10px; border-radius: 2px; flex: none; }
+.dot.b { background: var(--blue); }
+.dot.g { background: var(--gold); }
+
+.stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 12px; }
+.stat b { display: block; font-size: 20px; line-height: 26px; font-weight: 600; overflow-wrap: anywhere; }
+.note { padding: 12px 14px; background: var(--surface); border-radius: 12px; font-size: 14px; line-height: 20px; }
+
+.chart { display: flex; align-items: flex-end; gap: 3px; height: 190px; }
+.chart .col { flex: 1 1 0; min-width: 0; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; gap: 2px; }
+.chart .col i { display: block; min-height: 2px; border-radius: 3px; box-shadow: inset 0 2px 0 rgba(255,255,255,.3); }
+.chart .col .g { background: var(--gold); }
+.chart .col .b { background: var(--blue); }
+.axis { display: flex; justify-content: space-between; margin-top: 8px; font-size: 12px; line-height: 16px; color: var(--muted); }
+
+.versus { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+.versus .side { display: grid; gap: 14px; align-content: start; }
+.versus .rate { font-size: 34px; line-height: 40px; font-weight: 600; letter-spacing: -0.02em; }
+.versus .stack { display: flex; align-items: flex-end; aspect-ratio: 10 / var(--rows, 1); }
+.versus .stack .blocks { width: 100%; }
+
+/* ---------- Breakdown ---------- */
+.breakdown h2 { font-size: 20px; line-height: 26px; font-weight: 600; }
+.bd-head { display: grid; gap: 14px; }
+.seg { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px; padding: 4px; background: var(--surface); border-radius: 12px; }
+.seg button { height: 44px; border: 0; border-radius: 9px; background: transparent; color: var(--muted); font-size: 15px; font-weight: 500; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--white); color: var(--black); font-weight: 600; }
+.years { list-style: none; margin: 14px 0 0; padding: 0; }
+.yr { border-top: 1px solid var(--hairline); }
+.yr-btn { display: grid; gap: 6px; width: 100%; padding: 11px 0; border: 0; background: transparent; text-align: left; cursor: pointer; }
+.yr-top { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.yr-top b { font-size: 15px; line-height: 20px; font-weight: 600; }
+.yr-top .muted { font-size: 13px; line-height: 18px; display: inline-flex; align-items: center; gap: 6px; }
+.yr-top svg { transition: transform .15s ease; }
+.yr-btn[aria-expanded="true"] .yr-top svg { transform: rotate(180deg); }
+.bar { display: flex; gap: 2px; height: 10px; min-width: 6px; }
+.bar i { display: block; border-radius: 3px; min-width: 2px; }
+.bar .g { background: var(--gold); }
+.bar .b { background: var(--blue); }
+.yr-nums { display: flex; justify-content: space-between; gap: 12px; font-size: 13px; line-height: 18px; }
+.yr-rows { margin: 0 0 12px; padding: 6px 12px 4px; background: var(--surface); border-radius: 12px; }
+.scroll { margin-top: 14px; max-height: 70vh; overflow: auto; overscroll-behavior: contain; border-top: 1px solid var(--hairline); }
+table { width: 100%; border-collapse: collapse; font-size: 13px; line-height: 18px; }
+th, td { padding: 7px 0 7px 10px; text-align: right; white-space: nowrap; }
+th:first-child, td:first-child { padding-left: 0; text-align: left; }
+th { font-size: 12px; font-weight: 400; color: var(--muted); }
+.scroll th { position: sticky; top: 0; background: var(--black); }
+tbody tr + tr td, .scroll tbody tr td { border-top: 1px solid var(--hairline); }
+
+/* ---------- Number pad (touch screens) ---------- */
+body { padding-bottom: var(--pad, 0px); }
+html { scroll-padding-bottom: calc(var(--pad, 0px) + 16px); }
+.pad {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 10;
+  background: var(--black); border-top: 1px solid var(--hairline);
+  padding: 8px 8px calc(8px + env(safe-area-inset-bottom, 0px));
+  -webkit-user-select: none; user-select: none; touch-action: manipulation;
+}
+.pad[hidden] { display: none; }
+.pad-keys { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; max-width: 520px; margin: 0 auto; }
+.pad button {
+  height: 52px; border: 0; border-radius: 12px;
+  background: var(--surface); color: var(--white);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.07);
+  font-size: 22px; font-weight: 500; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  -webkit-tap-highlight-color: transparent;
+}
+.pad button:active { background: #232A36; }
+.pad button:disabled { color: #4A5262; cursor: default; }
+.pad button:disabled:active { background: var(--surface); }
+.pad .word { font-size: 16px; font-weight: 600; }
+.pad .next { grid-row: span 2; height: auto; background: var(--white); color: var(--black); box-shadow: none; }
+.pad .next:active { background: #C9CED6; }
+
+/* One purposeful motion: when a calculator opens, the interest blocks stack
+   up after the amount borrowed is already on screen. */
+@keyframes stack { from { opacity: 0; transform: translateY(-6px) scale(.6); } to { opacity: 1; transform: none; } }
+.intro .blk.g { animation: stack .28s cubic-bezier(.2,.8,.3,1) both; animation-delay: calc(120ms + min(var(--i, 0), 40) * 16ms); }
+@media (prefers-reduced-motion: reduce) {
+  .intro .blk.g { animation: none; }
+  .yr-top svg { transition: none; }
+}
+
+/* ---------- Tablet: calculator and breakdown side by side ---------- */
+@media (min-width: 860px) {
+  .rail-inner { display: flex; align-items: center; gap: 28px; padding: 12px 32px; }
+  .nav { margin: 0; padding: 0; overflow: visible; flex-wrap: wrap; }
+  main { max-width: 1120px; padding: 40px 32px 56px; grid-template-columns: minmax(0, 420px) minmax(0, 1fr); gap: 32px 56px; }
+  main.solo { grid-template-columns: minmax(0, 640px); }
+  main > .fine { grid-column: 1 / -1; }
+  .calc h1 { font-size: 36px; line-height: 42px; }
+  .hero { font-size: 54px; }
+  .hero.small { font-size: 42px; }
+  .breakdown { padding-top: 6px; }
+}
+
+/* ---------- Desktop: calculators move into a side rail ---------- */
+@media (min-width: 1200px) {
+  .app { grid-template-columns: 248px minmax(0, 1fr); grid-template-rows: 1fr; }
+  .rail { position: static; border-bottom: 0; border-right: 1px solid var(--hairline); }
+  .rail-inner { position: sticky; top: 0; display: flex; flex-direction: column; align-items: stretch; gap: 28px; padding: 32px 16px 24px; }
+  .brand { padding: 0 12px; font-size: 17px; }
+  .nav { flex-direction: column; flex-wrap: nowrap; gap: 2px; }
+  .nav button { width: 100%; height: 48px; padding: 0 12px; border: 0; border-radius: 12px; }
+  .nav button svg { display: block; }
+  .nav button:hover { color: var(--white); }
+  .nav button[aria-current="page"] { background: var(--surface); color: var(--white); }
+  .rail .fine { display: block; padding: 0 12px; }
+  main > .fine { display: none; }
+  main { margin: 0; max-width: 1240px; padding: 48px 56px 64px; grid-template-columns: minmax(0, 440px) minmax(0, 1fr); gap: 32px 72px; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="rail">
+    <div class="rail-inner">
+      <div class="brand"><span class="mark" aria-hidden="true"><i class="g"></i><i class="b"></i><i class="w"></i></span>Oakridge</div>
+      <nav class="nav" id="nav" aria-label="Calculators"></nav>
+      <p class="fine">Estimates only. Not financial advice.</p>
+    </div>
+  </header>
+  <main id="main">
+    <section class="calc" aria-labelledby="calc-title">
+      <h1 id="calc-title"></h1>
+      <p class="blurb" id="calc-blurb"></p>
+      <div class="fields" id="fields"></div>
+      <div class="result" id="result" aria-live="polite"></div>
+    </section>
+    <section class="breakdown" id="breakdown" aria-labelledby="bd-title"></section>
+    <p class="fine">Estimates only. Not financial advice.</p>
+  </main>
+</div>
+
+<div class="pad" id="pad" role="group" aria-label="Number pad" hidden>
+  <div class="pad-keys">
+    <button type="button" data-key="1">1</button>
+    <button type="button" data-key="2">2</button>
+    <button type="button" data-key="3">3</button>
+    <button type="button" data-key="del" aria-label="Delete"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5h10a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H9l-6-7z"/><path d="M12 9.5l5 5M17 9.5l-5 5"/></svg></button>
+    <button type="button" data-key="4">4</button>
+    <button type="button" data-key="5">5</button>
+    <button type="button" data-key="6">6</button>
+    <button type="button" data-key="next" class="word next" id="pad-next">Next</button>
+    <button type="button" data-key="7">7</button>
+    <button type="button" data-key="8">8</button>
+    <button type="button" data-key="9">9</button>
+    <button type="button" data-key="." aria-label="Decimal point">.</button>
+    <button type="button" data-key="0">0</button>
+    <button type="button" data-key="000" aria-label="Three zeros">000</button>
+    <button type="button" data-key="done" aria-label="Hide number pad"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="11" rx="2"/><path d="M7 8h.01M11 8h.01M15 8h.01M8 11.5h8M9 19l3 2.5 3-2.5"/></svg></button>
+  </div>
+</div>
+
+<script>
+/* Oakridge calculation engine (JavaScript port of the Dart engine).
+   Money is whole cents in a Number. Rates are exact fractions (BigInt).
+   Interest is rounded half up to the cent every period. */
+const CalcEngine = (() => {
+  'use strict';
+
+  const Compounding = { annually: 1, semiAnnually: 2, quarterly: 4, monthly: 12, daily: 365 };
+
+  const Frequency = {
+    monthly: { perYear: 12, label: 'Monthly', noun: 'month' },
+    semiMonthly: { perYear: 24, label: 'Twice a month', noun: 'payment' },
+    biWeekly: { perYear: 26, label: 'Every 2 weeks', noun: 'payment' },
+    acceleratedBiWeekly: { perYear: 26, monthlyDivisor: 2, label: 'Every 2 weeks, accelerated', noun: 'payment' },
+    weekly: { perYear: 52, label: 'Weekly', noun: 'payment' },
+    acceleratedWeekly: { perYear: 52, monthlyDivisor: 4, label: 'Weekly, accelerated', noun: 'payment' },
+  };
+
+  class PaymentTooSmallError extends Error {
+    constructor(paymentCents, interestCents) {
+      super('Payment does not cover the interest');
+      this.name = 'PaymentTooSmallError';
+      this.paymentCents = paymentCents;
+      this.interestCents = interestCents;
+      this.minimumPaymentCents = interestCents + 1;
+    }
+  }
+
+  function fail(message) { throw new RangeError(message); }
+
+  /** "100000", "1,234.5", "$2,441.29" -> cents. Throws on anything else. */
+  function parseCents(text) {
+    const cleaned = String(text).trim().replace(/[,$\s]/g, '');
+    if (!/^\d+(\.\d{1,2})?$/.test(cleaned)) throw new SyntaxError('Not a valid amount');
+    const [dollars, cents = ''] = cleaned.split('.');
+    return Number(dollars) * 100 + Number(cents.padEnd(2, '0') || 0);
+  }
+
+  function roundHalfUp(numerator, denominator) {
+    return Number((numerator * 2n + denominator) / (denominator * 2n));
+  }
+
+  /** A nominal annual rate held as an exact fraction: "8" is exactly 8/100. */
+  function annualRate(percentText) {
+    const cleaned = String(percentText).trim().replace('%', '').trim();
+    if (!/^\d+(\.\d+)?$/.test(cleaned)) throw new SyntaxError('Not a valid rate');
+    const [whole, decimals = ''] = cleaned.split('.');
+    const numerator = BigInt(whole + decimals);
+    const denominator = 100n * 10n ** BigInt(decimals.length);
+    return { numerator, denominator, fraction: Number(numerator) / Number(denominator) };
+  }
+
+  /** The rate for one payment period. Exact when compounding matches the
+      payment frequency; otherwise the equivalent rate in floating point. */
+  function periodicRate(rate, periodsPerYear, compoundsPerYear) {
+    if (periodsPerYear === compoundsPerYear || rate.numerator === 0n) {
+      const numerator = rate.numerator;
+      const denominator = rate.denominator * BigInt(periodsPerYear);
+      return {
+        value: Number(numerator) / Number(denominator),
+        interestOn: (balanceCents) => roundHalfUp(BigInt(balanceCents) * numerator, denominator),
+      };
+    }
+    const value = Math.pow(1 + rate.fraction / compoundsPerYear, compoundsPerYear / periodsPerYear) - 1;
+    return { value, interestOn: (balanceCents) => Math.round(balanceCents * value) };
+  }
+
+  function levelPaymentCents(principalCents, rate, periods) {
+    if (rate.value === 0) return roundHalfUp(BigInt(principalCents), BigInt(periods));
+    return Math.round(principalCents * rate.value / (1 - Math.pow(1 + rate.value, -periods)));
+  }
+
+  function makeSchedule(rows, periodsPerYear) {
+    const last = rows[rows.length - 1];
+    return {
+      rows,
+      periodsPerYear,
+      periods: rows.length,
+      totalInterestCents: last ? last.cumulativeInterestCents : 0,
+      totalPaidCents: rows.reduce((sum, r) => sum + r.paymentCents, 0),
+      closingCents: last ? last.closingCents : 0,
+      byYear() {
+        const years = [];
+        for (let start = 0; start < rows.length; start += periodsPerYear) {
+          const slice = rows.slice(start, start + periodsPerYear);
+          const end = slice[slice.length - 1];
+          years.push({
+            period: years.length + 1,
+            openingCents: slice[0].openingCents,
+            interestCents: slice.reduce((s, r) => s + r.interestCents, 0),
+            paymentCents: slice.reduce((s, r) => s + r.paymentCents, 0),
+            principalCents: slice.reduce((s, r) => s + r.principalCents, 0),
+            closingCents: end.closingCents,
+            cumulativeInterestCents: end.cumulativeInterestCents,
+            firstRow: start,
+            rowCount: slice.length,
+          });
+        }
+        return years;
+      },
+    };
+  }
+
+  /** Period-by-period breakdown of a debt. The last scheduled payment (or the
+      last payment needed) clears whatever is still owing. */
+  function amortize({ principalCents, rate, paymentCents, periodsPerYear, interestOnlyPeriods = 0, scheduledPeriods = null, maxPeriods = 12000 }) {
+    if (!(principalCents > 0)) fail('principal must be > 0');
+    if (!(paymentCents > 0)) fail('payment must be > 0');
+    const lastScheduled = scheduledPeriods == null ? null : interestOnlyPeriods + scheduledPeriods;
+    const rows = [];
+    let balance = principalCents;
+    let cumulative = 0;
+    while (balance > 0) {
+      const period = rows.length + 1;
+      if (period > maxPeriods) fail('debt not repaid within ' + maxPeriods + ' periods');
+      const interest = rate.interestOn(balance);
+      const owing = balance + interest;
+      let payment;
+      if (period <= interestOnlyPeriods) payment = interest;
+      else if (period === lastScheduled || paymentCents >= owing) payment = owing;
+      else if (paymentCents <= interest) throw new PaymentTooSmallError(paymentCents, interest);
+      else payment = paymentCents;
+      cumulative += interest;
+      rows.push({
+        period,
+        openingCents: balance,
+        interestCents: interest,
+        paymentCents: payment,
+        principalCents: payment - interest,
+        closingCents: owing - payment,
+        cumulativeInterestCents: cumulative,
+      });
+      balance = owing - payment;
+    }
+    return makeSchedule(rows, periodsPerYear);
+  }
+
+  function calculateLoan({ principalCents, rate, termPeriods, paymentsPerYear = 12, compoundsPerYear = 12, interestOnlyPeriods = 0, extraPaymentCents = 0 }) {
+    if (!(termPeriods > 0)) fail('term must be > 0');
+    if (interestOnlyPeriods < 0 || interestOnlyPeriods >= termPeriods) fail('interest-only period must be shorter than the term');
+    if (!(principalCents > 0)) fail('principal must be > 0');
+    const periodic = periodicRate(rate, paymentsPerYear, compoundsPerYear);
+    const amortizing = termPeriods - interestOnlyPeriods;
+    const paymentCents = levelPaymentCents(principalCents, periodic, amortizing);
+    const schedule = amortize({
+      principalCents, rate: periodic, paymentCents: paymentCents + extraPaymentCents,
+      periodsPerYear: paymentsPerYear, interestOnlyPeriods, scheduledPeriods: amortizing,
+    });
+    return {
+      principalCents,
+      paymentCents,
+      interestOnlyPaymentCents: interestOnlyPeriods > 0 ? periodic.interestOn(principalCents) : null,
+      schedule,
+      totalInterestCents: schedule.totalInterestCents,
+      totalPaidCents: schedule.totalPaidCents,
+      interestShare: schedule.totalInterestCents / principalCents,
+    };
+  }
+
+  function calculateMortgage({ priceCents, downPaymentCents, rate, amortizationYears, compoundsPerYear, termYears = null, frequency = 'monthly' }) {
+    if (downPaymentCents < 0 || downPaymentCents >= priceCents) fail('down payment must be less than the price');
+    if (!(amortizationYears > 0)) fail('amortization must be > 0');
+    if (termYears != null && (termYears <= 0 || termYears > amortizationYears)) fail('term must be no longer than the amortization');
+    const freq = Frequency[frequency] || fail('unknown frequency');
+    const principalCents = priceCents - downPaymentCents;
+    const periodic = periodicRate(rate, freq.perYear, compoundsPerYear);
+    const scheduledPeriods = amortizationYears * freq.perYear;
+    let paymentCents;
+    if (freq.monthlyDivisor) {
+      const monthly = levelPaymentCents(principalCents, periodicRate(rate, 12, compoundsPerYear), amortizationYears * 12);
+      paymentCents = roundHalfUp(BigInt(monthly), BigInt(freq.monthlyDivisor));
+    } else {
+      paymentCents = levelPaymentCents(principalCents, periodic, scheduledPeriods);
+    }
+    const schedule = amortize({ principalCents, rate: periodic, paymentCents, periodsPerYear: freq.perYear, scheduledPeriods });
+    const termPeriods = termYears == null ? null : termYears * freq.perYear;
+    const termEnd = termPeriods == null ? null : schedule.rows[Math.min(termPeriods, schedule.periods) - 1];
+    return {
+      principalCents,
+      paymentCents,
+      schedule,
+      termPeriods,
+      payoffPeriods: schedule.periods,
+      totalInterestCents: schedule.totalInterestCents,
+      totalPaidCents: schedule.totalPaidCents,
+      interestShare: schedule.totalInterestCents / principalCents,
+      balanceAtTermEndCents: termEnd ? termEnd.closingCents : null,
+      interestOverTermCents: termEnd ? termEnd.cumulativeInterestCents : null,
+      principalOverTermCents: termEnd ? principalCents - termEnd.closingCents : null,
+    };
+  }
+
+  function calculateSavings({ initialCents, contributionCents, rate, years, contributionsPerYear = 12, compoundsPerYear = 12, contributeAtStart = false }) {
+    if (initialCents < 0 || contributionCents < 0) fail('amounts must be >= 0');
+    if (!(years > 0)) fail('years must be > 0');
+    const periodic = periodicRate(rate, contributionsPerYear, compoundsPerYear);
+    const rows = [];
+    let balance = initialCents;
+    let cumulative = 0;
+    const periods = years * contributionsPerYear;
+    for (let period = 1; period <= periods; period++) {
+      const interest = periodic.interestOn(contributeAtStart ? balance + contributionCents : balance);
+      const closing = balance + contributionCents + interest;
+      cumulative += interest;
+      rows.push({
+        period, openingCents: balance, interestCents: interest, paymentCents: contributionCents,
+        principalCents: contributionCents, closingCents: closing, cumulativeInterestCents: cumulative,
+      });
+      balance = closing;
+    }
+    const schedule = makeSchedule(rows, contributionsPerYear);
+    return {
+      initialCents,
+      schedule,
+      finalBalanceCents: balance,
+      totalContributedCents: initialCents + schedule.totalPaidCents,
+      totalInterestCents: schedule.totalInterestCents,
+    };
+  }
+
+  function calculateDebtPayoff({ balanceCents, rate, paymentCents, paymentsPerYear = 12, compoundsPerYear = 12, extraPaymentCents = 0 }) {
+    const schedule = amortize({
+      principalCents: balanceCents,
+      rate: periodicRate(rate, paymentsPerYear, compoundsPerYear),
+      paymentCents: paymentCents + extraPaymentCents,
+      periodsPerYear: paymentsPerYear,
+    });
+    return {
+      principalCents: balanceCents,
+      schedule,
+      periods: schedule.periods,
+      totalInterestCents: schedule.totalInterestCents,
+      totalPaidCents: schedule.totalPaidCents,
+      interestShare: schedule.totalInterestCents / balanceCents,
+    };
+  }
+
+  return {
+    Compounding, Frequency, PaymentTooSmallError,
+    parseCents, annualRate, periodicRate, levelPaymentCents, amortize,
+    calculateLoan, calculateMortgage, calculateSavings, calculateDebtPayoff,
+  };
+})();
+
+</script>
+<script>
+(() => {
+  'use strict';
+  const E = CalcEngine;
+  const $ = (id) => document.getElementById(id);
+
+  // ---------- Formatting ----------
+  const group = (n) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  const money = (cents) => (cents < 0 ? '-' : '') + '$' + group(Math.floor(Math.abs(cents) / 100)) + '.' + String(Math.abs(cents) % 100).padStart(2, '0');
+  const dollars = (cents) => '$' + group(Math.round(cents / 100));
+  const plural = (n, word) => n + ' ' + word + (n === 1 ? '' : 's');
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+  function duration(periods, perYear) {
+    if (perYear === 12) {
+      const years = Math.floor(periods / 12);
+      const months = periods % 12;
+      return [years ? plural(years, 'year') : '', months ? plural(months, 'month') : ''].filter(Boolean).join(' ') || '0 months';
+    }
+    const years = Math.round((periods / perYear) * 10) / 10;
+    return years + (years === 1 ? ' year' : ' years');
+  }
+
+  function moreText(share, interestCents) {
+    if (interestCents === 0) return 'Nothing extra';
+    if (share < 0.01) return 'Under 1% more';
+    return Math.round(share * 100) + '% more';
+  }
+
+  // ---------- Reading inputs ----------
+  class Problem extends Error {}
+
+  function readMoney(text, name, { optional = false } = {}) {
+    const t = text.trim();
+    if (!t) {
+      if (optional) return 0;
+      throw new Problem('Enter the ' + name + '.');
+    }
+    let cents;
+    try { cents = E.parseCents(t); } catch (e) { throw new Problem('The ' + name + ' should be a number, like 25000 or 2,500.50.'); }
+    if (cents > 100000000000) throw new Problem('The ' + name + ' can be up to $1,000,000,000.');
+    return cents;
+  }
+
+  function readInt(text, name, { min, max, optional = false, unit }) {
+    const t = text.trim();
+    if (!t) {
+      if (optional) return null;
+      throw new Problem('Enter the ' + name + '.');
+    }
+    if (!/^\d+$/.test(t)) throw new Problem('The ' + name + ' should be a whole number of ' + unit + '.');
+    const n = Number(t);
+    if (n < min || n > max) throw new Problem('The ' + name + ' can be from ' + min + ' to ' + max + ' ' + unit + '.');
+    return n;
+  }
+
+  function readRate(text, name = 'interest rate') {
+    const t = text.trim();
+    if (!t) throw new Problem('Enter the ' + name + '.');
+    let rate;
+    try { rate = E.annualRate(t); } catch (e) { throw new Problem('The ' + name + ' should be a number, like 8 or 5.49.'); }
+    if (rate.fraction > 1) throw new Problem('The ' + name + ' can be up to 100%.');
+    return rate;
+  }
+
+  // ---------- Shared result pieces ----------
+  function blocksHtml(groups, { cols = 25, chunky = false, label }) {
+    let cells = '';
+    for (const [count, kind] of groups) {
+      for (let i = 0; i < count; i++) cells += '<i class="blk ' + kind + '" style="--i:' + i + '"></i>';
+    }
+    return '<div class="blocks' + (chunky ? ' chunky' : '') + '" style="--cols:' + cols + '" role="img" aria-label="' + esc(label) + '">' + cells + '</div>';
+  }
+
+  // One gold block per 1% of the amount borrowed, capped so very long loans
+  // do not fill the screen.
+  const interestBlocks = (share, interestCents) => (interestCents === 0 ? 0 : Math.min(400, Math.max(1, Math.round(share * 100))));
+
+  function debtPicture(r, baseLabel, baseWord) {
+    const more = moreText(r.interestShare, r.totalInterestCents);
+    return '<div>' +
+      blocksHtml([[100, 'b'], [interestBlocks(r.interestShare, r.totalInterestCents), 'g']], { label: 'Blocks: 100 blue for the amount ' + baseWord + ', gold for the interest. ' + more + '.' }) +
+      '<div class="legend"><span><i class="dot b"></i>' + baseLabel + ' ' + dollars(r.principalCents) + '</span>' +
+      '<span><i class="dot g"></i>Interest ' + money(r.totalInterestCents) + '</span></div></div>';
+  }
+
+  const heroHtml = (label, value, sub, cls = '') =>
+    '<div><div class="label">' + label + '</div><div class="hero ' + cls + '">' + value + '</div>' + (sub ? '<div class="sub">' + sub + '</div>' : '') + '</div>';
+
+  const statHtml = (label, value, cls = '') => '<div class="stat"><span class="label">' + label + '</span><b class="' + cls + '">' + value + '</b></div>';
+
+  // ---------- The calculators ----------
+  const CALCS = {
+    loan: {
+      title: 'Loan',
+      blurb: 'What a fixed-rate loan costs you, payment by payment.',
+      icon: '<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9.5 15l5-6"/><circle cx="9.5" cy="9.5" r=".9"/><circle cx="14.5" cy="14.5" r=".9"/>',
+      fields: [
+        { id: 'amount', label: 'Amount', kind: 'money', value: '100,000' },
+        { id: 'rate', label: 'Interest rate', kind: 'number', unit: '%', value: '8' },
+        { id: 'years', label: 'Term', kind: 'int', unit: 'years', value: '5' },
+        { id: 'io', label: 'Interest-only first', kind: 'int', unit: 'months', value: '12' },
+      ],
+      compute(v) {
+        const principalCents = readMoney(v.amount, 'amount');
+        if (principalCents === 0) throw new Problem('Enter the amount you want to borrow.');
+        const rate = readRate(v.rate);
+        const years = readInt(v.years, 'term', { min: 1, max: 50, unit: 'years' });
+        const io = readInt(v.io, 'interest-only period', { min: 0, max: 600, optional: true, unit: 'months' }) || 0;
+        if (io >= years * 12) throw new Problem('The interest-only months must be shorter than the term.');
+        const r = E.calculateLoan({ principalCents, rate, termPeriods: years * 12, interestOnlyPeriods: io });
+        const sub = r.interestOnlyPaymentCents == null ? '' : 'after ' + io + ' interest-only ' + (io === 1 ? 'month' : 'months') + ' at ' + money(r.interestOnlyPaymentCents);
+        return {
+          html: heroHtml('Monthly payment', money(r.paymentCents), sub) +
+            debtPicture(r, 'Borrowed', 'borrowed') +
+            heroHtml('You pay back', '<span class="gold">' + moreText(r.interestShare, r.totalInterestCents) + '</span>', 'than you borrowed. ' + money(r.totalPaidCents) + ' in total.'),
+          breakdown: { schedule: r.schedule, baseLabel: 'Principal', baseTotal: r.principalCents, noun: 'Month' },
+        };
+      },
+    },
+
+    mortgage: {
+      title: 'Mortgage',
+      blurb: 'Your payment, what you still owe when the term ends, and the interest along the way.',
+      icon: '<path d="M3.5 11L12 4l8.5 7"/><path d="M6 9.5V20h12V9.5"/>',
+      fields: [
+        { id: 'price', label: 'Home price', kind: 'money', value: '400,000' },
+        { id: 'down', label: 'Down payment', kind: 'money', value: '100,000' },
+        { id: 'rate', label: 'Interest rate', kind: 'number', unit: '%', value: '5' },
+        { id: 'amort', label: 'Amortization', kind: 'int', unit: 'years', value: '25' },
+        { id: 'term', label: 'Term', kind: 'int', unit: 'years', value: '5' },
+        { id: 'freq', label: 'Payments', kind: 'select', value: 'monthly', options: Object.entries(E.Frequency).map(([k, f]) => [k, f.label]) },
+        { id: 'comp', label: 'Interest compounds', kind: 'select', wide: true, value: '2', options: [['2', 'Twice a year (Canada, fixed rate)'], ['12', 'Monthly (US and most others)']] },
+      ],
+      compute(v) {
+        const priceCents = readMoney(v.price, 'home price');
+        if (priceCents === 0) throw new Problem('Enter the home price.');
+        const downPaymentCents = readMoney(v.down, 'down payment', { optional: true });
+        if (downPaymentCents >= priceCents) throw new Problem('The down payment must be less than the home price.');
+        const rate = readRate(v.rate);
+        const amortizationYears = readInt(v.amort, 'amortization', { min: 1, max: 40, unit: 'years' });
+        const termYears = readInt(v.term, 'term', { min: 1, max: 40, optional: true, unit: 'years' });
+        if (termYears != null && termYears > amortizationYears) throw new Problem('The term cannot be longer than the amortization.');
+        const freq = E.Frequency[v.freq];
+        const r = E.calculateMortgage({ priceCents, downPaymentCents, rate, amortizationYears, termYears, frequency: v.freq, compoundsPerYear: Number(v.comp) });
+        const heroLabel = { monthly: 'Monthly payment', semiMonthly: 'Payment twice a month', biWeekly: 'Payment every 2 weeks', acceleratedBiWeekly: 'Payment every 2 weeks', weekly: 'Weekly payment', acceleratedWeekly: 'Weekly payment' }[v.freq];
+        let termStats = '';
+        if (termYears != null && r.balanceAtTermEndCents > 0) {
+          termStats = '<div class="stats">' +
+            statHtml('Still owing after ' + plural(termYears, 'year'), money(r.balanceAtTermEndCents)) +
+            statHtml('Interest in those ' + plural(termYears, 'year'), money(r.interestOverTermCents), 'gold') + '</div>';
+        }
+        return {
+          html: heroHtml(heroLabel, money(r.paymentCents), 'on a mortgage of ' + dollars(r.principalCents) + ', paid off in ' + duration(r.payoffPeriods, freq.perYear)) +
+            termStats +
+            debtPicture(r, 'Borrowed', 'borrowed') +
+            heroHtml('You pay back', '<span class="gold">' + moreText(r.interestShare, r.totalInterestCents) + '</span>', 'than you borrowed, if the rate never changes. ' + money(r.totalPaidCents) + ' in total.'),
+          breakdown: { schedule: r.schedule, baseLabel: 'Principal', baseTotal: r.principalCents, noun: freq.perYear === 12 ? 'Month' : 'Payment' },
+        };
+      },
+    },
+
+    savings: {
+      title: 'Savings',
+      blurb: 'How regular deposits grow, and how much of the total is interest.',
+      icon: '<rect x="5" y="15.5" width="14" height="4.5" rx="2"/><rect x="5" y="9.75" width="14" height="4.5" rx="2"/><rect x="5" y="4" width="14" height="4.5" rx="2"/>',
+      fields: [
+        { id: 'start', label: 'Starting amount', kind: 'money', value: '5,000' },
+        { id: 'deposit', label: 'Monthly deposit', kind: 'money', value: '200' },
+        { id: 'rate', label: 'Interest rate', kind: 'number', unit: '%', value: '4.5' },
+        { id: 'years', label: 'For', kind: 'int', unit: 'years', value: '20' },
+      ],
+      compute(v) {
+        const initialCents = readMoney(v.start, 'starting amount', { optional: true });
+        const contributionCents = readMoney(v.deposit, 'monthly deposit', { optional: true });
+        if (initialCents === 0 && contributionCents === 0) throw new Problem('Enter a starting amount or a monthly deposit.');
+        const rate = readRate(v.rate);
+        const years = readInt(v.years, 'number of years', { min: 1, max: 60, unit: 'years' });
+        const r = E.calculateSavings({ initialCents, contributionCents, rate, years });
+        const byYear = r.schedule.byYear();
+        const top = r.finalBalanceCents || 1;
+        let deposited = initialCents;
+        const cols = byYear.map((y) => {
+          deposited += y.paymentCents;
+          const interestPct = (y.cumulativeInterestCents / top) * 100;
+          const depositPct = (deposited / top) * 100;
+          return '<div class="col" title="Year ' + y.period + ': ' + money(y.closingCents) + '">' +
+            (y.cumulativeInterestCents > 0 ? '<i class="g" style="height:' + interestPct.toFixed(2) + '%"></i>' : '') +
+            '<i class="b" style="height:' + depositPct.toFixed(2) + '%"></i></div>';
+        }).join('');
+        return {
+          html: heroHtml('After ' + plural(years, 'year'), money(r.finalBalanceCents), '') +
+            '<div><div class="chart" role="img" aria-label="Balance at the end of each year. Deposits in blue, interest in gold.">' + cols + '</div>' +
+            '<div class="axis"><span>Year 1</span><span>Year ' + years + '</span></div></div>' +
+            '<div class="stats">' + statHtml('<i class="dot b"></i> You put in', money(r.totalContributedCents), 'blue') +
+            statHtml('<i class="dot g"></i> Interest earned', money(r.totalInterestCents), 'gold') + '</div>',
+          breakdown: { schedule: r.schedule, baseLabel: 'Deposits', baseTotalLabel: 'Monthly deposits', baseTotal: r.schedule.totalPaidCents, noun: 'Month', savings: true },
+        };
+      },
+    },
+
+    payoff: {
+      title: 'Debt payoff',
+      blurb: 'How long a fixed payment takes to clear a balance, and what paying extra saves.',
+      icon: '<path d="M4 6h5v5h5v5h6"/><path d="M4 20h16"/>',
+      fields: [
+        { id: 'balance', label: 'Balance', kind: 'money', value: '5,000' },
+        { id: 'rate', label: 'Interest rate', kind: 'number', unit: '%', value: '19.99' },
+        { id: 'payment', label: 'Monthly payment', kind: 'money', value: '150' },
+        { id: 'extra', label: 'Extra each month', kind: 'money', value: '50' },
+        { id: 'comp', label: 'Interest compounds', kind: 'select', wide: true, value: '365', options: [['365', 'Daily (credit cards)'], ['12', 'Monthly (most loans)']] },
+      ],
+      compute(v) {
+        const balanceCents = readMoney(v.balance, 'balance');
+        if (balanceCents === 0) throw new Problem('Enter the balance you owe.');
+        const rate = readRate(v.rate);
+        const paymentCents = readMoney(v.payment, 'monthly payment');
+        if (paymentCents === 0) throw new Problem('Enter the monthly payment.');
+        const extraPaymentCents = readMoney(v.extra, 'extra payment', { optional: true });
+        const input = { balanceCents, rate, paymentCents, compoundsPerYear: Number(v.comp) };
+        let r;
+        try {
+          r = E.calculateDebtPayoff({ ...input, extraPaymentCents });
+        } catch (e) {
+          if (!(e instanceof E.PaymentTooSmallError)) throw e;
+          throw new Problem('A payment of ' + money(e.paymentCents) + ' never clears this debt, because one month of interest is ' + money(e.interestCents) + '. Pay at least ' + money(e.minimumPaymentCents) + ' a month.');
+        }
+        let saving = '';
+        if (extraPaymentCents > 0) {
+          try {
+            const base = E.calculateDebtPayoff(input);
+            const months = base.periods - r.periods;
+            saving = '<p class="note">The extra ' + money(extraPaymentCents) + ' a month saves <span class="gold">' + money(base.totalInterestCents - r.totalInterestCents) + '</span> of interest and clears the debt ' + (months > 0 ? duration(months, 12) + ' sooner' : 'in the same number of months') + '.</p>';
+          } catch (e) {
+            if (!(e instanceof E.PaymentTooSmallError)) throw e;
+            saving = '<p class="note">Without the extra ' + money(extraPaymentCents) + ', the ' + money(paymentCents) + ' payment would not cover the interest and the debt would never be cleared.</p>';
+          }
+        }
+        return {
+          html: heroHtml('Paid off in', duration(r.periods, 12), 'paying ' + money(paymentCents + extraPaymentCents) + ' a month', 'small') +
+            saving +
+            debtPicture(r, 'Balance', 'owed') +
+            heroHtml('You pay back', '<span class="gold">' + moreText(r.interestShare, r.totalInterestCents) + '</span>', 'than you owe today. ' + money(r.totalPaidCents) + ' in total.'),
+          breakdown: { schedule: r.schedule, baseLabel: 'Principal', baseTotal: r.principalCents, noun: 'Month' },
+        };
+      },
+    },
+
+    compare: {
+      title: 'Compare rates',
+      blurb: 'The same loan at two interest rates, side by side.',
+      icon: '<rect x="5" y="10" width="5" height="10" rx="1"/><rect x="14" y="4" width="5" height="16" rx="1"/>',
+      fields: [
+        { id: 'amount', label: 'Amount', kind: 'money', value: '100,000' },
+        { id: 'years', label: 'Term', kind: 'int', unit: 'years', value: '5' },
+        { id: 'rateA', label: 'Rate A', kind: 'number', unit: '%', value: '6' },
+        { id: 'rateB', label: 'Rate B', kind: 'number', unit: '%', value: '8' },
+      ],
+      compute(v) {
+        const principalCents = readMoney(v.amount, 'amount');
+        if (principalCents === 0) throw new Problem('Enter the amount you want to borrow.');
+        const years = readInt(v.years, 'term', { min: 1, max: 50, unit: 'years' });
+        const rateA = readRate(v.rateA, 'rate A');
+        const rateB = readRate(v.rateB, 'rate B');
+        const run = (rate) => E.calculateLoan({ principalCents, rate, termPeriods: years * 12 });
+        const a = run(rateA);
+        const b = run(rateB);
+        const rows = Math.max(1, Math.ceil(Math.max(interestBlocks(a.interestShare, a.totalInterestCents), interestBlocks(b.interestShare, b.totalInterestCents)) / 10));
+        const side = (r, text) =>
+          '<div class="side"><div class="rate">' + esc(text.trim().replace('%', '')) + '%</div>' +
+          '<div class="stack" style="--rows:' + rows + '">' + blocksHtml([[interestBlocks(r.interestShare, r.totalInterestCents), 'g']], { cols: 10, chunky: true, label: 'Interest is ' + Math.round(r.interestShare * 100) + '% of the amount borrowed.' }) + '</div>' +
+          statHtml('Interest', money(r.totalInterestCents), 'gold') +
+          statHtml('Monthly payment', money(r.paymentCents)) +
+          statHtml('Total repaid', money(r.totalPaidCents)) + '</div>';
+        const gap = Math.abs(b.totalInterestCents - a.totalInterestCents);
+        const payGap = Math.abs(b.paymentCents - a.paymentCents);
+        const verdict = gap === 0
+          ? heroHtml('The two rates cost', 'The same', '')
+          : heroHtml('The higher rate costs you', '<span class="gold">' + money(gap) + '</span>', 'more interest over ' + plural(years, 'year') + ', and ' + money(payGap) + ' more every month.');
+        return {
+          html: '<div class="versus">' + side(a, v.rateA) + side(b, v.rateB) + '</div>' +
+            '<p class="sub">Each block is interest worth 1% of the amount borrowed.</p>' + verdict,
+          breakdown: null,
+        };
+      },
+    },
+  };
+
+  // ---------- State ----------
+  const STORE = 'oakridge-calculator-v1';
+  const state = { active: 'loan', values: {}, byYear: true, openYear: null };
+  for (const [id, calc] of Object.entries(CALCS)) {
+    state.values[id] = Object.fromEntries(calc.fields.map((f) => [f.id, f.value]));
+  }
+  try {
+    const saved = JSON.parse(localStorage.getItem(STORE) || 'null');
+    if (saved && typeof saved === 'object') {
+      if (CALCS[saved.active]) state.active = saved.active;
+      if (typeof saved.byYear === 'boolean') state.byYear = saved.byYear;
+      for (const [id, calc] of Object.entries(CALCS)) {
+        for (const f of calc.fields) {
+          const value = saved.values && saved.values[id] && saved.values[id][f.id];
+          if (typeof value !== 'string') continue;
+          if (f.kind === 'select' && !f.options.some(([key]) => key === value)) continue;
+          state.values[id][f.id] = value.slice(0, 24);
+        }
+      }
+    }
+  } catch (e) { /* storage unavailable: start from the defaults */ }
+
+  function save() {
+    try { localStorage.setItem(STORE, JSON.stringify({ active: state.active, values: state.values, byYear: state.byYear })); } catch (e) { /* ignore */ }
+  }
+
+  // ---------- Number pad ----------
+  // On touch screens the page shows its own number pad and asks the system
+  // keyboard to stay closed (inputmode="none"). With a mouse or a physical
+  // keyboard nothing changes.
+  const coarse = window.matchMedia('(pointer: coarse)');
+  const usePad = () => coarse.matches;
+  const pad = $('pad');
+  let padInput = null;
+
+  function showPad(input) {
+    padInput = input;
+    pad.hidden = false;
+    pad.querySelector('[data-key="."]').disabled = input.dataset.kind === 'int';
+    const inputs = [...$('fields').querySelectorAll('input')];
+    $('pad-next').textContent = inputs.indexOf(input) === inputs.length - 1 ? 'Done' : 'Next';
+    document.documentElement.style.setProperty('--pad', pad.offsetHeight + 'px');
+    input.scrollIntoView({ block: 'nearest' });
+  }
+
+  function hidePad() {
+    padInput = null;
+    pad.hidden = true;
+    document.documentElement.style.removeProperty('--pad');
+  }
+
+  function padPress(key) {
+    const input = padInput;
+    if (!input) return;
+    if (key === 'next' || key === 'done') {
+      const inputs = [...$('fields').querySelectorAll('input')];
+      const next = key === 'next' ? inputs[inputs.indexOf(input) + 1] : null;
+      if (next) { next.focus(); next.select(); } else { input.blur(); hidePad(); }
+      return;
+    }
+    const start = input.selectionStart == null ? input.value.length : input.selectionStart;
+    const end = input.selectionEnd == null ? start : input.selectionEnd;
+    if (key === 'del') {
+      if (start === end && start === 0) return;
+      input.setRangeText('', start === end ? start - 1 : start, end, 'end');
+    } else {
+      const rest = input.value.slice(0, start) + input.value.slice(end);
+      if (key === '.' && (input.dataset.kind === 'int' || rest.includes('.'))) return;
+      if (rest.length + key.length > 24) return;
+      input.setRangeText(key, start, end, 'end');
+    }
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+  }
+
+  // Keys never take focus from the field, so the caret stays where it is.
+  let holdTimer = null;
+  let holdRepeat = null;
+  let heldDelete = false;
+  const stopHold = () => { clearTimeout(holdTimer); clearInterval(holdRepeat); holdTimer = holdRepeat = null; };
+  pad.addEventListener('pointerdown', (e) => {
+    e.preventDefault();
+    const button = e.target.closest('button[data-key="del"]');
+    if (!button) return;
+    heldDelete = false;
+    stopHold();
+    holdTimer = setTimeout(() => {
+      heldDelete = true;
+      holdRepeat = setInterval(() => padPress('del'), 70);
+    }, 450);
+  });
+  for (const type of ['pointerup', 'pointercancel', 'pointerleave']) pad.addEventListener(type, stopHold);
+  pad.addEventListener('click', (e) => {
+    const button = e.target.closest('button[data-key]');
+    if (!button || button.disabled) return;
+    if (button.dataset.key === 'del' && heldDelete) { heldDelete = false; return; }
+    padPress(button.dataset.key);
+  });
+
+  const padShouldStay = () => {
+    const active = document.activeElement;
+    return pad.contains(active) || (active && active.matches && active.matches('#fields input'));
+  };
+  $('fields').addEventListener('focusin', (e) => {
+    if (usePad() && e.target.matches('input')) showPad(e.target); else hidePad();
+  });
+  const maybeHide = () => setTimeout(() => { if (!padShouldStay()) hidePad(); }, 0);
+  $('fields').addEventListener('focusout', maybeHide);
+  pad.addEventListener('focusout', maybeHide);
+  // A tap anywhere outside the fields and the pad puts the pad away.
+  document.addEventListener('pointerdown', (e) => {
+    if (padInput && !pad.contains(e.target) && !e.target.closest('.field')) padInput.blur();
+  });
+  coarse.addEventListener('change', () => { hidePad(); renderFields(); });
+
+  // ---------- Rendering ----------
+  function renderNav() {
+    $('nav').innerHTML = Object.entries(CALCS).map(([id, calc]) =>
+      '<button type="button" data-calc="' + id + '"' + (id === state.active ? ' aria-current="page"' : '') + '>' +
+      '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + calc.icon + '</svg>' +
+      esc(calc.title) + '</button>').join('');
+    // On narrow screens the list scrolls sideways: keep the current one in view.
+    const nav = $('nav');
+    const current = nav.querySelector('[aria-current="page"]');
+    if (current && nav.scrollWidth > nav.clientWidth) {
+      nav.scrollLeft = current.offsetLeft - (nav.clientWidth - current.offsetWidth) / 2;
+    }
+  }
+
+  function renderFields() {
+    const calc = CALCS[state.active];
+    const values = state.values[state.active];
+    $('calc-title').textContent = calc.title;
+    $('calc-blurb').textContent = calc.blurb;
+    $('fields').innerHTML = calc.fields.map((f) => {
+      const id = 'f-' + f.id;
+      let control;
+      if (f.kind === 'select') {
+        control = '<select id="' + id + '" data-field="' + f.id + '">' + f.options.map(([key, text]) => '<option value="' + esc(key) + '"' + (values[f.id] === key ? ' selected' : '') + '>' + esc(text) + '</option>').join('') + '</select>';
+      } else {
+        control = '<span class="row">' + (f.kind === 'money' ? '<span class="unit">$</span>' : '') +
+          '<input id="' + id + '" data-field="' + f.id + '" data-kind="' + f.kind + '" type="text" inputmode="' + (usePad() ? 'none' : f.kind === 'int' ? 'numeric' : 'decimal') + '" autocomplete="off" maxlength="24" value="' + esc(values[f.id]) + '">' +
+          (f.unit ? '<span class="unit">' + f.unit + '</span>' : '') + '</span>';
+      }
+      return '<label class="field' + (f.wide ? ' wide' : '') + '" for="' + id + '"><span>' + esc(f.label) + '</span>' + control + '</label>';
+    }).join('');
+  }
+
+  let breakdown = null;
+
+  function renderResult({ intro = false } = {}) {
+    const calc = CALCS[state.active];
+    const result = $('result');
+    let view;
+    try {
+      view = calc.compute(state.values[state.active]);
+    } catch (e) {
+      if (!(e instanceof Problem)) console.error(e);
+      view = { html: '<p class="problem">' + esc(e instanceof Problem ? e.message : 'Those numbers do not work together. Check them and try again.') + '</p>', breakdown: null };
+    }
+    result.classList.toggle('intro', intro);
+    result.innerHTML = view.html;
+    breakdown = view.breakdown;
+    $('main').classList.toggle('solo', !breakdown);
+    renderBreakdown();
+  }
+
+  function rowsTable(bd, rows) {
+    return '<table><thead><tr><th scope="col">' + bd.noun + '</th><th scope="col">Interest</th><th scope="col">' + (bd.savings ? 'Deposit' : 'Principal') + '</th><th scope="col">Balance</th></tr></thead><tbody>' +
+      rows.map((r) => '<tr><td>' + r.period + '</td><td class="gold">' + money(r.interestCents) + '</td><td class="blue">' + money(r.principalCents) + '</td><td>' + money(r.closingCents) + '</td></tr>').join('') +
+      '</tbody></table>';
+  }
+
+  function renderBreakdown() {
+    const el = $('breakdown');
+    const bd = breakdown;
+    el.hidden = !bd;
+    if (!bd) { el.innerHTML = ''; return; }
+    const schedule = bd.schedule;
+    let body;
+    if (state.byYear) {
+      const years = schedule.byYear();
+      if (!years.some((y) => y.period === state.openYear)) state.openYear = null;
+      const largest = Math.max(1, ...years.map((y) => y.interestCents + y.principalCents));
+      body = '<ol class="years">' + years.map((y) => {
+        const open = y.period === state.openYear;
+        const width = Math.max(2, ((y.interestCents + y.principalCents) / largest) * 100);
+        const interest = y.interestCents > 0 ? '<i class="g" style="flex:' + y.interestCents + ' 1 0"></i>' : '';
+        const interestText = '<span class="gold">Interest ' + money(y.interestCents) + '</span>';
+        const baseText = '<span class="blue">' + bd.baseLabel + ' ' + money(y.principalCents) + '</span>';
+        const base = y.principalCents > 0 ? '<i class="b" style="flex:' + y.principalCents + ' 1 0"></i>' : '';
+        return '<li class="yr"><button type="button" class="yr-btn" data-year="' + y.period + '" aria-expanded="' + open + '">' +
+          '<span class="yr-top"><b>Year ' + y.period + '</b><span class="muted">Balance ' + money(y.closingCents) +
+          '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 9l7 7 7-7"/></svg></span></span>' +
+          '<span class="bar" style="width:' + width.toFixed(2) + '%">' +
+          (bd.savings ? base + interest : interest + base) + '</span>' +
+          '<span class="yr-nums">' + (bd.savings ? baseText + interestText : interestText + baseText) + '</span></button>' +
+          (open ? '<div class="yr-rows">' + rowsTable(bd, schedule.rows.slice(y.firstRow, y.firstRow + y.rowCount)) + '</div>' : '') + '</li>';
+      }).join('') + '</ol>';
+    } else {
+      body = '<div class="scroll" tabindex="0" role="region" aria-label="Every ' + bd.noun.toLowerCase() + '">' + rowsTable(bd, schedule.rows) + '</div>';
+    }
+    el.innerHTML = '<div class="bd-head"><h2 id="bd-title">Breakdown</h2>' +
+      '<div class="seg"><button type="button" data-view="period" aria-pressed="' + !state.byYear + '">By ' + bd.noun.toLowerCase() + '</button>' +
+      '<button type="button" data-view="year" aria-pressed="' + state.byYear + '">By year</button></div>' +
+      '<div class="stats">' + statHtml('Interest', money(schedule.totalInterestCents), 'gold') + statHtml(bd.baseTotalLabel || bd.baseLabel, money(bd.baseTotal), 'blue') + '</div></div>' + body;
+  }
+
+  function open(id) {
+    state.active = id;
+    state.openYear = null;
+    renderNav();
+    renderFields();
+    renderResult({ intro: true });
+    save();
+  }
+
+  // ---------- Events ----------
+  $('nav').addEventListener('click', (e) => {
+    const button = e.target.closest('button[data-calc]');
+    if (button && button.dataset.calc !== state.active) {
+      open(button.dataset.calc);
+      window.scrollTo(0, 0);
+    }
+  });
+
+  const onField = (e) => {
+    const field = e.target.dataset && e.target.dataset.field;
+    if (!field) return;
+    state.values[state.active][field] = e.target.value;
+    renderResult();
+    save();
+  };
+  $('fields').addEventListener('input', onField);
+  $('fields').addEventListener('change', onField);
+
+  // Tidy money fields when the user leaves them: 100000 becomes 100,000.
+  $('fields').addEventListener('focusout', (e) => {
+    if (!e.target.dataset || e.target.dataset.kind !== 'money') return;
+    try {
+      const cents = E.parseCents(e.target.value);
+      const tidy = group(Math.floor(cents / 100)) + (cents % 100 ? '.' + String(cents % 100).padStart(2, '0') : '');
+      if (tidy !== e.target.value) {
+        e.target.value = tidy;
+        state.values[state.active][e.target.dataset.field] = tidy;
+        save();
+      }
+    } catch (err) { /* leave what was typed */ }
+  });
+
+  $('breakdown').addEventListener('click', (e) => {
+    const view = e.target.closest('button[data-view]');
+    if (view) {
+      state.byYear = view.dataset.view === 'year';
+      renderBreakdown();
+      save();
+      const again = $('breakdown').querySelector('button[data-view="' + view.dataset.view + '"]');
+      if (again) again.focus();
+      return;
+    }
+    const year = e.target.closest('button[data-year]');
+    if (year) {
+      const n = Number(year.dataset.year);
+      state.openYear = state.openYear === n ? null : n;
+      renderBreakdown();
+      const again = $('breakdown').querySelector('button[data-year="' + n + '"]');
+      if (again) again.focus();
+    }
+  });
+
+  open(state.active);
+})();
+</script>
+</body>
+</html>
