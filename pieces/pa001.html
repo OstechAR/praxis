@@ -1,0 +1,706 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>PA001 Why Is Everything So Expensive?</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;700&family=IBM+Plex+Sans+Condensed:wght@500;600&family=IBM+Plex+Sans:wght@400;500&display=swap">
+<style>
+/* Layout: one screen. Black stage fills the top, a fixed-height caption and transport panel sits below it. Single dark look by choice: the black stage is the brand. */
+:root{
+  color-scheme:dark;
+  --void:#000000;
+  --surface:#12161D;
+  --line:#262d39;
+  --ink:#F5F7FA;
+  --dim:#98a2b1;
+  --gold:#D4AF37;
+  --blue:#3B82F6;
+  --ember:#FF7A33;
+  --f-label:"IBM Plex Sans Condensed","Arial Narrow",system-ui,sans-serif;
+  --f-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-num:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{margin:0;background:var(--void);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.45;overflow:hidden}
+#app{height:100%;display:flex;flex-direction:column;min-height:0}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+
+.bar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 16px;border-bottom:1px solid var(--line)}
+.bar .id{min-width:0;min-height:3.9em}
+@media (min-width:700px){.bar .id{min-height:0}}
+.tag{font-family:var(--f-label);font-weight:500;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);display:block}
+h1{font-family:var(--f-label);font-weight:600;font-size:1.15rem;letter-spacing:.02em;margin:0;text-wrap:balance}
+.bar-actions{display:flex;gap:6px;flex:none}
+.ghost{background:transparent;border:1px solid var(--line);border-radius:4px;padding:8px 10px;font-family:var(--f-label);font-weight:500;font-size:.85rem;letter-spacing:.06em;text-transform:uppercase}
+.ghost:hover{border-color:var(--dim)}
+.ghost[aria-pressed="true"]{border-color:var(--blue);color:var(--blue)}
+.ghost:disabled{opacity:.35;cursor:default}
+
+#stage{flex:1;min-height:0;position:relative;background:var(--void)}
+#c{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:grab}
+#hint{position:absolute;left:16px;bottom:10px;font-family:var(--f-label);font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);pointer-events:none;transition:opacity .6s}
+#nogl{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:16px;text-align:center;color:var(--dim)}
+
+.panel{border-top:1px solid var(--line);padding-block:12px 14px;padding-inline:16px;display:flex;flex-direction:column;gap:10px}
+.panel>*{width:100%;max-width:760px;margin-inline:auto}
+.hud{display:flex;flex-wrap:wrap;gap:6px 18px;min-height:1.5em;font-family:var(--f-label);font-size:.74rem;letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
+.hud b{font-family:var(--f-num);font-weight:500;font-size:.92rem;letter-spacing:0;color:var(--ink);font-variant-numeric:tabular-nums;margin-left:6px}
+.hud .gold b{color:var(--gold)}
+#cap{margin-block:0;font-size:clamp(1rem,2.4vw,1.2rem);min-height:5.8em}
+@media (min-width:700px){#cap{min-height:3.1em}}
+.pips{display:flex;gap:4px}
+.pips button{flex:1;height:22px;padding:0;border:0;background:transparent;position:relative;min-width:0;--f:0%}
+.pips button::after{content:"";position:absolute;left:0;right:0;top:9px;height:4px;background:linear-gradient(to right,var(--dim) var(--f),var(--line) var(--f))}
+.pips button.now::after{background:linear-gradient(to right,var(--ink) var(--f),var(--line) var(--f))}
+.controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.count{font-family:var(--f-num);font-size:.82rem;color:var(--dim);font-variant-numeric:tabular-nums;margin-left:4px}
+#next{flex:1 1 170px;min-width:0;margin-left:auto;background:var(--ink);color:#000;border:0;border-radius:4px;padding:11px 16px;font-family:var(--f-label);font-weight:600;font-size:.95rem;letter-spacing:.06em;text-transform:uppercase}
+#next.act{background:var(--blue)}
+#next:hover{filter:brightness(1.08)}
+
+.over{position:fixed;inset:0;z-index:5;background:rgba(0,0,0,.72);display:flex;justify-content:flex-end}
+.over .sheet{width:min(560px,100%);height:100%;overflow-y:auto;background:var(--surface);border-left:1px solid var(--line);padding-block:calc(16px + env(safe-area-inset-top,0px)) 32px;padding-inline:16px}
+.over header{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:6px}
+.over h2{font-family:var(--f-label);font-weight:600;font-size:1.2rem;margin:0}
+.over h3{font-family:var(--f-label);font-weight:600;font-size:.8rem;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);margin:22px 0 8px}
+.over p{margin:0 0 8px;color:var(--dim);font-size:.92rem}
+.over ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:12px}
+.over li{font-size:.92rem;border-top:1px solid var(--line);padding-top:10px}
+.over li b{display:block;font-weight:500;color:var(--ink)}
+.over li span{color:var(--dim)}
+.over kbd{font-family:var(--f-num);font-size:.8rem;border:1px solid var(--line);border-radius:3px;padding:1px 5px;color:var(--ink)}
+.over .foot{margin-top:26px;padding-top:14px;border-top:1px solid var(--line)}
+.over li i{font-style:normal;font-family:var(--f-label);font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);display:block;margin-bottom:2px}
+@media (prefers-reduced-motion:reduce){#hint{transition:none}}
+</style>
+
+<div id="app">
+  <header class="bar">
+    <div class="id">
+      <span class="tag">PA001 · Paced Animation</span>
+      <h1 id="seg">Something changed</h1>
+    </div>
+    <div class="bar-actions">
+      <button class="ghost" id="voiceBtn" aria-pressed="false" hidden>Voice</button>
+      <button class="ghost" id="mapBtn" aria-pressed="false">Map</button>
+      <button class="ghost" id="helpBtn">Help</button>
+    </div>
+  </header>
+
+  <main id="stage">
+    <canvas id="c" aria-label="3D miniature model of an economy: a bread supply chain, a town of six sellers, and a restaurant"></canvas>
+    <div id="hint">Drag to look around · Tap anything to look closer</div>
+    <div id="nogl" hidden>This prototype needs WebGL, which this browser or view has switched off.</div>
+  </main>
+
+  <section class="panel">
+    <div class="hud" id="hud"></div>
+    <p id="cap" aria-live="polite"></p>
+    <div class="pips" id="pips"></div>
+    <div class="controls">
+      <button class="ghost" id="back">Back</button>
+      <button class="ghost" id="pause" aria-pressed="false">Pause</button>
+      <button class="ghost" id="replay">Replay</button>
+      <span class="count" id="count"></span>
+      <button id="next">Next</button>
+    </div>
+  </section>
+</div>
+
+<div id="help" class="over" hidden>
+  <div class="sheet" role="dialog" aria-labelledby="helpTitle">
+    <header><h2 id="helpTitle">How to use this</h2><button class="ghost" id="helpClose">Close</button></header>
+    <p>This is a model you can move through at your own speed. Nothing plays until you ask it to.</p>
+    <h3>Moving through the story</h3>
+    <ul>
+      <li><b>Next and Back</b><span>Move one step at a time. On a keyboard use <kbd>→</kbd> and <kbd>←</kbd>.</span></li>
+      <li><b>The chapter bar</b><span>The ten segments above the buttons are the ten chapters. Tap any segment to jump to the start of that chapter.</span></li>
+      <li><b>Pause and Replay</b><span>Pause freezes the scene where it is. Replay runs the current step again from the start. <kbd>Space</kbd> also pauses.</span></li>
+    </ul>
+    <h3>Exploring the scene</h3>
+    <ul>
+      <li><b>Drag to look around</b><span>Drag anywhere on the scene with a finger or the mouse to swing the camera around what you are looking at. It settles back when you move to the next step.</span></li>
+      <li><b>Tap anything to look closer</b><span>Tap a building, a stack of blocks or a group of people to fly to it and read what it is. Press Return to the story to pick up where you left off.</span></li>
+      <li><b>Map</b><span>Shows the whole world you are in, with every station named. <kbd>M</kbd> on a keyboard.</span></li>
+    </ul>
+    <h3>Making changes yourself</h3>
+    <ul>
+      <li><b>The blue ring and the blue button</b><span>When a blue ring appears in the scene, the next change is yours to make. Tap inside the ring, or press the blue button below. Both do the same thing.</span></li>
+    </ul>
+    <h3>Reading the model</h3>
+    <ul>
+      <li><b>Gold is money</b><span>Gold plates show prices. In the gold stacks, one block is fifty cents.</span></li>
+      <li><b>Blue is information</b><span>Blue lines show what is connected. In the town, each blue column shows how far a price has moved from where it started. The white square marks the starting level.</span></li>
+      <li><b>Orange means in use</b><span>A lit oven or stove is working. A dark one is spare.</span></li>
+      <li><b>Voice</b><span>Reads each caption aloud using your device's built-in voice, where the device allows it.</span></li>
+    </ul>
+    <div class="foot"><button class="ghost" id="logBtn">Production standards log</button></div>
+  </div>
+</div>
+
+<div id="log" class="over" hidden>
+  <div class="sheet" role="dialog" aria-labelledby="logTitle">
+    <header><h2 id="logTitle">Standards log</h2><button class="ghost" id="logClose">Close</button></header>
+    <p>What this piece does against the current Praxis standards and SOPs, as read on 2026-10-08. For the production team, not for learners.</p>
+
+    <h3>Standards this prototype breaks</h3>
+    <ul>
+      <li><i>Artstyle Standard §14 · Content-to-Blender SOP</i><b>No Blender in the pipeline.</b><span>The standard workflow is script, storyboard, production spec, Blender Python, preview, render. This piece is drawn live in the browser with WebGL. Nothing is rendered ahead of time, which is what makes back, forward, pause and replay possible.</span></li>
+      <li><i>Visual Grammar §2, §14 · Artstyle §23.6</i><b>Assets are hand-built in web code, not taken from the Asset Library.</b><span>Every model here is a web-local rebuild with no PRX asset ID. The person is rebuilt to the measurements of the figure used in S001 to S003, which the CEO made the official Praxis person on 2026-10-08. The Asset Catalog and the PRX-CHAR-0001 spec do not record that yet.</span></li>
+      <li><i>Visual Grammar §12</i><b>Custom assets were not reviewed before use.</b><span>All geometry should be treated as CUSTOM_REQUIRED and unapproved: farm, bakery, ovens, energy tank, trucks, stores, shelf, loaf, price plates, block stacks, the six town stalls, the restaurant and the block-letter title.</span></li>
+      <li><i>Artstyle §13, §23.5 · Content-to-Blender core rule</i><b>No approved script, storyboard or production handoff.</b><span>All ten chapters of step copy, every camera pose and every layout were written during the build. All on-screen text is draft and is not approved content.</span></li>
+      <li><i>PA001 Activation Record, Required Redesign</i><b>Built before the interaction architecture was approved.</b><span>The record asks for the progression model, controls and reveal logic to be defined before implementation. This build is the proposal for that architecture, not an implementation of an approved one.</span></li>
+      <li><i>PA001 Activation Record, Preserved Inputs</i><b>The ten-act L001 story architecture was reused as the chapter structure.</b><span>The record keeps that document as historical input only. Its acts, its rewind and replay devices and its closing transfer were adapted here because no replacement exists yet.</span></li>
+      <li><i>L001 Story Architecture, Act 1 (locked direction)</i><b>The title reveal has no narrator cut-off and no music swell.</b><span>The pull-back and the physical title are kept. The title is built from blocks because the page cannot load a 3D typeface.</span></li>
+      <li><i>Artstyle §23.8 · Visual Grammar §15</i><b>No automated style validation.</b><span>No validator exists for web scenes, so none was run.</span></li>
+      <li><i>Artstyle §9, Sonic Identity extension</i><b>No recorded narration and no music.</b><span>The learner sets the timing and short on-screen text carries the explanation. The Voice button reads the captions with the browser's built-in voice as a stand-in. It is not the Praxis narrator.</span></li>
+      <li><i>Artstyle §9, camera direction</i><b>The camera is not fully authored.</b><span>The learner can drag to orbit and can jump to any station at any time.</span></li>
+    </ul>
+
+    <h3>Extensions that stay inside the rules</h3>
+    <ul>
+      <li><i>Artstyle §3</i><b>Three extra colours, each with one meaning.</b><span>Ember orange marks an oven or stove in use. Bread brown and wheat tan identify objects. None replaces gold, blue or white.</span></li>
+      <li><i>Cross-product semantics, block primitive</i><b>Gold blocks are money at a fixed scale.</b><span>In the cost, price and price-over-time stacks one block is $0.50. Blue columns in the town are information: each shows a price relative to where it started, exaggerated eight times so small changes are visible.</span></li>
+      <li><i>Artstyle §15</i><b>Interaction happens inside the 3D scene.</b><span>The standard allows 2D web UI for interactive blocks. The 3D requirement goes further and should be written in as a new rule for Paced Animation.</span></li>
+      <li><i>Research &amp; Scope Record</i><b>Every number is illustrative.</b><span>All prices, costs and percentage changes are model values chosen to make the mechanism visible. No historical or sourced claim is made. Interest rates, exchange rates, CPI construction and the other deferred topics are left out.</span></li>
+    </ul>
+
+    <h3>Followed</h3>
+    <ul>
+      <li><b>Black stage, semantic colour.</b><span>Pure black void and no ground plane. Gold appears only on money. Blue marks flows, information and things you can tap.</span></li>
+      <li><b>Praxis person.</b><span>The figure from S001, reused in S002 and S003: rounded-box torso 0.57 by 0.43 by 0.95, sphere head of radius 0.32 seated into it, all white, no limbs or face. Drawn at 0.85 scale. Official Praxis person by CEO decision, 2026-10-08.</span></li>
+      <li><b>Miniature model look.</b><span>Shiny plastic, primitive-led geometry, cutaway buildings with front walls and roofs removed.</span></li>
+      <li><b>Spatial narrative.</b><span>Persistent worlds that are revisited. System, story and detail views. The camera does most of the moving, and objects move only when the motion carries meaning.</span></li>
+    </ul>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+'use strict';
+const $=id=>document.getElementById(id);
+const stage=$('stage'), canvas=$('c');
+const T=window.THREE;
+function fail(){ $('nogl').hidden=false; canvas.hidden=true; $('hint').hidden=true; }
+let renderer=null;
+if(T){ try{ renderer=new T.WebGLRenderer({canvas,antialias:true}); }catch(e){ renderer=null; } }
+const reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ---------- content: every step is a complete world state; each chapter starts from D ---------- */
+const D={world:'bread',view:'shelf',labels:0,hud:null,shoppers:3,rival:0,stock:12,price:3,ovens:2,truck:.07,wheat:1,flour:6,energy:1,cost:2,
+  ledger:0,rivalOn:0,stairOn:0,title:0,s:[3,0,0],ti:[1,1,1,1,1,1],tp:1,tEnergy:1};
+const ONE=[1,1,1,1,1,1], Y1=[1.1333,1.075,1.2,1.025,.97,1.04], Y2=[1.156,1.0965,1.2,1.035,.96,1.06];
+const CH=[
+{t:'Something changed',s:[
+ {view:'shelf',price:3.4,stock:6,ovens:3,cap:'A loaf of bread. It used to be $3.00. Today the tag says $3.40.'},
+ {view:'store',cap:'You probably already have a theory about why.'},
+ {view:'behind',cap:'But this shelf is the last stop on a long road.'},
+ {view:'title',title:1,cap:'Which leaves you asking…'}]},
+{t:'Follow the product',s:[
+ {view:'store',price:3.4,stock:6,ovens:3,cap:'The store printed the tag. But the loaf did not start here.'},
+ {view:'road',cap:'It came in on a truck.'},
+ {view:'bakery',cap:'Before that, a bakery baked it. This bakery has four ovens. Remember that number.'},
+ {view:'farm',cap:'And before that, someone grew the wheat.'},
+ {view:'system',labels:1,cap:'All of this had to work before the loaf reached the shelf. So where could something have changed? Tap a station to look closer.'}]},
+{t:'More people want it',s:[
+ {view:'system',labels:1,hud:['price','shoppers','shelf','ovens'],cap:'Rewind to when the loaf cost $3.00. Three shoppers, a full shelf, and the bakery using two of its four ovens.'},
+ {view:'store',labels:0,hot:'shoppers',cta:'Send more shoppers',cap:'Change one thing. Send more shoppers to the store.'},
+ {shoppers:9,stock:3,cap:'Nine shoppers now. Loaves leave the shelf faster than the truck brings them.'},
+ {view:'bakery',ovens:4,truck:.16,cap:'The bakery had two ovens sitting idle. It switches them on and bakes more.'},
+ {view:'store',stock:11,cap:'The shelf refills. More people wanted bread, the system kept up, and the price stayed at $3.00.'},
+ {view:'bakery',shoppers:3,stock:12,ovens:4,truck:.1,cap:'Rewind again. Same three shoppers, same $3.00. One difference: on a normal day this bakery already needs all four ovens.'},
+ {view:'store',hot:'shoppers',cta:'Send the same shoppers',cap:'Now send the same extra shoppers.'},
+ {shoppers:9,stock:2,price:3.4,cap:'The shelf empties and stays thin. The bakery has no oven left to switch on. With more buyers than loaves, the price climbs to $3.40.'},
+ {view:'shelf',cap:'The same $3.40 tag you started with. More shoppers pushed it up only because the bakery could not keep up.'}]},
+{t:'There is less',s:[
+ {view:'system',labels:1,hud:['price','shoppers','shelf','harvest'],cap:'Rewind again. $3.00, a full shelf, three shoppers. This time the shoppers never change.'},
+ {view:'farm',labels:0,hot:'farm',cta:'Shrink the harvest',cap:'Go back to the start of the road. Give the farm a bad season.'},
+ {wheat:.4,cap:'Less wheat comes off the field.'},
+ {view:'bakery',flour:2,ovens:1,truck:.04,cap:'Less flour reaches the bakery. The ovens are fine. There is just less to bake.'},
+ {view:'store',stock:2,price:3.4,cap:'Fewer loaves reach the shelf. The same three shoppers want them, and the tag reads $3.40.'},
+ {view:'shelf',cap:'The same tag again. Last time the cause stood at the front of the store. This time it started in a field.'}]},
+{t:'Something costs more',s:[
+ {view:'system',labels:1,hud:['price','cost','shoppers','away'],cap:'Rewind once more. Shoppers are normal. The harvest is normal. Nothing is missing.'},
+ {view:'ledger',labels:0,ledger:1,cap:'So follow the money. Each loaf costs about $2.00 to make and deliver. It sells for $3.00.'},
+ {view:'bakeryE',hot:'energy',cta:'Raise the energy bill',cap:'The ovens run on energy. Raise its price.'},
+ {view:'ledger',energy:1.4,cost:2.4,cta:'Choice one: absorb it',cap:'Now each loaf costs $2.40. The pressure moves down the chain and stops at the business. It has choices.'},
+ {cta:'Choice two: adapt',cap:'Absorb it. The price stays at $3.00 and the business keeps less from every loaf.'},
+ {cost:2.2,cta:'Choice three: pass it on',cap:'Adapt. Bake at cheaper hours, waste less. The cost falls to $2.20, and some of the pressure is gone before it reaches you.'},
+ {view:'street',cost:2.4,price:3.4,rivalOn:1,cap:'Pass it on. The tag goes to $3.40. But there is another store down the street.'},
+ {shoppers:1,rival:2,cap:'It charges $3.10. Two of the three shoppers walk.'},
+ {price:3.2,shoppers:3,rival:0,cap:'So the business settles at $3.20. Part of the cost is absorbed and part is passed on.'},
+ {view:'ledger',cap:'A higher cost creates pressure. It does not decide the price. Customers and competitors get a say.'}]},
+{t:'The reveal',s:[
+ {view:'shelf',price:3.4,stock:4,cap:'Back to the shelf where you started. $3.40.'},
+ {view:'store',shoppers:9,ovens:4,stock:2,cap:'Maybe more people wanted bread than the bakery could bake.'},
+ {view:'farm',shoppers:3,wheat:.4,flour:2,ovens:1,cap:'Maybe it was a bad harvest.'},
+ {view:'ledger',wheat:1,flour:6,ovens:2,ledger:1,energy:1.4,cost:2.4,cap:'Maybe it was a bill somewhere up the chain.'},
+ {view:'shelf',ledger:0,cap:'The price tells you something changed. It does not tell you where, or why.'},
+ {world:'town',view:'town',labels:1,ti:Y1,cap:'And look around. Other prices are moving too. What if this is not about bread anymore?'}]},
+{t:'The mystery gets bigger',s:[
+ {world:'town',view:'town',labels:1,cta:'Let a year pass',cap:'A small economy. Six things people buy. Start every price where it was. The blue columns will show how far each one moves.'},
+ {ti:Y1,cap:'A year passes. Fuel jumps. Bread and meals climb. The chair barely moves. The TV got cheaper.'},
+ {cap:'Prices are not marching together. But most of them are rising.'},
+ {cap:'That broad rise has a name: inflation.'},
+ {cap:'Notice what the word does. It describes the pattern. It still does not tell you the cause.'}]},
+{t:'The whole economy',s:[
+ {world:'town',view:'town',labels:1,cta:'Send more spending',cap:'Rewind the whole town. You have already seen what moves one price. Now run it everywhere.'},
+ {tp:3,ti:[1.08,1.1,1.05,1.03,1,1.08],cap:'More spending arrives at every counter at once. Where sellers cannot keep up, prices rise.'},
+ {view:'tenergy',tp:1,ti:ONE,hot:'tenergy',cta:'Raise the price of energy',cap:'Rewind. Now pick one cost that touches almost everything: energy.'},
+ {view:'town',tEnergy:1.4,ti:[1.08,1.05,1.2,1.02,1,1.04],cap:'It reaches ovens, kitchens, trucks and fuel pumps. But not equally. Some sellers absorb it. Some barely use it.'},
+ {tp:3,ti:[1.16,1.15,1.25,1.05,1,1.12],cap:'And nothing says only one thing happens at a time. More spending and a cost shock can arrive together.'},
+ {cap:'The whole economy feels the same kinds of pressure you saw in one loaf, across many sellers at once.'}]},
+{t:'Still high',s:[
+ {world:'town',view:'town',labels:1,ti:Y1,cta:'Let another year pass',cap:'Go back to the year prices jumped.'},
+ {ti:Y2,cap:'The next year is calmer. Most prices rise only a little. Fuel does not move at all.'},
+ {world:'bread',view:'shelf',labels:0,price:3.47,stock:8,cap:'The news says inflation is down. So you go back to the shelf. $3.47. Not $3.00.'},
+ {view:'stair',stairOn:1,s:[3,3.4,0],cap:'Here is the same loaf over time. $3.00, then $3.40.'},
+ {s:[3,3.4,3.47],cap:'Then $3.47.'},
+ {cap:'The second step up was smaller. That is what lower inflation means. Nobody took the first step back down.'}]},
+{t:'Your turn',s:[
+ {world:'rest',view:'rest',labels:1,cap:'A different price. Dinner at a restaurant near you was $20.00. Now it is $21.50.'},
+ {labels:0,cap:'This time nobody is going to tell you why. But you know what to ask.'},
+ {view:'rdiners',cap:'Did more people want it?'},
+ {view:'rkitchen',cap:'Could the kitchen keep up?'},
+ {view:'rsupplier',cap:'Did something upstream get more expensive?'},
+ {view:'rmenu',cap:'How much of that reached the menu?'},
+ {view:'rcafe',cap:'Was there somewhere else to eat?'},
+ {world:'town',view:'town',labels:1,ti:Y1,cap:'Are many other prices moving too?'},
+ {world:'rest',view:'rmenu',labels:0,cap:'A higher price is not the explanation. It is where the investigation begins.'}]}
+];
+const S=[],CHS=[];
+CH.forEach((c,ci)=>{let p=D;CHS.push(S.length);c.s.forEach(r=>{p=Object.assign({},p,{cta:null,hot:null},r,{ch:ci});S.push(p);});});
+const MAPV={bread:'system',town:'town',rest:'rest'};
+const INFO={
+ store:{view:'store',cap:'Store. It sets the shelf price, and it can only sell what arrives.'},
+ shoppers:{view:'store',cap:'Shoppers. Each one wants a loaf.'},
+ road:{view:'road',cap:'Delivery. A truck moves loaves from the bakery to the store.'},
+ bakery:{view:'bakery',cap:'Bakery. Four ovens. A lit oven is in use. A dark oven is spare capacity.'},
+ farm:{view:'farm',cap:'Farm. It grows the wheat the bakery turns into bread.'},
+ energy:{view:'bakeryE',cap:'Energy. The ovens cannot run without it, so its price is part of every loaf.'},
+ ledger:{view:'ledger',cap:'Cost and price. One gold block is fifty cents. The gap between the stacks is what the business keeps.'},
+ rival:{view:'street',cap:'The other store. It sells the same loaf, which limits how far this price can rise.'},
+ stair:{view:'stair',cap:'The same loaf over time. One gold block is fifty cents.'},
+ t0:{view:'t0',cap:'Bread. Started at $3.00.'},t1:{view:'t1',cap:'A restaurant meal. Started at $20.00.'},
+ t2:{view:'t2',cap:'Fuel. Started at $1.50 a litre.'},t3:{view:'t3',cap:'A chair. Started at $80.00.'},
+ t4:{view:'t4',cap:'A television. Started at $400.'},t5:{view:'t5',cap:'A cup of coffee. Started at $2.50.'},
+ tenergy:{view:'tenergy',cap:'Energy. A blue line runs from here to every seller in town.'},
+ rdiners:{view:'rdiners',cap:'The dining room.'},rkitchen:{view:'rkitchen',cap:'The kitchen. Two stoves.'},
+ rsupplier:{view:'rsupplier',cap:'The supplier who delivers the ingredients.'},rmenu:{view:'rmenu',cap:'The menu price.'},
+ rcafe:{view:'rcafe',cap:'Another place to eat, just down the street.'}
+};
+const V={
+ shelf:{t:[0,1.45,6.2],hw:1.9,hh:1.5,az:.3,el:.12},
+ store:{t:[0,1,11.5],hw:4.4,hh:5.2,az:.42,el:.55},
+ road:{t:[7,.6,-2],hw:3,hh:7,az:.2,el:.6,wide:{hw:11.5,hh:3.8,az:1.15,el:.5}},
+ bakery:{t:[0,1.3,-12],hw:4.3,hh:3.1,az:.45,el:.35},
+ bakeryE:{t:[-1.7,1.3,-12],hw:5.9,hh:3.3,az:.3,el:.4},
+ farm:{t:[0,1.2,-30],hw:4.5,hh:3.3,az:.5,el:.4},
+ system:{t:[2.5,0,-5],hw:8.4,hh:23.5,az:.08,el:.8,wide:{hw:30,hh:13,az:1.05,el:.55}},
+ behind:{t:[3,0,-8],hw:9,hh:14,az:.35,el:.4,wide:{hw:22,hh:9,az:.9,el:.35}},
+ title:{t:[2.5,44,-8],hw:26,hh:11,az:0,el:.06},
+ ledger:{t:[-10,1.8,-2],hw:3.6,hh:2.9,az:.2,el:.22},
+ street:{t:[-4.5,1,13.5],hw:8.8,hh:5.8,az:.25,el:.6},
+ stair:{t:[-11,2.1,6.5],hw:5,hh:3.3,az:.15,el:.2},
+ town:{t:[90,0,0],hw:11,hh:14,az:.1,el:.8,wide:{hw:20,hh:11,az:1.05,el:.55}},
+ tenergy:{t:[90,1,0],hw:4.2,hh:3.2,az:.4,el:.45},
+ rest:{t:[89.5,1,70.5],hw:11,hh:6.8,az:.3,el:.55},
+ rdiners:{t:[88.4,.9,70.4],hw:3.9,hh:3,az:.35,el:.45},
+ rkitchen:{t:[92.6,1.1,67.2],hw:2.8,hh:2.2,az:.3,el:.35},
+ rsupplier:{t:[97.4,.8,70.4],hw:3,hh:4,az:.5,el:.5},
+ rmenu:{t:[88.4,1.9,66.2],hw:2.3,hh:1.5,az:.15,el:.1},
+ rcafe:{t:[81,1.2,71.5],hw:3.6,hh:3,az:.3,el:.4}
+};
+const STALL=[['BREAD',-6.5,-11,3],['MEAL',6.5,-11,20],['FUEL',-6.5,0,1.5],['CHAIR',6.5,0,80],['TV',-6.5,11,400],['COFFEE',6.5,11,2.5]];
+STALL.forEach((q,i)=>{V['t'+i]={t:[90+q[1],1.2,q[2]],hw:3.6,hh:3,az:.4,el:.4};});
+const money=v=>v>=100?'$'+Math.round(v):'$'+v.toFixed(2);
+
+/* ---------- UI state ---------- */
+let idx=0, inspect=null, paused=false, voice=false, lastCap='', hudKey='';
+const NUM=['stock','price','truck','wheat','flour','energy','cost','ledger','rivalOn','stairOn','title','labels','tp','tEnergy'], ARR=['s','ti'];
+const cur={};
+function setCur(s){NUM.forEach(k=>{cur[k]=s[k];});ARR.forEach(k=>{cur[k]=s[k].slice();});}
+setCur(S[0]);
+const HF={
+ price:['Price',()=>'$'+cur.price.toFixed(2),'gold'],shoppers:['Shoppers',()=>String(S[idx].shoppers)],
+ shelf:['On shelf',()=>String(Math.round(cur.stock))],ovens:['Ovens in use',()=>S[idx].ovens+'/4'],
+ harvest:['Harvest',()=>Math.round(cur.wheat*100)+'%'],cost:['Cost per loaf',()=>'$'+cur.cost.toFixed(2),'gold'],
+ away:['At other store',()=>String(S[idx].rival)]
+};
+function updateHud(){const h=S[idx].hud;if(!h)return;h.forEach(k=>{const el=$('h_'+k),t=HF[k][1]();if(el&&el.textContent!==t)el.textContent=t;});}
+const synth=window.speechSynthesis;
+function say(t){if(!voice||!synth)return;try{synth.cancel();const u=new SpeechSynthesisUtterance(t);u.rate=.95;synth.speak(u);}catch(e){}}
+if(synth&&window.SpeechSynthesisUtterance)$('voiceBtn').hidden=false;
+
+const pips=$('pips');
+CH.forEach((c,i)=>{const b=document.createElement('button');b.id='pip'+i;b.setAttribute('aria-label','Chapter '+(i+1)+': '+c.t);b.title=c.t;b.addEventListener('click',()=>go(CHS[i]));pips.appendChild(b);});
+function eff(){
+  const s=S[idx];
+  if(inspect==='map')return{view:MAPV[s.world],labels:1,cap:'The whole picture. Tap anything to look closer.'};
+  if(inspect){const n=INFO[inspect];return{view:n.view,labels:0,cap:n.cap};}
+  return s;
+}
+function render(){
+  const s=S[idx], e=eff();
+  $('seg').textContent=(s.ch+1)+' · '+CH[s.ch].t;
+  $('cap').textContent=e.cap;
+  if(e.cap!==lastCap){lastCap=e.cap;say(e.cap);}
+  $('count').textContent=(idx+1)+' / '+S.length;
+  const key=s.hud?s.hud.join():'';
+  if(key!==hudKey){hudKey=key;$('hud').innerHTML=s.hud?s.hud.map(k=>'<span class="'+(HF[k][2]||'')+'">'+HF[k][0]+'<b id="h_'+k+'"></b></span>').join(''):'';}
+  updateHud();
+  const nx=$('next');
+  nx.textContent=inspect?'Return to the story':(s.cta||(idx===S.length-1?'Start over':'Next'));
+  nx.className=(!inspect&&s.cta)?'act':'';
+  $('back').disabled=!inspect&&idx===0;
+  $('replay').disabled=!!inspect||idx===0;
+  $('pause').textContent=paused?'Play':'Pause';
+  $('pause').setAttribute('aria-pressed',String(paused));
+  $('mapBtn').setAttribute('aria-pressed',String(inspect==='map'));
+  $('voiceBtn').setAttribute('aria-pressed',String(voice));
+  CH.forEach((c,i)=>{const b=$('pip'+i),n=c.s.length,f=i<s.ch?1:(i===s.ch?(idx-CHS[i]+1)/n:0);b.style.setProperty('--f',(f*100)+'%');b.classList.toggle('now',i===s.ch);});
+}
+function unpause(){paused=false;if(synth){try{synth.resume();}catch(e){}}}
+function go(i){$('hint').style.opacity='0';idx=Math.max(0,Math.min(S.length-1,i));inspect=null;unpause();orbitHome=true;render();}
+function next(){ if(inspect){inspect=null;orbitHome=true;render();return;} go(idx===S.length-1?0:idx+1); }
+function back(){ if(inspect){inspect=null;orbitHome=true;render();return;} go(idx-1); }
+function look(id){inspect=id;unpause();orbitHome=true;render();}
+$('next').addEventListener('click',next);
+$('back').addEventListener('click',back);
+$('pause').addEventListener('click',togglePause);
+function togglePause(){paused=!paused;if(synth){try{paused?synth.pause():synth.resume();}catch(e){}}render();}
+$('replay').addEventListener('click',()=>{if(idx>0){setCur(S[idx-1]);if(world)world.snap(S[idx-1]);unpause();say(S[idx].cap);render();}});
+$('mapBtn').addEventListener('click',()=>{ inspect=inspect==='map'?null:'map'; unpause();orbitHome=true;render(); });
+$('voiceBtn').addEventListener('click',()=>{voice=!voice;if(!voice&&synth){try{synth.cancel();}catch(e){}}else say(eff().cap);render();});
+$('helpBtn').addEventListener('click',()=>{$('help').hidden=false;$('helpClose').focus();});
+$('helpClose').addEventListener('click',()=>{$('help').hidden=true;$('helpBtn').focus();});
+$('logBtn').addEventListener('click',()=>{$('help').hidden=true;$('log').hidden=false;$('logClose').focus();});
+$('logClose').addEventListener('click',()=>{$('log').hidden=true;$('helpBtn').focus();});
+['help','log'].forEach(id=>$(id).addEventListener('click',e=>{if(e.target===$(id))$(id).hidden=true;}));
+window.addEventListener('keydown',e=>{
+  if(!$('log').hidden||!$('help').hidden){if(e.key==='Escape'){$('log').hidden=true;$('help').hidden=true;}return;}
+  if(e.target&&e.target.tagName==='BUTTON'&&(e.key===' '||e.key==='Enter'))return;
+  if(e.key==='ArrowRight'){next();e.preventDefault();}
+  else if(e.key==='ArrowLeft'){back();e.preventDefault();}
+  else if(e.key===' '){togglePause();e.preventDefault();}
+  else if(e.key==='m'||e.key==='M'){$('mapBtn').click();}
+});
+
+let orbit={az:0,el:0}, orbitHome=false, world=null;
+
+/* ---------- 3D worlds ---------- */
+function build(){
+  const C={surf:0x12161D,gold:0xD4AF37,blue:0x3B82F6,white:0xF5F7FA,ember:0xFF7A33,bread:0xC98B4B,wheat:0xB9A77A,slate:0x2A313C,tyre:0x3A424E,soil:0x1c1a17};
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+  renderer.shadowMap.enabled=true; renderer.shadowMap.type=T.PCFSoftShadowMap;
+  const scene=new T.Scene(); scene.background=new T.Color(0x000000);
+  const cam=new T.PerspectiveCamera(38,1,.1,600);
+  const mats={};
+  function plastic(c,smooth){const k=c+(smooth?'s':'f');if(!mats[k])mats[k]=new T.MeshPhongMaterial({color:c,shininess:c===C.surf?12:90,specular:c===C.surf?0x0a0c10:0x4a4a4a,flatShading:!smooth});return mats[k];}
+  function add(p,geo,mat,x,y,z){const m=new T.Mesh(geo,mat);m.position.set(x||0,y||0,z||0);m.castShadow=true;m.receiveShadow=true;p.add(m);return m;}
+  function box(p,w,h,d,x,y,z,c){return add(p,new T.BoxGeometry(w,h,d),typeof c==='number'?plastic(c):c,x,y,z);}
+  function cyl(p,rt,rb,h,seg,x,y,z,c,smooth){return add(p,new T.CylinderGeometry(rt,rb,h,seg),plastic(c,smooth),x,y,z);}
+  function prism(p,w,h,d,x,y,z,c){const sh=new T.Shape();sh.moveTo(-w/2,0);sh.lineTo(w/2,0);sh.lineTo(0,h);sh.closePath();
+    const g=new T.ExtrudeGeometry(sh,{depth:d,bevelEnabled:false});g.translate(0,0,-d/2);return add(p,g,plastic(c),x,y,z);}
+  function grp(p,x,y,z){const g=new T.Group();g.position.set(x||0,y||0,z||0);(p||scene).add(g);return g;}
+  // Praxis person as used in S001-S003: rounded-box torso .57 x .43 x .95, sphere head r .32 seated at 1.25, all white.
+  function rbox(w,d,h,bs,cr){const x=(w-2*bs)/2,y=(d-2*bs)/2,sh=new T.Shape();
+    sh.moveTo(-x+cr,-y);sh.lineTo(x-cr,-y);sh.quadraticCurveTo(x,-y,x,-y+cr);sh.lineTo(x,y-cr);sh.quadraticCurveTo(x,y,x-cr,y);
+    sh.lineTo(-x+cr,y);sh.quadraticCurveTo(-x,y,-x,y-cr);sh.lineTo(-x,-y+cr);sh.quadraticCurveTo(-x,-y,-x+cr,-y);
+    const g=new T.ExtrudeGeometry(sh,{depth:h-2*bs,bevelEnabled:true,bevelThickness:bs,bevelSize:bs,bevelSegments:6,curveSegments:8});
+    g.translate(0,0,bs);g.rotateX(-Math.PI/2);return g;}
+  const PS=.85, headGeo=new T.SphereGeometry(.32,32,16), torsoGeo=rbox(.57,.43,.95,.08,.07);
+  function person(p,x,z,hat){const g=new T.Group(),b=new T.Group();b.scale.setScalar(PS);g.add(b);
+    add(b,torsoGeo,plastic(C.white,true),0,0,0);add(b,headGeo,plastic(C.white,true),0,1.25,0);
+    if(hat)cyl(g,.21,.18,.2,14,0,1.4,0,C.white,true);g.position.set(x,0,z);p.add(g);return g;}
+  const loafA=new T.BoxGeometry(.44,.16,.24), loafB=new T.CylinderGeometry(.12,.12,.44,10);
+  function loaf(p,x,y,z){const g=new T.Group();add(g,loafA,plastic(C.bread),0,.08,0);const t=add(g,loafB,plastic(C.bread,true),0,.16,0);t.rotation.z=Math.PI/2;g.position.set(x,y,z);p.add(g);return g;}
+
+  // lights follow the camera's focus, so any number of worlds costs the same
+  scene.add(new T.AmbientLight(0xbfc8d6,.34));
+  const key=new T.DirectionalLight(0xffffff,.6);scene.add(key,key.target);
+  key.castShadow=true;key.shadow.mapSize.set(2048,2048);key.shadow.bias=-.0006;key.shadow.camera.near=1;key.shadow.camera.far=160;
+  const focus=new T.PointLight(0xffffff,1.05,40,1);scene.add(focus);
+
+  const hits=[];
+  function hit(id,w,h,d,x,y,z){const m=new T.Mesh(new T.BoxGeometry(w,h,d),new T.MeshBasicMaterial());m.position.set(x,y,z);m.visible=false;m.userData.id=id;scene.add(m);hits.push(m);}
+  const flow=new T.MeshBasicMaterial({color:C.blue});
+  function line(p,w,d,x,z){const m=add(p,new T.BoxGeometry(w,.02,d),flow,x,.012,z);m.castShadow=false;return m;}
+
+  // gold price plates: every number shown in the world is drawn by one of these
+  function plate(p,w,x,y,z){const h=w*.44,pc=document.createElement('canvas');pc.width=384;pc.height=176;const tex=new T.CanvasTexture(pc);
+    box(p,w+.12,h+.12,.08,x,y,z-.05,C.gold);const m=new T.Mesh(new T.PlaneGeometry(w,h),new T.MeshBasicMaterial({map:tex}));m.position.set(x,y,z);p.add(m);
+    const o={txt:null,set(t){if(t===o.txt)return;o.txt=t;o.draw();},draw(){const g=pc.getContext('2d');g.fillStyle='#0b0d11';g.fillRect(0,0,384,176);
+      const px=Math.min(104,Math.floor(330/(Math.max(1,o.txt.length)*.62)));g.fillStyle='#D4AF37';g.font='700 '+px+'px "IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace';
+      g.textAlign='center';g.textBaseline='middle';g.fillText(o.txt,192,94);tex.needsUpdate=true;}};
+    plates.push(o);return o;}
+  const plates=[];
+  // quantitative gold blocks: one block is $0.50, the top block is cut to the remainder
+  function stack(p,x,z,size,max){const b=[];for(let i=0;i<max;i++)b.push(box(p,size,.46,size,x,0,z,C.gold));
+    return v=>{b.forEach((m,i)=>{const f=Math.max(0,Math.min(1,v/.5-i));m.visible=f>.02;m.scale.y=Math.max(f,.02);m.position.y=i*.5+f*.23;});};}
+  // labels live in the 3D scene
+  const labels=[];
+  function label(text,x,y,z,sc,src){const c=document.createElement('canvas');c.width=512;c.height=128;const tex=new T.CanvasTexture(c);
+    const draw=()=>{const g=c.getContext('2d');g.clearRect(0,0,512,128);g.fillStyle='#F5F7FA';try{g.letterSpacing='6px';}catch(e){}
+      let px=62;const ff='px "IBM Plex Sans Condensed","Arial Narrow",sans-serif';g.font='600 '+px+ff;while(px>26&&g.measureText(text).width>470){px-=3;g.font='600 '+px+ff;}
+      g.textAlign='center';g.textBaseline='middle';g.fillText(text,256,66);tex.needsUpdate=true;};
+    draw();const sp=new T.Sprite(new T.SpriteMaterial({map:tex,transparent:true,opacity:0,depthTest:false}));sp.scale.set(sc||8,(sc||8)/4,1);sp.position.set(x,y,z);sp.renderOrder=10;scene.add(sp);
+    labels.push({sp,draw,src:src||(()=>cur.labels)});}
+
+  /* ===== WORLD 1: the bread chain ===== */
+  box(scene,2.6,.1,41,7,-.05,-11,C.surf);
+  line(scene,.07,38.4,7,-11);[-30,-12,8].forEach(z=>line(scene,4,.07,5,z));
+  hit('road',2.6,1.6,20,7,.8,-2);
+
+  // FARM
+  const FZ=-30, farm=grp(scene,0,0,FZ);
+  box(farm,6.4,.3,6,0,-.15,0,C.surf);
+  const wheat=[];
+  for(let r=0;r<5;r++){box(farm,.56,.05,3.7,-2.4+r*.82,.025,.71,C.soil);for(let k=0;k<8;k++){const h=.4+((r*3+k*5)%4)*.06;wheat.push({m:box(farm,.5,h,.4,-2.4+r*.82,h/2,-.9+k*.46,C.wheat),v:1,o:(r*8+k)*17%40});}}
+  cyl(farm,.8,.8,2.6,14,2.2,1.3,-1.7,C.white,true);cyl(farm,.84,.84,.09,14,2.2,.9,-1.7,C.slate,true);cyl(farm,.84,.84,.09,14,2.2,1.9,-1.7,C.slate,true);
+  add(farm,new T.ConeGeometry(.88,.7,14),plastic(C.slate),2.2,2.95,-1.7);
+  box(farm,1.8,1.3,1.5,-.4,.65,-2.1,C.white);prism(farm,2.05,.7,1.65,-.4,1.3,-2.1,C.slate);box(farm,.5,.85,.06,-.4,.43,-1.33,C.slate);
+  person(farm,2.3,1.5);
+  hit('farm',6.4,4,6,0,2,FZ);
+
+  // BAKERY (cutaway: front wall and roof removed)
+  const BZ=-12, bak=grp(scene,0,0,BZ);
+  box(bak,6.4,.3,5.4,0,-.15,0,C.surf);
+  box(bak,6,2.8,.25,0,1.4,-2.45,C.white);box(bak,.25,2.8,4.6,-2.9,1.4,-.2,C.white);box(bak,6.1,.2,.45,0,2.9,-2.45,C.slate);
+  box(bak,.6,1.3,.6,1.9,3.6,-2.45,C.white);box(bak,.72,.14,.72,1.9,4.3,-2.45,C.slate);
+  const ovens=[];
+  for(let i=0;i<4;i++){const x=-2+i*1.25;box(bak,1,1.3,.9,x,.65,-1.8,C.slate);box(bak,1.06,.1,.96,x,1.35,-1.8,C.white);box(bak,.66,.06,.08,x,1.08,-1.31,C.white);
+    const m=new T.MeshPhongMaterial({color:0x15181d,emissive:C.ember,emissiveIntensity:0,shininess:30});box(bak,.66,.5,.06,x,.68,-1.33,m);ovens.push({m,v:0});}
+  box(bak,2.2,.12,.9,.2,.82,.8,C.white);[[-.8,.45],[1.2,.45],[-.8,1.15],[1.2,1.15]].forEach(q=>box(bak,.1,.76,.1,q[0],.38,q[1],C.white));
+  loaf(bak,-.3,.88,.8);loaf(bak,.3,.88,.8);loaf(bak,.9,.88,.8);
+  person(bak,-1.7,.9,true);
+  const sacks=[];[[2.1,.2,1.6],[2.6,.2,1.6],[2.1,.2,1.05],[2.6,.2,1.05],[2.35,.58,1.6],[2.35,.58,1.05]].forEach(q=>{const m=cyl(bak,.22,.22,.46,10,q[0],q[1],q[2],C.white,true);m.rotation.x=Math.PI/2;sacks.push({m,v:1});});
+  hit('bakery',6.4,4,5.4,0,2,BZ);
+  // energy supply for the ovens
+  const tank=grp(scene,-5.6,0,-12.5);
+  box(tank,3,.3,3,0,-.15,0,C.surf);cyl(tank,.75,.75,1.9,18,-.3,.95,-.4,C.white,true);cyl(tank,.5,.5,.18,18,-.3,1.99,-.4,C.slate,true);cyl(tank,.77,.77,.2,18,-.3,1.2,-.4,C.blue,true);
+  box(tank,2.4,.12,.12,1.4,.5,-.4,C.slate);
+  const tankPlate=plate(tank,1.15,.5,.42,1.1);
+  hit('energy',3,3,3,-5.6,1.5,-12.5);
+
+  // STORE (cutaway)
+  const SZ=8, store=grp(scene,0,0,SZ);
+  box(store,6.4,.3,5.4,0,-.15,0,C.surf);
+  box(store,6,2.8,.25,0,1.4,-2.45,C.white);box(store,.25,2.8,4.6,-2.9,1.4,-.2,C.white);box(store,6.1,.2,.45,0,2.9,-2.45,C.slate);
+  box(store,.1,2,.6,-1.3,1,-1.9,C.slate);box(store,.1,2,.6,1.3,1,-1.9,C.slate);
+  const tiers=[1.65,1.05,.45];tiers.forEach(y=>box(store,2.7,.08,.6,0,y,-1.9,C.slate));
+  const loaves=[];tiers.forEach(y=>{for(let j=0;j<4;j++)loaves.push({g:loaf(store,-.9+j*.6,y+.04,-1.85),v:1});});
+  const shelfPlate=plate(store,1.54,0,2.45,-1.8);
+  box(store,1.2,.9,.7,2.25,.45,1.4,C.slate);box(store,1.26,.08,.76,2.25,.94,1.4,C.white);box(store,.4,.3,.3,2.25,1.13,1.4,C.white);
+  add(store,new T.PlaneGeometry(.3,.18),flow,2.25,1.16,1.56).castShadow=false;
+  person(store,2.3,.6);
+  hit('store',6.4,4,5.4,0,2,SZ);
+
+  // pavement and shoppers
+  box(scene,6.4,.3,5,0,-.15,15.5,C.surf);hit('shoppers',6.4,2,5,0,1,15.5);
+  const slots=[[-2.1,7.4],[-1.5,14.2],[0,14.2],[1.5,14.2],[-1.5,15.5],[0,15.5],[1.5,15.5],[-.75,16.8],[.75,16.8]];
+  const rslots=[[-10.4,16.6],[-9.5,16.9],[-8.6,16.6]];
+  const people=slots.map(()=>{const g=person(scene,-9,22);g.scale.setScalar(.001);return g;});
+
+  // the other store down the street
+  const rival=grp(scene,-9.5,0,15.5);
+  box(rival,4.4,.3,4.4,0,-.15,0,C.surf);box(rival,4,2.4,.2,0,1.2,-2,C.white);box(rival,.2,2.4,3.6,-2,1.2,-.3,C.white);box(rival,4.1,.18,.4,0,2.49,-2,C.slate);
+  box(rival,2,.8,.6,.2,.4,-.9,C.slate);box(rival,2.06,.07,.66,.2,.83,-.9,C.white);loaf(rival,-.3,.87,-.9);loaf(rival,.3,.87,-.9);loaf(rival,.9,.87,-.9);
+  plate(rival,1.3,.2,1.8,-1.85).set('$3.10');person(rival,.2,-1.5);
+  hit('rival',4.4,3,4.4,-9.5,1.5,15.5);
+  label('OTHER STORE',-9.5,3.6,15.5,4.4,()=>cur.rivalOn);
+
+  // cost and price, in blocks
+  const ledger=grp(scene,-10,0,-2);
+  box(ledger,5.4,.3,3.6,0,-.15,0,C.surf);
+  const costStack=stack(ledger,-1.2,-.2,.9,8), priceStack=stack(ledger,1.2,-.2,.9,8);
+  const costPlate=plate(ledger,1.05,-1.2,.33,1.1), pricePlate=plate(ledger,1.05,1.2,.33,1.1);
+  hit('ledger',5.4,4,3.6,-10,2,-2);
+  label('COST',-11.2,4.5,-2.2,2.8,()=>cur.ledger);label('PRICE',-8.8,4.5,-2.2,2.8,()=>cur.ledger);
+
+  // the same loaf over time
+  const stair=grp(scene,-11,0,6.5);
+  box(stair,8,.3,3.6,0,-.15,0,C.surf);
+  const stairStacks=[-2.5,0,2.5].map(x=>stack(stair,x,-.2,1.1,8)), stairPlates=[-2.5,0,2.5].map(x=>plate(stair,1.15,x,.36,1.2));
+  box(stair,7.2,.05,.05,0,3,.42,C.white);
+  hit('stair',8,4.5,3.6,-11,2.2,6.5);
+  ['THEN','A YEAR ON','TWO YEARS ON'].forEach((t,i)=>label(t,-13.5+i*2.5,4.7,6.3,2.4,()=>cur.stairOn*(cur.s[i]>.1?1:.35)));
+
+  // trucks
+  function truck(cargo){const g=new T.Group();box(g,.9,.15,2,0,.3,0,C.slate);box(g,.86,.62,.62,0,.7,.68,C.white);box(g,.88,.2,.05,0,.82,1,C.slate);
+    box(g,.9,.3,1.3,0,.52,-.32,C.white);box(g,.92,.08,1.32,0,.5,-.32,C.blue);
+    [[-.48,.62],[.48,.62],[-.48,-.62],[.48,-.62]].forEach(q=>{const w=cyl(g,.2,.2,.14,14,q[0],.2,q[1],C.tyre,true);w.rotation.z=Math.PI/2;});
+    const load=new T.Group();load.position.y=.67;g.add(load);
+    if(cargo==='grain')box(load,.8,.34,1.2,0,.17,-.32,C.wheat);
+    else if(cargo==='crates'){box(load,.36,.3,.36,-.2,.15,-.05,C.wheat);box(load,.36,.3,.36,.2,.15,-.5,C.wheat);box(load,.36,.3,.36,-.2,.15,-.72,C.white);}
+    else{loaf(load,0,0,-.02).rotation.y=Math.PI/2;loaf(load,0,0,-.6).rotation.y=Math.PI/2;}
+    scene.add(g);return{g,load};}
+  const grainTruck=truck('grain');grainTruck.g.position.set(6.3,0,-21);
+  const van=truck('bread');let vanS=0;const L=20,R=.7,P=2*L+2*Math.PI*R;
+  function oval(s,o){s=((s%P)+P)%P;
+    if(s<L){o.x=6.3;o.z=-12+s;}
+    else if(s<L+Math.PI*R){const a=(s-L)/R;o.x=7-R*Math.cos(a);o.z=8+R*Math.sin(a);}
+    else if(s<2*L+Math.PI*R){o.x=7.7;o.z=8-(s-L-Math.PI*R);}
+    else{const a=(s-2*L-Math.PI*R)/R;o.x=7+R*Math.cos(a);o.z=-12-R*Math.sin(a);}
+    return o;}
+  const p1={},p2={};
+  label('FARM',-.4,4.3,FZ);label('BAKERY',-.4,5.2,BZ);label('DELIVERY',9.4,2.4,-2);label('STORE',-.4,5,SZ);label('SHOPPERS',0,2.8,16.4);label('ENERGY',-5.9,3.3,-12.9,4);
+
+  // the title, built from blocks
+  const GLY={W:'10001100011000110101101011101110001',H:'10001100011000111111100011000110001',Y:'10001100010101000100001000010000100',I:'11111001000010000100001000010011111',
+    S:'01111100001000001110000010000111110',E:'11111100001000011110100001000011111',V:'10001100011000110001100010101000100',R:'11110100011000111110101001001010001',
+    T:'11111001000010000100001000010000100',N:'10001110011010110011100011000110001',G:'01110100011000010111100011000101110',O:'01110100011000110001100011000101110',
+    X:'10001100010101000100010101000110001',P:'11110100011000111110100001000010000','?':'01110100010000100010001000000000100'};
+  const titleG=grp(scene,2.5,44,-8), cells=[], U=.62;
+  ['WHY IS','EVERYTHING','SO EXPENSIVE?'].forEach((ln,li)=>{const w=ln.length*6-1;[...ln].forEach((ch,ci)=>{const g=GLY[ch];if(!g)return;
+    for(let r=0;r<7;r++)for(let c=0;c<5;c++)if(g[r*5+c]==='1')cells.push([(ci*6+c-(w-1)/2)*U,(12-(li*9+r))*U]);});});
+  const titleM=new T.InstancedMesh(new T.BoxGeometry(U*.9,U*.9,U*1.6),plastic(C.white),cells.length), mx=new T.Matrix4();
+  cells.forEach((q,i)=>{mx.makeTranslation(q[0],q[1],0);titleM.setMatrixAt(i,mx);});titleM.frustumCulled=false;titleG.add(titleM);
+
+  /* ===== WORLD 2: a town of six sellers ===== */
+  const TX=90, town=grp(scene,TX,0,0);
+  const spoke=new T.MeshBasicMaterial({color:0x1f3e75}), c0=new T.Color(0x1f3e75), c1=new T.Color(0x7db6ff);
+  box(town,4.4,.3,4.4,0,-.15,0,C.surf);cyl(town,.7,.7,1.8,18,-.9,.9,-.6,C.white,true);cyl(town,.72,.72,.2,18,-.9,1.15,-.6,C.blue,true);
+  cyl(town,.7,.7,1.8,18,.8,.9,-.9,C.white,true);cyl(town,.72,.72,.2,18,.8,1.15,-.9,C.blue,true);box(town,1.5,.9,1,.4,.45,.9,C.slate);box(town,1.56,.08,1.06,.4,.94,.9,C.white);
+  const tEnergyPlate=plate(town,1.15,-1,.42,1.7);
+  hit('tenergy',4.4,3,4.4,TX,1.5,0);label('ENERGY',TX,3.4,-.6,4.2);
+  const stalls=STALL.map((q,i)=>{const g=grp(town,q[1],0,q[2]);
+    const len=Math.hypot(q[1],q[2])-4,sp=add(town,new T.BoxGeometry(len,.03,.1),spoke,q[1]/2,.02,q[2]/2);sp.rotation.y=-Math.atan2(q[2],q[1]);sp.castShadow=false;
+    box(g,5,.3,4.4,0,-.15,0,C.surf);box(g,4.4,2.4,.2,0,1.2,-2,C.white);box(g,.2,2.4,3.4,-2.1,1.2,-.4,C.white);box(g,4.5,.18,.4,0,2.49,-2,C.slate);
+    box(g,2.4,.8,.7,-.4,.4,-.4,C.slate);box(g,2.46,.07,.76,-.4,.83,-.4,C.white);
+    const py=.87,px=-.4,pz=-.4;
+    if(i===0){loaf(g,px-.3,py,pz);loaf(g,px+.3,py,pz);}
+    else if(i===1){cyl(g,.34,.34,.04,20,px,py+.02,pz,C.white,true);add(g,new T.SphereGeometry(.26,18,9,0,Math.PI*2,0,Math.PI/2),plastic(C.white,true),px,py+.04,pz);cyl(g,.05,.05,.07,10,px,py+.32,pz,C.slate,true);}
+    else if(i===2){box(g,.42,.8,.3,px,py+.4,pz,C.white);box(g,.44,.14,.32,px,py+.87,pz,C.slate);add(g,new T.PlaneGeometry(.26,.18),flow,px,py+.55,pz+.16).castShadow=false;box(g,.06,.5,.06,px+.28,py+.35,pz,C.slate);}
+    else if(i===3){box(g,.44,.07,.44,px,py+.3,pz,C.wheat);box(g,.44,.5,.07,px,py+.58,pz-.19,C.wheat);[[-.18,-.18],[.18,-.18],[-.18,.18],[.18,.18]].forEach(l=>box(g,.06,.3,.06,px+l[0],py+.15,pz+l[1],C.wheat));}
+    else if(i===4){box(g,.9,.54,.06,px,py+.42,pz,C.slate);add(g,new T.PlaneGeometry(.8,.44),flow,px,py+.42,pz+.035).castShadow=false;box(g,.08,.14,.08,px,py+.08,pz,C.slate);box(g,.4,.03,.2,px,py+.015,pz,C.slate);}
+    else{cyl(g,.26,.26,.03,18,px,py+.015,pz,C.white,true);cyl(g,.15,.11,.26,16,px,py+.16,pz,C.white,true);cyl(g,.13,.13,.02,16,px,py+.29,pz,C.bread,true);}
+    person(g,-.4,-1.3);
+    const pl=plate(g,1.5,-.4,1.85,-1.85);
+    box(g,.9,.05,.9,1.7,1,1.2,C.white);const col=add(g,new T.BoxGeometry(.6,1,.6),plastic(C.blue),1.7,.5,1.2);
+    const ppl=[[-1.3,1.4],[-.4,1.6],[.5,1.4]].map(s=>{const m=person(g,s[0],s[1]);return{m,v:1};});
+    hit('t'+i,5,3,4.4,TX+q[1],1.5,q[2]);label(q[0],TX+q[1]-.3,3.5,q[2]-1.6,4.6);
+    return{pl,col,ppl,base:q[3]};});
+
+  /* ===== WORLD 3: the restaurant ===== */
+  const RX=90,RZ=70, rest=grp(scene,RX,0,RZ);
+  box(rest,10,.3,8.4,0,-.15,0,C.surf);box(rest,9.6,2.8,.25,0,1.4,-4,C.white);box(rest,.25,2.8,7.6,-4.7,1.4,-.2,C.white);box(rest,9.7,.2,.45,0,2.9,-4,C.slate);
+  [[-2.6,.8],[-.2,2.3],[-2.3,-1.6]].forEach(q=>{cyl(rest,.6,.6,.07,20,q[0],.72,q[1],C.white,true);cyl(rest,.08,.08,.7,10,q[0],.35,q[1],C.slate,true);cyl(rest,.3,.3,.04,14,q[0],.02,q[1],C.slate,true);
+    person(rest,q[0]-1,q[1]);person(rest,q[0]+1,q[1]);});
+  [2,3.2].forEach(x=>{box(rest,.95,.95,.8,x,.475,-3.3,C.slate);const m=new T.MeshPhongMaterial({color:0x15181d,emissive:C.ember,emissiveIntensity:1.2,shininess:30});box(rest,.62,.04,.5,x,.97,-3.3,m);});
+  box(rest,3,.9,.5,2.6,.45,-1.7,C.slate);box(rest,3.06,.08,.56,2.6,.94,-1.7,C.white);cyl(rest,.3,.3,.04,18,2.2,1,-1.7,C.white,true);
+  person(rest,2.6,-2.5,true);
+  plate(rest,2.2,-1.6,2,-3.85).set('$21.50');
+  box(rest,3,.1,7.4,7.4,-.05,.4,C.surf);line(rest,.07,6.6,7.4,.4);const sup=truck('crates');sup.g.position.set(RX+7.4,0,RZ+.6);
+  const cafe=grp(rest,-9,0,1.5);
+  box(cafe,4.4,.3,4.4,0,-.15,0,C.surf);box(cafe,4,2.4,.2,0,1.2,-2,C.white);box(cafe,.2,2.4,3.6,-2,1.2,-.3,C.white);box(cafe,4.1,.18,.4,0,2.49,-2,C.slate);
+  box(cafe,2,.8,.6,.2,.4,-.9,C.slate);box(cafe,2.06,.07,.66,.2,.83,-.9,C.white);cyl(cafe,.3,.3,.04,18,.2,.89,-.9,C.white,true);
+  plate(cafe,1.3,.2,1.8,-1.85).set('$20.00');person(cafe,.2,-1.5);person(cafe,.6,.9);
+  hit('rmenu',2.5,1.3,.6,RX-1.6,2,RZ-3.7);hit('rkitchen',3.6,2.4,2.8,RX+2.6,1.2,RZ-2.6);hit('rdiners',5.4,2,5.6,RX-1.7,1,RZ+.5);
+  hit('rsupplier',3,2,7.4,RX+7.4,1,RZ+.4);hit('rcafe',4.4,3,4.4,RX-9,1.5,RZ+1.5);
+  label('RESTAURANT',RX-.4,4.6,RZ-4,5);label('SUPPLIER',RX+7.6,2.6,RZ+.4,4.4);label('ANOTHER PLACE',RX-9,3.7,RZ+1.5,4.6);
+
+  if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>{labels.forEach(l=>l.draw());plates.forEach(p=>{if(p.txt)p.draw();});});
+
+  // tap target marker
+  const HOT={shoppers:[0,15.5,2.3],farm:[0,-30,3.8],energy:[-5.6,-12.5,2],tenergy:[TX,0,2.9]};
+  const ring=new T.Mesh(new T.RingGeometry(.96,1.03,64),new T.MeshBasicMaterial({color:C.blue,transparent:true,opacity:.9,side:T.DoubleSide}));
+  ring.rotation.x=-Math.PI/2;ring.position.y=.03;scene.add(ring);
+
+  /* ---------- per-frame ---------- */
+  const cv={tx:0,ty:0,tz:0,hw:2,hh:2,az:0,el:.3}; let camInit=false;
+  function viewOf(name){const v=V[name],w=(cam.aspect>1.15&&v.wide)?v.wide:{};return{tx:v.t[0],ty:v.t[1],tz:v.t[2],hw:w.hw||v.hw,hh:w.hh||v.hh,az:w.az!==undefined?w.az:v.az,el:w.el!==undefined?w.el:v.el};}
+  function place(s,k){people.forEach((g,i)=>{let tx=-9,tz=22,ts=.001;
+    if(i<s.shoppers){tx=slots[i][0];tz=slots[i][1];ts=1;}else if(i<s.shoppers+s.rival){const q=rslots[i-s.shoppers];tx=q[0];tz=q[1];ts=1;}
+    g.position.x+=(tx-g.position.x)*k;g.position.z+=(tz-g.position.z)*k;g.scale.setScalar(g.scale.x+(ts-g.scale.x)*k);});}
+  function snap(s){place(s,1);ovens.forEach((o,i)=>{o.v=i<s.ovens?1:0;});}
+  snap(S[idx]);
+  function onoff(g,v){g.visible=v>.01;g.scale.setScalar(Math.max(.001,v));}
+  function pop(o,on,k){o.v+=((on?1:.001)-o.v)*Math.min(1,k*3);o.m.scale.setScalar(o.v);o.m.visible=o.v>.02;}
+
+  function resize(){const w=stage.clientWidth,h=stage.clientHeight;if(!w||!h)return;renderer.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix();}
+  if(window.ResizeObserver)new ResizeObserver(resize).observe(stage);else window.addEventListener('resize',resize);
+  resize();
+
+  let last=performance.now(),clock=0,shHalf=0;
+  function frame(now){
+    requestAnimationFrame(frame);
+    const dt=Math.min(.1,(now-last)/1000);last=now;
+    const s=S[idx],e=eff(),run=paused?0:dt;clock+=run;
+    const k=reduce?(paused?0:1):1-Math.exp(-run*2.4),kc=reduce?(paused?0:1):1-Math.exp(-run*2);
+    NUM.forEach(n=>{const t=n==='labels'?e.labels:s[n];cur[n]+=(t-cur[n])*k;if(Math.abs(t-cur[n])<.004)cur[n]=t;});
+    ARR.forEach(n=>{for(let i=0;i<cur[n].length;i++){cur[n][i]+=(s[n][i]-cur[n][i])*k;if(Math.abs(s[n][i]-cur[n][i])<.004)cur[n][i]=s[n][i];}});
+    // bread chain
+    place(s,k*.8);
+    loaves.forEach((l,i)=>{const t=i<Math.round(cur.stock)?1:.001;l.v+=(t-l.v)*Math.min(1,k*3);l.g.scale.setScalar(l.v);l.g.visible=l.v>.02;});
+    ovens.forEach((o,i)=>{o.v+=((i<s.ovens?1:0)-o.v)*k;o.m.emissiveIntensity=o.v*1.25;});
+    wheat.forEach(w=>pop(w,w.o<Math.round(cur.wheat*40),k));
+    sacks.forEach((o,i)=>pop(o,i<Math.round(cur.flour),k));
+    grainTruck.load.scale.setScalar(.35+.65*cur.wheat);
+    shelfPlate.set('$'+cur.price.toFixed(2));tankPlate.set('$'+cur.energy.toFixed(2));
+    costStack(cur.cost);priceStack(cur.price);costPlate.set('$'+cur.cost.toFixed(2));pricePlate.set('$'+cur.price.toFixed(2));
+    stairStacks.forEach((f,i)=>{f(cur.s[i]);stairPlates[i].set(cur.s[i]>.1?'$'+cur.s[i].toFixed(2):'');});
+    onoff(ledger,cur.ledger);onoff(rival,cur.rivalOn);onoff(stair,cur.stairOn);onoff(titleG,cur.title);
+    if(!reduce)vanS+=run*cur.truck*P;
+    oval(vanS,p1);oval(vanS+.08,p2);van.g.position.set(p1.x,0,p1.z);van.g.rotation.y=Math.atan2(p2.x-p1.x,p2.z-p1.z);
+    van.load.visible=(((vanS%P)+P)%P)<L+1;
+    // town
+    stalls.forEach((st,i)=>{const h=Math.max(.05,1+(cur.ti[i]-1)*8);st.col.scale.y=h;st.col.position.y=h/2;st.pl.set(money(st.base*cur.ti[i]));
+      st.ppl.forEach((p,j)=>pop(p,j<Math.round(cur.tp),k));});
+    tEnergyPlate.set('$'+cur.tEnergy.toFixed(2));
+    const ef=Math.max(0,Math.min(1,(cur.tEnergy-1)/.4));spoke.color.copy(c0).lerp(c1,ef*(reduce?1:.75+.25*Math.sin(clock*4)));
+    labels.forEach(l=>{const o=l.src();l.sp.material.opacity=o;l.sp.visible=o>.02;});
+    // tap target
+    const hp=!inspect&&s.hot?HOT[s.hot]:null;ring.visible=!!hp;
+    if(hp){const q=hp[2]*(reduce?1:1+.05*Math.sin(clock*3.2));ring.position.x=hp[0];ring.position.z=hp[1];ring.scale.set(q,q,1);ring.material.opacity=reduce?.9:.6+.3*Math.sin(clock*3.2);}
+    updateHud();
+    // camera
+    const tv=viewOf(e.view);
+    if(!camInit){Object.assign(cv,tv);camInit=true;}else for(const a in cv)cv[a]+=(tv[a]-cv[a])*kc;
+    if(orbitHome&&!paused){orbit.az+=(0-orbit.az)*kc;orbit.el+=(0-orbit.el)*kc;}
+    const th=Math.tan(cam.fov*Math.PI/360),dist=1.1*Math.max(cv.hh/th,cv.hw/(th*cam.aspect));
+    const az=cv.az+orbit.az,el=Math.max(.05,Math.min(1.45,cv.el+orbit.el));
+    cam.position.set(cv.tx+dist*Math.sin(az)*Math.cos(el),cv.ty+dist*Math.sin(el),cv.tz+dist*Math.cos(az)*Math.cos(el));
+    cam.lookAt(cv.tx,cv.ty,cv.tz);
+    // lights and shadows follow the focus
+    const ext=Math.max(cv.hw,cv.hh);
+    focus.position.set(cv.tx,cv.ty+5+ext*.5,cv.tz+2.5+ext*.25);focus.distance=18+ext*2.6;
+    key.target.position.set(cv.tx,cv.ty,cv.tz);key.position.set(cv.tx+16,cv.ty+34,cv.tz+12);
+    const half=Math.max(14,Math.min(48,ext*1.5));
+    if(Math.abs(half-shHalf)>.5){shHalf=half;const sc=key.shadow.camera;sc.left=-half;sc.right=half;sc.top=half;sc.bottom=-half;sc.updateProjectionMatrix();}
+    renderer.render(scene,cam);
+  }
+  requestAnimationFrame(frame);
+
+  /* pointer: drag orbits, tap picks */
+  const ray=new T.Raycaster(),ndc=new T.Vector2();
+  function pick(ev){const r=canvas.getBoundingClientRect();ndc.set(((ev.clientX-r.left)/r.width)*2-1,-((ev.clientY-r.top)/r.height)*2+1);ray.setFromCamera(ndc,cam);
+    const h=ray.intersectObjects(hits,false);for(let i=0;i<h.length;i++){const id=h[i].object.userData.id;
+      if((id==='ledger'&&cur.ledger<.5)||(id==='rival'&&cur.rivalOn<.5)||(id==='stair'&&cur.stairOn<.5))continue;return id;}return null;}
+  let down=null;
+  canvas.addEventListener('pointerdown',ev=>{down={x:ev.clientX,y:ev.clientY,az:orbit.az,el:orbit.el,moved:false};try{canvas.setPointerCapture(ev.pointerId);}catch(e){}$('hint').style.opacity='0';});
+  canvas.addEventListener('pointermove',ev=>{
+    if(!down){if(ev.pointerType==='mouse')canvas.style.cursor=pick(ev)?'pointer':'grab';return;}
+    const dx=ev.clientX-down.x,dy=ev.clientY-down.y;if(Math.abs(dx)+Math.abs(dy)>7)down.moved=true;
+    if(down.moved){orbitHome=false;orbit.az=Math.max(-1.1,Math.min(1.1,down.az-dx*.006));orbit.el=Math.max(-.4,Math.min(.5,down.el+dy*.004));}});
+  canvas.addEventListener('pointerup',ev=>{const d=down;down=null;if(!d||d.moved)return;const id=pick(ev);if(!id)return;
+    if(!inspect&&S[idx].hot===id){next();return;}look(id);});
+  canvas.addEventListener('pointercancel',()=>{down=null;});
+
+  return{snap};
+}
+
+function start(data){
+  if(data&&typeof data.i==='number'){idx=Math.max(0,Math.min(S.length-1,data.i));setCur(S[idx]);}
+  if(renderer){try{world=build();}catch(e){world=null;fail();if(window.console)console.error(e);}}else fail();
+  render();
+  try{if(!localStorage.getItem('pa001-help-seen')){localStorage.setItem('pa001-help-seen','1');$('help').hidden=false;}}catch(e){}
+}
+const hot=window.claude&&window.claude.hot;
+if(hot&&hot.snapshot)hot.snapshot(()=>({i:idx}));
+if(hot&&hot.ready)hot.ready(start);else start((hot&&hot.data)||{});
+})();
+</script>
+
+</body></html>
