@@ -94,8 +94,8 @@ window.PRAXIS = {
       title: 'When the paycheque stops, what does insurance actually pay?',
       blurb: 'Follow one household through a sudden loss, and see which kinds of insurance respond, which don’t, and why the terms decide.',
       file: 'pieces/insurance-types.html',
-      status: 'upcoming',              // change to 'published' with a date to release
-      stage: 'In development',
+      status: 'published',              // change to 'published' with a date to release
+      stage: '2026-10-13',
       date: '',
       poster: { fig: '$50,000', line: 'a year of income, gone', cols: 14, groups: [[['g', 4], ['o', 10]]] },
     },
