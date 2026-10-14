@@ -1,0 +1,720 @@
+<!doctype html><html lang="en"><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>When the Paycheque Stops · Insurance Types</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;700&family=IBM+Plex+Sans+Condensed:wght@500;600&family=IBM+Plex+Sans:wght@400;500&display=swap">
+<style>
+/* Same shell as PA001: black stage on top, caption and transport panel below. */
+:root{
+  color-scheme:dark;
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+  --void:#000000;--surface:#12161D;--line:#262d39;--ink:#F5F7FA;--dim:#98a2b1;--gold:#D4AF37;--blue:#3B82F6;--ember:#FF7A33;
+  --f-label:"IBM Plex Sans Condensed","Arial Narrow",system-ui,sans-serif;
+  --f-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-num:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{margin:0;background:var(--void);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.45;overflow:hidden}
+#app{height:100%;display:flex;flex-direction:column;min-height:0}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+
+.bar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 16px;border-bottom:1px solid var(--line)}
+.bar .id{min-width:0;min-height:3.9em}
+@media (min-width:700px){.bar .id{min-height:0}}
+.tag{font-family:var(--f-label);font-weight:500;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);display:block}
+h1{font-family:var(--f-label);font-weight:600;font-size:1.15rem;letter-spacing:.02em;margin:0;text-wrap:balance}
+.bar-actions{display:flex;gap:6px;flex:none}
+.ghost{background:transparent;border:1px solid var(--line);border-radius:4px;padding:8px 10px;font-family:var(--f-label);font-weight:500;font-size:.85rem;letter-spacing:.06em;text-transform:uppercase}
+.ghost:hover{border-color:var(--dim)}
+.ghost[aria-pressed="true"]{border-color:var(--blue);color:var(--blue)}
+.ghost:disabled{opacity:.35;cursor:default}
+
+#stage{flex:1;min-height:0;position:relative;background:var(--void)}
+#c{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:grab}
+#hint{position:absolute;left:16px;bottom:10px;font-family:var(--f-label);font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);pointer-events:none;transition:opacity .6s}
+#nogl{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:16px;text-align:center;color:var(--dim)}
+
+.panel{border-top:1px solid var(--line);padding-block:12px 14px;padding-inline:16px;display:flex;flex-direction:column;gap:10px}
+.panel>*{width:100%;max-width:760px;margin-inline:auto}
+.hud{display:flex;flex-wrap:wrap;gap:6px 18px;min-height:1.5em;font-family:var(--f-label);font-size:.74rem;letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
+.hud b{font-family:var(--f-num);font-weight:500;font-size:.92rem;letter-spacing:0;color:var(--ink);font-variant-numeric:tabular-nums;margin-left:6px}
+.hud .gold b{color:var(--gold)}
+#cap{margin-block:0;font-size:clamp(1rem,2.4vw,1.2rem);min-height:5.8em}
+@media (min-width:700px){#cap{min-height:3.1em}}
+.pips{display:flex;gap:4px}
+.pips button{flex:1;height:22px;padding:0;border:0;background:transparent;position:relative;min-width:0;--f:0%}
+.pips button::after{content:"";position:absolute;left:0;right:0;top:9px;height:4px;background:linear-gradient(to right,var(--dim) var(--f),var(--line) var(--f))}
+.pips button.now::after{background:linear-gradient(to right,var(--ink) var(--f),var(--line) var(--f))}
+.controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.count{font-family:var(--f-num);font-size:.82rem;color:var(--dim);font-variant-numeric:tabular-nums;margin-left:4px}
+#next{flex:1 1 170px;min-width:0;margin-left:auto;background:var(--ink);color:#000;border:0;border-radius:4px;padding:11px 16px;font-family:var(--f-label);font-weight:600;font-size:.95rem;letter-spacing:.06em;text-transform:uppercase}
+#next.act{background:var(--blue)}
+#next:hover{filter:brightness(1.08)}
+
+.over{position:fixed;inset:0;z-index:5;background:rgba(0,0,0,.72);display:flex;justify-content:flex-end}
+.over .sheet{width:min(560px,100%);height:100%;overflow-y:auto;background:var(--surface);border-left:1px solid var(--line);padding-block:calc(16px + env(safe-area-inset-top,0px)) 32px;padding-inline:16px}
+.over header{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:6px}
+.over h2{font-family:var(--f-label);font-weight:600;font-size:1.2rem;margin:0}
+.over h3{font-family:var(--f-label);font-weight:600;font-size:.8rem;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);margin:22px 0 8px}
+.over p{margin:0 0 8px;color:var(--dim);font-size:.92rem}
+.over ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:12px}
+.over li{font-size:.92rem;border-top:1px solid var(--line);padding-top:10px}
+.over li b{display:block;font-weight:500;color:var(--ink)}
+.over li span{color:var(--dim)}
+.over kbd{font-family:var(--f-num);font-size:.8rem;border:1px solid var(--line);border-radius:3px;padding:1px 5px;color:var(--ink)}
+.over .foot{margin-top:26px;padding-top:14px;border-top:1px solid var(--line)}
+.over li i{font-style:normal;font-family:var(--f-label);font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);display:block;margin-bottom:2px}
+@media (prefers-reduced-motion:reduce){#hint{transition:none}}
+</style></head><body>
+
+<div id="app">
+  <header class="bar">
+    <div class="id">
+      <span class="tag">Interactive lesson · Insurance · Draft</span>
+      <h1 id="seg">One paycheque</h1>
+    </div>
+    <div class="bar-actions">
+      <button class="ghost" id="voiceBtn" aria-pressed="false" hidden>Voice</button>
+      <button class="ghost" id="mapBtn" aria-pressed="false">Map</button>
+      <button class="ghost" id="helpBtn">Help</button>
+    </div>
+  </header>
+
+  <main id="stage">
+    <canvas id="c" aria-label="3D miniature model of a household, the money flowing in and out of it, seven kinds of insurance, and a life insurance claim"></canvas>
+    <div id="hint">Drag to look around · Tap anything to look closer</div>
+    <div id="nogl" hidden>This piece needs WebGL, which this browser or view has switched off.</div>
+  </main>
+
+  <section class="panel">
+    <div class="hud" id="hud"></div>
+    <p id="cap" aria-live="polite"></p>
+    <div class="pips" id="pips"></div>
+    <div class="controls">
+      <button class="ghost" id="back">Back</button>
+      <button class="ghost" id="pause" aria-pressed="false">Pause</button>
+      <button class="ghost" id="replay">Replay</button>
+      <span class="count" id="count"></span>
+      <button id="next">Next</button>
+    </div>
+  </section>
+</div>
+
+<div id="help" class="over" hidden>
+  <div class="sheet" role="dialog" aria-labelledby="helpTitle">
+    <header><h2 id="helpTitle">How to use this</h2><button class="ghost" id="helpClose">Close</button></header>
+    <p>This is a model you can move through at your own speed. Nothing plays until you ask it to.</p>
+    <h3>Moving through the story</h3>
+    <ul>
+      <li><b>Next and Back</b><span>Move one step at a time. On a keyboard use <kbd>→</kbd> and <kbd>←</kbd>.</span></li>
+      <li><b>The chapter bar</b><span>The eight segments above the buttons are the eight chapters. Tap any segment to jump to the start of that chapter.</span></li>
+      <li><b>Pause and Replay</b><span>Pause freezes the scene where it is. Replay runs the current step again from the start. <kbd>Space</kbd> also pauses.</span></li>
+    </ul>
+    <h3>Exploring the scene</h3>
+    <ul>
+      <li><b>Drag to look around</b><span>Drag anywhere on the scene to swing the camera around what you are looking at. It settles back when you move to the next step.</span></li>
+      <li><b>Tap anything to look closer</b><span>Tap a building, a policy, a switch or a stack of blocks to fly to it and read what it is. Press Return to the story to pick up where you left off.</span></li>
+      <li><b>Map</b><span>Shows the whole world you are in, with every station named. <kbd>M</kbd> on a keyboard.</span></li>
+    </ul>
+    <h3>Making changes yourself</h3>
+    <ul>
+      <li><b>The blue ring and the blue button</b><span>When a blue ring appears in the scene, the next change is yours to make. Tap inside the ring, or press the blue button below. Both do the same thing.</span></li>
+    </ul>
+    <h3>Reading the model</h3>
+    <ul>
+      <li><b>Gold is money</b><span>Gold plates show amounts. One gold block is $10,000. An outlined block is $10,000 the household needs but doesn't have.</span></li>
+      <li><b>Blue is information and flow</b><span>A lit blue line means money or cover is reaching the household. A dark line means it isn't. A dim line means only under certain terms.</span></li>
+      <li><b>Orange is fire</b><span>Only used in the house fire.</span></li>
+    </ul>
+    <h3>What this is, and isn't</h3>
+    <p>Praxis explains how insurance generally works. Every amount is an illustration in no particular currency. Policies, laws and public programs differ by country and by insurer, and the contract decides what is paid. This is education, not advice about what to buy.</p>
+    <div class="foot"><button class="ghost" id="logBtn">Production standards log</button></div>
+  </div>
+</div>
+
+<div id="log" class="over" hidden>
+  <div class="sheet" role="dialog" aria-labelledby="logTitle">
+    <header><h2 id="logTitle">Standards log</h2><button class="ghost" id="logClose">Close</button></header>
+    <p>What this piece does against current Praxis standards and SOPs, as read on 2026-10-13. For the production team, not for learners.</p>
+    <h3>Open governance items</h3>
+    <ul>
+      <li><i>Course Catalogue &amp; Content ID — SOP · File Architecture §14</i><b>No permanent ID.</b><span>The Master Roadmap lists this as "Unassigned — Interactive Lesson #2". The file and site entry use the descriptive name insurance-types until an ID is registered.</span></li>
+      <li><i>Content Development — Workspace SOP</i><b>Copy is not content-approved.</b><span>The six-page script and seven-step interaction design from the previous workspace were not available. Every caption was written during this build and needs Learning &amp; Content review before release.</span></li>
+      <li><i>Workspace brief</i><b>Anchor scenario is provisional.</b><span>The loss of the household's main earner is used as directed, pending CEO confirmation.</span></li>
+      <li><i>PA001 lessons</i><b>Engine and look reused from PA001.</b><span>Step model, camera fitting, controls, Help and this log follow PA001. Models are web-local rebuilds with no PRX asset IDs, as in PA001.</span></li>
+    </ul>
+    <h3>Extensions that stay inside the rules</h3>
+    <ul>
+      <li><i>Artstyle §3</i><b>Ember orange means fire.</b><span>In PA001 it meant an oven in use. Here it appears only in the house-fire event.</span></li>
+      <li><i>Block primitive</i><b>One gold block is $10,000 throughout.</b><span>Outlined blocks show need not yet met. All amounts are illustrative model values, not quotes or sourced figures.</span></li>
+      <li><i>Learner-facing balance</i><b>No product, provider or recommendation.</b><span>Each policy type is shown answering the event it was built for. Term and permanent life are presented as trade-offs.</span></li>
+    </ul>
+    <h3>Followed</h3>
+    <ul>
+      <li><b>Black stage, semantic colour.</b><span>Pure black void, no ground plane. Gold only on money. Blue for flows, cover and anything tappable.</span></li>
+      <li><b>Praxis person.</b><span>Rounded-box torso 0.57 by 0.43 by 0.95, sphere head of radius 0.32 at 1.25, all white, no limbs or face, drawn at 0.85 scale. Children at 0.62 of that.</span></li>
+      <li><b>Viewer in the scene.</b><span>The learner is "you", the surviving partner, throughout.</span></li>
+    </ul>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+'use strict';
+const $=id=>document.getElementById(id);
+const stage=$('stage'), canvas=$('c');
+const T=window.THREE;
+function fail(){ $('nogl').hidden=false; canvas.hidden=true; $('hint').hidden=true; }
+let renderer=null;
+if(T){ try{ renderer=new T.WebGLRenderer({canvas,antialias:true}); }catch(e){ renderer=null; } }
+const reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+const fmt=v=>'$'+Math.round(v).toLocaleString('en-US');
+
+/* ---------- content: every step is a complete world state; each chapter starts from D ----------
+   Money: one block = $10,000. save, need, pay, cash and funeral are in blocks.
+   pol: seven policies, 0 dark, .5 only under certain terms, 1 responds.
+   Order: term life, permanent life, health, disability, vehicle, home or renters, liability. */
+const Z7=[0,0,0,0,0,0,0];
+const D={world:'home',view:'home',labels:0,hud:null,mIn:'$5,000',mOut:'$4,700',
+  partner:1,ploc:'work',income:1,bills:1,save:2,funeral:0,polOn:0,pol:Z7,
+  need:0,pay:0,inforce:1,benef:1,clean:1,age:42,perm:0,cash:0,fire:0,crash:0,guest:0,title:0};
+const GONE={partner:0,income:0,save:.5,funeral:1,mIn:'$1,400'};
+const CH=[
+{t:'One paycheque',s:[
+ {view:'home',ploc:'home',cap:'This is your home. You, your partner and your two kids.'},
+ {view:'work',cap:'Most of the money comes from one place: your partner’s job. About $3,600 a month after tax.'},
+ {view:'system',labels:1,hud:['in','out','save'],cap:'With your smaller income, $5,000 comes in each month. $4,700 goes out: the mortgage, groceries and the car loan.'},
+ {view:'pile',cap:'What’s left goes into savings. Right now that’s $20,000. Each gold block is $10,000.'},
+ {view:'title',labels:0,title:1,cap:'Now imagine the biggest of those flows stops for good.'}]},
+{t:'The day it stops',s:[
+ {view:'home',hud:['in','out','save'],cap:'One ordinary week, without warning, your partner dies.'},
+ {view:'work',partner:0,cap:'The job ends with them. The paycheque doesn’t shrink. It stops.'},
+ {view:'system',labels:1,income:0,mIn:'$1,400',cap:'$1,400 still comes in from your job. The mortgage, the groceries and the car loan carry on as before.'},
+ {view:'funeral',labels:0,funeral:1,save:.5,cap:'Then a new bill arrives: the funeral, around $15,000. It comes out of savings.'},
+ {view:'pile',cap:'$5,000 left. With $3,300 a month more going out than coming in, that lasts about six weeks.'},
+ {view:'home',cap:'That gap is the financial event. Now: which insurance responds to it?'}]},
+{t:'Who answers?',s:[
+ Object.assign({view:'policies',polOn:1,cap:'Seven kinds of insurance a household might carry. Each one is built for a different kind of loss.'},GONE),
+ {view:'both',hot:'row',cta:'Ask about this death',cap:'Ask each of them the same question: does this death fall under you?'},
+ {pol:[1,1,0,0,0,0,0],cap:'Two answer clearly: life insurance, term and permanent. Each pays a set amount when the insured person dies, if the policy is still in force.'},
+ {pol:[1,1,.5,0,.5,0,0],cap:'Two might answer in part. Health insurance may have paid medical bills before the death. Vehicle insurance, only if a car was involved.'},
+ {view:'policies',cap:'Three stay dark. Disability insurance pays while someone is alive but unable to work. Home insurance covers the house. Liability covers harm you cause others.'},
+ {view:'both',cap:'None of them are bad policies. A policy only answers the kind of loss it was built for.'}]},
+{t:'The claim',s:[
+ Object.assign({world:'claim',view:'claimDoc',hud:['need','paid','to'],cap:'Say your partner bought a 20-year term life policy at 35, for $500,000. They died at 42, inside the term.'},GONE),
+ {view:'wall',need:69.5,cap:'First, what does the household need? About ten years of lost take-home pay, $430,000. The debts, $250,000. The funeral you paid from savings, $15,000.'},
+ {view:'console',cap:'The policy is in force. You are the named beneficiary. No exclusion applies.'},
+ {view:'claim',pay:50,cap:'So it pays. $500,000 goes to you.'},
+ {view:'wall',cap:'That is a lot of money. It still leaves about $195,000 of the need uncovered.'},
+ {view:'claim',cap:'A policy pays what the contract says, not what the household turns out to need. The amount was chosen years earlier.'}]},
+{t:'When it pays nothing',s:[
+ Object.assign({world:'claim',view:'console',need:69.5,hud:['need','paid','to'],hot:'inforce',cta:'Stop the payments',cap:'Rewind. Same policy, same death. But months earlier, money got tight and the premiums stopped.'},GONE),
+ {view:'claim',inforce:0,cap:'After a short grace period, often about a month, the policy lapsed. It pays nothing.'},
+ {view:'ruler',inforce:1,hot:'ruler',cta:'Make it age 58',cap:'Rewind. The premiums were always paid. This time your partner dies at 58.'},
+ {age:58,cap:'The 20-year term ended at 55. Unless it was renewed or converted in time, it pays nothing.'},
+ {view:'console',age:42,hot:'benef',cta:'Remove the beneficiary',cap:'Rewind. Age 42, premiums paid. But no living beneficiary is named on the policy.'},
+ {view:'claim',benef:0,pay:50,cap:'It pays, but to your partner’s estate. That can take months to reach you, and in many places the estate’s debts are paid from it first.'},
+ {view:'console',benef:1,pay:0,hot:'clean',cta:'Find a missing fact',cap:'Rewind. You are the beneficiary. But a health condition was left off the application, and the death came in the policy’s first two years.'},
+ {view:'claim',clean:0,cap:'The insurer can contest the claim and deny it, often refunding the premiums instead. The event happened. The terms decided.'}]},
+{t:'Term or permanent',s:[
+ Object.assign({world:'claim',view:'ruler',perm:1,hud:['age'],cap:'Life insurance comes in two broad kinds. Term covers a set stretch of years. Permanent covers for life, as long as premiums are paid.'},GONE),
+ {hot:'ruler',cta:'Make it age 60',cap:'At 42, both would pay.'},
+ {age:60,cap:'At 60 the term has ended. Only the permanent policy would still pay.'},
+ {age:80,cash:1.5,cap:'Many permanent policies also build a cash value, which can be borrowed against. Loans not paid back reduce what is paid out.'},
+ {cap:'For the same amount of cover, permanent insurance costs more each year. Term costs less, and ends.'},
+ {view:'claim',cap:'Neither is right for everyone. The trade-off is cost now, how long the cover lasts, and what else the policy does.'}]},
+{t:'A different event',s:[
+ {view:'both',polOn:1,labels:1,cap:'Rewind to before any of this. Your partner is alive. Same household, same seven policies. Now change the event.'},
+ {view:'work',labels:0,hot:'work',cta:'An accident at work',cap:'Start with your partner’s job.'},
+ {view:'hospital',ploc:'hosp',income:0,cap:'Your partner is badly hurt. They survive, but they can’t work for a year. The paycheque stops, and no one has died.'},
+ {view:'both',pol:[0,0,1,1,.5,0,0],cap:'Disability insurance answers: part of the income, after a waiting period. Health insurance helps with treatment. Vehicle, only if a car was involved. Life insurance stays dark.'},
+ {view:'home',ploc:'work',income:1,pol:Z7,hot:'home',cta:'A kitchen fire',cap:'Rewind. Everyone is fine. Then something goes wrong in the kitchen.'},
+ {fire:1,cap:'The fire makes the house unlivable for months.'},
+ {view:'both',pol:[0,0,0,0,0,1,.5],cap:'Home insurance answers: repairs, belongings and often a place to stay, up to its limits and after the deductible. A renters policy covers belongings, not the building.'},
+ {view:'car',fire:0,pol:Z7,hot:'car',cta:'Cause a crash',cap:'Rewind. This time you are driving.'},
+ {crash:1,cap:'You cause a crash. The other driver is hurt.'},
+ {view:'both',pol:[0,0,.5,.5,1,0,.5],cap:'Vehicle insurance answers. Its liability cover pays for the other driver, up to the limit. Your own car is covered only if you carry collision cover.'},
+ {view:'home',crash:0,pol:Z7,hot:'steps',cta:'A guest falls',cap:'Rewind once more. A friend comes over.'},
+ {guest:1,cap:'They slip on a wet floor, are badly hurt, and sue you.'},
+ {view:'both',pol:[0,0,0,0,0,1,1],cap:'The liability part of your home policy answers, up to its limit. A separate liability policy can pay above it.'},
+ {view:'both',guest:0,pol:Z7,cap:'Every one of these policies answered something. Each one only answered its own kind of loss.'}]},
+{t:'Your turn',s:[
+ Object.assign({world:'claim',view:'claim',labels:1,need:69.5,pay:50,cap:'Any policy, anywhere. Six questions decide what it pays.'},GONE),
+ {view:'claimDoc',labels:0,cap:'Which events does it cover?'},
+ {view:'console',cap:'Is it still in force?'},
+ {view:'wall',cap:'How much does it pay, and is that enough?'},
+ {world:'home',view:'policies',polOn:1,cap:'What do you pay first? Deductibles, co-payments and waiting periods come before the policy pays.'},
+ {world:'claim',view:'console',cap:'What is excluded?'},
+ {view:'claim',cap:'Who receives the money?'},
+ {world:'home',view:'home',partner:1,income:1,save:2,funeral:0,polOn:0,mIn:'$5,000',cap:'The event is what happens to you. The policy is a contract about which events it pays for. Read it before you need it.'}]}
+];
+const S=[],CHS=[];
+CH.forEach((c,ci)=>{let p=D;CHS.push(S.length);c.s.forEach(r=>{p=Object.assign({},p,{cta:null,hot:null},r,{ch:ci});S.push(p);});});
+const MAPV={home:'system',claim:'claimAll'};
+const PP=[[-5.4,-19],[-1.8,-19],[1.8,-19],[5.4,-19],[-3.6,-24.5],[0,-24.5],[3.6,-24.5]],PE=[-3.5,-1.1,1.1,3.5,-2.7,0,2.7];
+const POLN=['TERM LIFE','PERMANENT LIFE','HEALTH','DISABILITY','VEHICLE','HOME / RENTERS','LIABILITY'];
+const INFO={
+ home:{view:'home',cap:'Your home. The mortgage on it is the biggest monthly bill.'},
+ work:{view:'work',cap:'Your partner’s job. Most of the household’s income comes from here.'},
+ save:{view:'pile',cap:'Savings. One gold block is $10,000.'},
+ bank:{view:'bank',cap:'The mortgage lender. The payment is due every month, whatever happens.'},
+ store:{view:'store',cap:'Groceries and everyday costs.'},
+ car:{view:'car',cap:'The car, and the loan on it.'},
+ funeral:{view:'funeral',cap:'Funeral costs: the service, burial or cremation, and everything around them.'},
+ hospital:{view:'hospital',cap:'The hospital.'},
+ p0:{view:'pol0',cap:'Term life insurance. Pays a set amount if the insured person dies during the term, such as 10, 20 or 30 years, while the policy is in force.'},
+ p1:{view:'pol1',cap:'Permanent life insurance. Pays a set amount whenever the insured person dies, as long as premiums are kept up. Many types build a cash value.'},
+ p2:{view:'pol2',cap:'Health insurance. Pays toward medical care, after deductibles and co-payments and up to limits. Where public health care exists, private plans often cover what it doesn’t.'},
+ p3:{view:'pol3',cap:'Disability insurance. Replaces part of the income while someone is alive but unable to work, usually after a waiting period.'},
+ p4:{view:'pol4',cap:'Vehicle insurance. Liability cover pays for harm you cause others. Collision cover pays for your own car. Some places add accident benefits.'},
+ p5:{view:'pol5',cap:'Home or renters insurance. Covers the building, your belongings or both, plus some liability, up to the limits and after the deductible.'},
+ p6:{view:'pol6',cap:'Liability insurance. Pays claims from people you harm, up to a limit. An umbrella policy sits above home and vehicle cover.'},
+ doc:{view:'claimDoc',cap:'The policy. A contract that says which events it pays for, how much, and to whom.'},
+ inforce:{view:'console',cap:'In force. The policy is active only while premiums are paid.'},
+ benef:{view:'console',cap:'Beneficiary. The person the policy pays.'},
+ clean:{view:'console',cap:'Exclusions. Events or circumstances the policy won’t pay for.'},
+ wall:{view:'wall',cap:'Needed and paid. Each gold block paid is $10,000. Each outlined block is $10,000 the household needs and doesn’t have.'},
+ ruler:{view:'ruler',cap:'Age. The 20-year term covers 35 to 55. Permanent cover lasts for life.'},
+ estate:{view:'claim',cap:'The estate. Everything your partner left behind, settled before anyone inherits.'},
+ you:{view:'claim',cap:'You, the named beneficiary.'}
+};
+const CX=70;
+const V={
+ home:{t:[-.2,1,.2],hw:5.4,hh:3.8,az:.35,el:.5},
+ pile:{t:[3,.7,1.9],hw:1.8,hh:1.4,az:.3,el:.35},
+ work:{t:[-11,1,-4],hw:3.6,hh:2.8,az:.4,el:.45},
+ hospital:{t:[-11,1,6],hw:3.6,hh:2.8,az:.4,el:.45},
+ bank:{t:[11,1,-4],hw:3,hh:2.6,az:.3,el:.45},
+ store:{t:[11,1,5],hw:3,hh:2.6,az:.3,el:.45},
+ funeral:{t:[-5.5,.8,8],hw:2.6,hh:2,az:.3,el:.4},
+ car:{t:[.3,.6,9.2],hw:3.2,hh:2.4,az:.4,el:.5},
+ system:{t:[0,0,2],hw:14.5,hh:10,az:.08,el:1.0,wide:{hw:16,hh:9,az:.5,el:.65}},
+ policies:{t:[0,1,-21.6],hw:7.9,hh:5.4,az:0,el:.62},
+ both:{t:[0,0,-10.5],hw:12,hh:17.5,az:0,el:.85,wide:{hw:17,hh:11.5,az:.35,el:.6}},
+ title:{t:[0,44,-8],hw:19,hh:10,az:0,el:.06},
+ claim:{t:[CX,1,1.5],hw:9.4,hh:7.5,az:.12,el:.55},
+ claimDoc:{t:[CX-6,1.5,-1.2],hw:2.6,hh:2.7,az:.25,el:.22},
+ console:{t:[CX-6,.4,2.7],hw:2.8,hh:1.7,az:.12,el:1.0},
+ wall:{t:[CX+1,2,-.5],hw:3.6,hh:2.9,az:.1,el:.15},
+ ruler:{t:[CX-.5,.3,8.2],hw:8.9,hh:2.6,az:0,el:.85},
+ claimAll:{t:[CX,0,3],hw:10,hh:10,az:.1,el:.8}
+};
+for(let i=0;i<7;i++)V['pol'+i]={t:[PP[i][0],1.2,PP[i][1]],hw:2.4,hh:2,az:.3,el:.35};
+
+/* ---------- UI state ---------- */
+let idx=0, inspect=null, paused=false, voice=false, lastCap='', hudKey='';
+const NUM=['labels','partner','income','bills','save','funeral','polOn','need','pay','inforce','benef','clean','age','perm','cash','fire','crash','guest','title'], ARR=['pol'];
+const cur={};
+function setCur(s){NUM.forEach(k=>{cur[k]=s[k];});ARR.forEach(k=>{cur[k]=s[k].slice();});}
+setCur(S[0]);
+const HF={
+ in:['Money in / month',()=>S[idx].mIn],out:['Money out / month',()=>S[idx].mOut],save:['Savings',()=>fmt(cur.save*1e4),'gold'],
+ need:['Needed',()=>fmt(cur.need*1e4)],paid:['Paid',()=>fmt(cur.pay*1e4),'gold'],
+ to:['Paid to',()=>cur.pay<.5?'No one':(S[idx].benef?'You':'The estate')],age:['Age',()=>String(Math.round(cur.age))]
+};
+function updateHud(){const h=S[idx].hud;if(!h)return;h.forEach(k=>{const el=$('h_'+k),t=HF[k][1]();if(el&&el.textContent!==t)el.textContent=t;});}
+const synth=window.speechSynthesis;
+function say(t){if(!voice||!synth)return;try{synth.cancel();const u=new SpeechSynthesisUtterance(t);u.rate=.95;synth.speak(u);}catch(e){}}
+if(synth&&window.SpeechSynthesisUtterance)$('voiceBtn').hidden=false;
+
+const pips=$('pips');
+CH.forEach((c,i)=>{const b=document.createElement('button');b.id='pip'+i;b.setAttribute('aria-label','Chapter '+(i+1)+': '+c.t);b.title=c.t;b.addEventListener('click',()=>go(CHS[i]));pips.appendChild(b);});
+function eff(){
+  const s=S[idx];
+  if(inspect==='map')return{view:MAPV[s.world],labels:1,cap:'The whole picture. Tap anything to look closer.'};
+  if(inspect){const n=INFO[inspect];return{view:n.view,labels:0,cap:n.cap};}
+  return s;
+}
+function render(){
+  const s=S[idx], e=eff();
+  $('seg').textContent=(s.ch+1)+' · '+CH[s.ch].t;
+  $('cap').textContent=e.cap;
+  if(e.cap!==lastCap){lastCap=e.cap;say(e.cap);}
+  $('count').textContent=(idx+1)+' / '+S.length;
+  const key=s.hud?s.hud.join():'';
+  if(key!==hudKey){hudKey=key;$('hud').innerHTML=s.hud?s.hud.map(k=>'<span class="'+(HF[k][2]||'')+'">'+HF[k][0]+'<b id="h_'+k+'"></b></span>').join(''):'';}
+  updateHud();
+  const nx=$('next');
+  nx.textContent=inspect?'Return to the story':(s.cta||(idx===S.length-1?'Start over':'Next'));
+  nx.className=(!inspect&&s.cta)?'act':'';
+  $('back').disabled=!inspect&&idx===0;
+  $('replay').disabled=!!inspect||idx===0;
+  $('pause').textContent=paused?'Play':'Pause';
+  $('pause').setAttribute('aria-pressed',String(paused));
+  $('mapBtn').setAttribute('aria-pressed',String(inspect==='map'));
+  $('voiceBtn').setAttribute('aria-pressed',String(voice));
+  CH.forEach((c,i)=>{const b=$('pip'+i),n=c.s.length,f=i<s.ch?1:(i===s.ch?(idx-CHS[i]+1)/n:0);b.style.setProperty('--f',(f*100)+'%');b.classList.toggle('now',i===s.ch);});
+}
+function unpause(){paused=false;if(synth){try{synth.resume();}catch(e){}}}
+function go(i){$('hint').style.opacity='0';idx=Math.max(0,Math.min(S.length-1,i));inspect=null;unpause();orbitHome=true;render();}
+function next(){ if(inspect){inspect=null;orbitHome=true;render();return;} go(idx===S.length-1?0:idx+1); }
+function back(){ if(inspect){inspect=null;orbitHome=true;render();return;} go(idx-1); }
+function look(id){inspect=id;unpause();orbitHome=true;render();}
+$('next').addEventListener('click',next);
+$('back').addEventListener('click',back);
+$('pause').addEventListener('click',togglePause);
+function togglePause(){paused=!paused;if(synth){try{paused?synth.pause():synth.resume();}catch(e){}}render();}
+$('replay').addEventListener('click',()=>{if(idx>0){setCur(S[idx-1]);if(world)world.snap(S[idx-1]);unpause();say(S[idx].cap);render();}});
+$('mapBtn').addEventListener('click',()=>{ inspect=inspect==='map'?null:'map'; unpause();orbitHome=true;render(); });
+$('voiceBtn').addEventListener('click',()=>{voice=!voice;if(!voice&&synth){try{synth.cancel();}catch(e){}}else say(eff().cap);render();});
+$('helpBtn').addEventListener('click',()=>{$('help').hidden=false;$('helpClose').focus();});
+$('helpClose').addEventListener('click',()=>{$('help').hidden=true;$('helpBtn').focus();});
+$('logBtn').addEventListener('click',()=>{$('help').hidden=true;$('log').hidden=false;$('logClose').focus();});
+$('logClose').addEventListener('click',()=>{$('log').hidden=true;$('helpBtn').focus();});
+['help','log'].forEach(id=>$(id).addEventListener('click',e=>{if(e.target===$(id))$(id).hidden=true;}));
+window.addEventListener('keydown',e=>{
+  if(!$('log').hidden||!$('help').hidden){if(e.key==='Escape'){$('log').hidden=true;$('help').hidden=true;}return;}
+  if(e.target&&e.target.tagName==='BUTTON'&&(e.key===' '||e.key==='Enter'))return;
+  if(e.key==='ArrowRight'){next();e.preventDefault();}
+  else if(e.key==='ArrowLeft'){back();e.preventDefault();}
+  else if(e.key===' '){togglePause();e.preventDefault();}
+  else if(e.key==='m'||e.key==='M'){$('mapBtn').click();}
+});
+
+let orbit={az:0,el:0}, orbitHome=false, world=null;
+
+/* ---------- 3D worlds ---------- */
+function build(){
+  const C={surf:0x12161D,gold:0xD4AF37,blue:0x3B82F6,white:0xF5F7FA,ember:0xFF7A33,slate:0x2A313C,tyre:0x3A424E,wood:0xB9A77A};
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+  renderer.shadowMap.enabled=true; renderer.shadowMap.type=T.PCFSoftShadowMap;
+  const scene=new T.Scene(); scene.background=new T.Color(0x000000);
+  const cam=new T.PerspectiveCamera(38,1,.1,600);
+  const mats={};
+  function plastic(c,smooth){const k=c+(smooth?'s':'f');if(!mats[k])mats[k]=new T.MeshPhongMaterial({color:c,shininess:c===C.surf?12:90,specular:c===C.surf?0x0a0c10:0x4a4a4a,flatShading:!smooth});return mats[k];}
+  function add(p,geo,mat,x,y,z){const m=new T.Mesh(geo,mat);m.position.set(x||0,y||0,z||0);m.castShadow=true;m.receiveShadow=true;p.add(m);return m;}
+  function box(p,w,h,d,x,y,z,c){return add(p,new T.BoxGeometry(w,h,d),typeof c==='number'?plastic(c):c,x,y,z);}
+  function cyl(p,rt,rb,h,seg,x,y,z,c,smooth){return add(p,new T.CylinderGeometry(rt,rb,h,seg),typeof c==='number'?plastic(c,smooth):c,x,y,z);}
+  function prism(p,w,h,d,x,y,z,c){const sh=new T.Shape();sh.moveTo(-w/2,0);sh.lineTo(w/2,0);sh.lineTo(0,h);sh.closePath();
+    const g=new T.ExtrudeGeometry(sh,{depth:d,bevelEnabled:false});g.translate(0,0,-d/2);return add(p,g,plastic(c),x,y,z);}
+  function grp(p,x,y,z){const g=new T.Group();g.position.set(x||0,y||0,z||0);(p||scene).add(g);return g;}
+  function plinth(p,w,d,x,z){return box(p,w,.3,d,x,-.15,z,C.surf);}
+  // sheet: w x h paper on a stand at (x,z), leaning back by tilt. bars = [[offsetX, y, width], ...] in sheet units.
+  const SD=.06, GAP=.012;
+  function sheet(p,w,h,x,z,tilt,bars){
+    box(p,w+.24,.12,.5,x,.06,z,C.slate);
+    const g=grp(p,x,.125,z);g.rotation.x=-tilt;
+    box(g,w,h,SD,0,h/2,0,C.white);
+    const face=SD/2+GAP;
+    (bars||[]).forEach(q=>{const b=box(g,q[2],.07,.012,q[0],q[1],face,C.slate);b.castShadow=false;});
+    g.userData.face=face;return g;}
+  // Praxis person: rounded-box torso .57 x .43 x .95, sphere head r .32 seated at 1.25, all white.
+  function rbox(w,d,h,bs,cr){const x=(w-2*bs)/2,y=(d-2*bs)/2,sh=new T.Shape();
+    sh.moveTo(-x+cr,-y);sh.lineTo(x-cr,-y);sh.quadraticCurveTo(x,-y,x,-y+cr);sh.lineTo(x,y-cr);sh.quadraticCurveTo(x,y,x-cr,y);
+    sh.lineTo(-x+cr,y);sh.quadraticCurveTo(-x,y,-x,y-cr);sh.lineTo(-x,-y+cr);sh.quadraticCurveTo(-x,-y,-x+cr,-y);
+    const g=new T.ExtrudeGeometry(sh,{depth:h-2*bs,bevelEnabled:true,bevelThickness:bs,bevelSize:bs,bevelSegments:6,curveSegments:8});
+    g.translate(0,0,bs);g.rotateX(-Math.PI/2);return g;}
+  const PS=.85, headGeo=new T.SphereGeometry(.32,32,16), torsoGeo=rbox(.57,.43,.95,.08,.07);
+  function person(p,x,z,sc){const g=new T.Group(),b=new T.Group();b.scale.setScalar(PS*(sc||1));g.add(b);
+    add(b,torsoGeo,plastic(C.white,true),0,0,0);add(b,headGeo,plastic(C.white,true),0,1.25,0);g.position.set(x,0,z);g.userData.unit='person';p.add(g);return g;}
+
+  // lights follow the camera's focus, so any number of worlds costs the same
+  scene.add(new T.AmbientLight(0xbfc8d6,.34));
+  const key=new T.DirectionalLight(0xffffff,.6);scene.add(key,key.target);
+  key.castShadow=true;key.shadow.mapSize.set(2048,2048);key.shadow.bias=-.0003;key.shadow.normalBias=.025;key.shadow.camera.near=1;key.shadow.camera.far=160;
+  const focus=new T.PointLight(0xffffff,1.05,40,1);scene.add(focus);
+
+  const hits=[];
+  function hit(id,w,h,d,x,y,z){const m=new T.Mesh(new T.BoxGeometry(w,h,d),new T.MeshBasicMaterial());m.position.set(x,y,z);m.visible=false;m.userData.id=id;scene.add(m);hits.push(m);}
+
+  // gold plates: every amount shown in the world is drawn by one of these
+  const plates=[];
+  function plate(p,w,x,y,z,ry){const h=w*.44,pc=document.createElement('canvas');pc.width=384;pc.height=176;const tex=new T.CanvasTexture(pc);
+    const g=new T.Group();g.position.set(x,y,z);g.rotation.y=ry||0;p.add(g);
+    box(g,w+.12,h+.12,.08,0,0,-.05,C.gold);const m=new T.Mesh(new T.PlaneGeometry(w,h),new T.MeshBasicMaterial({map:tex}));g.add(m);
+    const o={txt:null,set(t){if(t===o.txt)return;o.txt=t;o.draw();},draw(){const c=pc.getContext('2d');c.fillStyle='#0b0d11';c.fillRect(0,0,384,176);
+      const px=Math.min(104,Math.floor(340/(Math.max(1,o.txt.length)*.62)));c.fillStyle='#D4AF37';c.font='700 '+px+'px "IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace';
+      c.textAlign='center';c.textBaseline='middle';c.fillText(o.txt,192,94);tex.needsUpdate=true;}};
+    plates.push(o);return o;}
+  // vertical gold stacks, one block per unit; the top block is cut to the remainder
+  function stack(p,x,z,size,max){const b=[];for(let i=0;i<max;i++)b.push(box(p,size,.46,size,x,0,z,C.gold));
+    return v=>{b.forEach((m,i)=>{const f=Math.max(0,Math.min(1,v-i));m.visible=f>.02;m.scale.y=Math.max(f,.02);m.position.y=i*.5+f*.23;});};}
+  // labels live in the 3D scene; a label with no fixed text can be changed
+  const labels=[];
+  function label(text,x,y,z,sc,src){const c=document.createElement('canvas');c.width=512;c.height=128;const tex=new T.CanvasTexture(c);
+    const o={text};
+    const draw=()=>{const g=c.getContext('2d');g.clearRect(0,0,512,128);g.fillStyle='#F5F7FA';try{g.letterSpacing='6px';}catch(e){}
+      let px=62;const ff='px "IBM Plex Sans Condensed","Arial Narrow",sans-serif';g.font='600 '+px+ff;while(px>26&&g.measureText(o.text).width>470){px-=3;g.font='600 '+px+ff;}
+      g.textAlign='center';g.textBaseline='middle';g.fillText(o.text,256,66);tex.needsUpdate=true;};
+    draw();const sp=new T.Sprite(new T.SpriteMaterial({map:tex,transparent:true,opacity:0,depthTest:false}));sp.scale.set(sc||8,(sc||8)/4,1);sp.position.set(x,y,z);sp.renderOrder=10;scene.add(sp);
+    const l={sp,draw,src:src||(()=>cur.labels),set(t){if(t!==o.text){o.text=t;draw();}}};labels.push(l);return l;}
+
+  // flows: a ground line with gold tokens riding along it toward the second point
+  const OFF=new T.Color(0x161a21),MID=new T.Color(0x1f3e75),ON=new T.Color(C.blue);
+  const tokGeo=new T.BoxGeometry(.24,.24,.24);
+  const flows=[];let flowY=.012;
+  function flow(x1,z1,x2,z2,n,src,gate){const dx=x2-x1,dz=z2-z1,len=Math.hypot(dx,dz);
+    const mat=new T.MeshBasicMaterial({color:C.blue});const m=new T.Mesh(new T.BoxGeometry(len,.02,.08),mat);
+    m.position.set((x1+x2)/2,flowY,(z1+z2)/2);flowY+=.0025;m.rotation.y=-Math.atan2(dz,dx);scene.add(m);
+    const toks=[];for(let i=0;i<n;i++){const t=new T.Mesh(tokGeo,plastic(C.gold));t.castShadow=true;scene.add(t);toks.push(t);}
+    const f={src,update(clock){const v=Math.max(0,Math.min(1,src()));m.visible=!gate||gate()>.02;
+      mat.color.copy(OFF).lerp(MID,Math.min(1,v*2));if(v>.5)mat.color.lerp(ON,(v-.5)*2);
+      toks.forEach((t,i)=>{const u=((clock*.22+i/n)%1+1)%1;t.position.set(x1+dx*u,.16,z1+dz*u);const s=v>.7?Math.min(1,(v-.7)/.3):0;t.visible=s>.05&&m.visible;t.scale.setScalar(Math.max(.01,s));});}};
+    flows.push(f);return f;}
+
+  /* ===== WORLD 1: the household ===== */
+  // HOME (cutaway: front wall and roof removed)
+  const home=grp(scene,0,0,0);
+  plinth(home,8,6.4,0,0);
+  box(home,7.4,2.6,.25,0,1.3,-2.9,C.white);box(home,.25,2.6,5.375,-3.6,1.3,-.0875,C.white);box(home,7.5,.2,.45,0,2.7,-2.9,C.slate);
+  box(home,.25,2.6,2.475,.6,1.3,-1.5375,C.white);
+  // kitchen and table
+  box(home,1.8,.9,.6,-2.3,.45,-2.4,C.slate);box(home,1.86,.08,.66,-2.3,.92,-2.4,C.white);
+  cyl(home,.65,.65,.07,20,-1.8,.72,-.4,C.white,true);cyl(home,.08,.08,.7,10,-1.8,.35,-.4,C.slate,true);
+  // sofa
+  box(home,2,.45,.8,2.2,.22,-2.2,C.slate);box(home,1.94,.5,.2,2.2,.6,-2.55,C.slate);
+  // you and the kids
+  const you1=person(home,-2.8,.6);person(home,-1.1,.5,.62);person(home,-.7,-.9,.62);
+  hit('home',7.4,3,6,-.6,1.5,-.2);
+  label('HOME',-.4,4,-1.6);
+  // savings
+  const saveStack=stack(home,3.1,1.7,.7,3), savePlate=plate(home,1.2,1.85,.35,2.7);
+  hit('save',1.6,2,1.8,3.1,1,1.9);label('SAVINGS',3.1,2.4,1.7,3.2);
+  // the guest who falls
+  const guest=person(scene,2.45,1.4);guest.rotation.z=Math.PI/2;guest.position.y=.28;guest.scale.setScalar(.001);
+  hit('steps',2,1,1.6,1.9,.5,1.4);
+  // fire
+  const fireG=grp(home,0,0,0),flames=[];
+  const fireMat=new T.MeshBasicMaterial({color:C.ember});
+  // [x, z, radius, height, base]: three on the counter top, two on the floor in front of it
+  [[-2.75,-2.4,.28,1.3,.96],[-2.25,-2.42,.3,1.6,.96],[-1.75,-2.38,.26,1.1,.96],[-2.6,-1.75,.32,.9,0],[-1.9,-1.6,.26,.7,0]].forEach(q=>{
+    const m=add(fireG,new T.ConeGeometry(q[2],q[3],7),fireMat,q[0],q[4]+q[3]/2,q[1]);m.castShadow=false;
+    const g=new T.Group();g.position.set(q[0],q[4],q[1]);m.position.set(0,q[3]/2,0);fireG.add(g);g.add(m);flames.push({m:g,o:Math.random()*6});});
+  const fireLight=new T.PointLight(C.ember,0,9,1.6);fireLight.position.set(-2.3,2,-1.6);scene.add(fireLight);
+
+  // WORK
+  const work=grp(scene,-11,0,-4);
+  plinth(work,5.2,4.6,0,0);
+  box(work,4.6,2.4,.22,0,1.2,-2.1,C.white);box(work,.22,2.4,3.79,-2.4,1.2,-.095,C.white);box(work,4.7,.18,.4,0,2.49,-2.1,C.slate);
+  box(work,1.8,.08,.9,-.3,.78,-.9,C.white);[[-1.1,-1.25],[.5,-1.25],[-1.1,-.55],[.5,-.55]].forEach(q=>box(work,.08,.74,.08,q[0],.37,q[1],C.slate));
+  box(work,.8,.5,.06,-.3,1.12,-1.25,C.slate);add(work,new T.PlaneGeometry(.7,.42),new T.MeshBasicMaterial({color:C.blue}),-.3,1.12,-1.21).castShadow=false;
+  box(work,.6,.08,.6,-.3,.5,-.1,C.slate);
+  const workPlate=plate(work,1.3,1.4,1.8,-1.95);
+  person(work,1.6,.8);
+  hit('work',5.2,3,4.6,-11,1.5,-4);label('WORK',-11,3.4,-5.6,4.2);
+
+  // HOSPITAL
+  const hosp=grp(scene,-11,0,6);
+  plinth(hosp,5.2,4.6,0,0);
+  box(hosp,4.6,2.4,.22,0,1.2,-2.1,C.white);box(hosp,.22,2.4,3.79,-2.4,1.2,-.095,C.white);box(hosp,4.7,.18,.4,0,2.49,-2.1,C.slate);
+  const crossM=new T.MeshBasicMaterial({color:C.blue});box(hosp,.9,.28,.05,1.2,1.6,-1.96,crossM);box(hosp,.28,.9,.05,1.2,1.6,-1.94,crossM);
+  box(hosp,1.9,.45,.9,-.8,.3,-1.2,C.white);box(hosp,1.82,.1,.82,-.8,.575,-1.2,C.slate);
+  person(hosp,1.4,.6);
+  hit('hospital',5.2,3,4.6,-11,1.5,6);label('HOSPITAL',-11,3.4,4.4,4.6);
+
+  // MORTGAGE LENDER
+  const bank=grp(scene,11,0,-4);
+  plinth(bank,4.6,4.4,0,0);
+  box(bank,3.8,.3,2.8,0,.15,-.4,C.white);[-1.4,-.47,.47,1.4].forEach(x=>cyl(bank,.18,.18,1.7,14,x,1.15,.6,C.white,true));
+  box(bank,3.4,1.7,1.6,0,1.15,-1,C.white);box(bank,4,.2,2.8,0,2.1,-.4,C.slate);prism(bank,4,.8,2.8,0,2.2,-.4,C.white);
+  hit('bank',4.6,3.4,4.4,11,1.7,-4);label('MORTGAGE',11,4,-5,4.4);
+  // GROCERIES
+  const store=grp(scene,11,0,5);
+  plinth(store,4.6,4.4,0,0);
+  box(store,4,2.2,.2,0,1.1,-1.9,C.white);box(store,.2,2.2,3.2,-1.9,1.1,-.2,C.white);box(store,4.1,.18,.4,0,2.29,-1.9,C.slate);
+  [1.4,.8].forEach(y=>box(store,2.6,.08,.5,0,y,-1.5,C.slate));
+  for(let j=0;j<4;j++){box(store,.4,.4,.35,-.9+j*.6,1.64,-1.5,C.wood);box(store,.35,.32,.35,-.9+j*.6,1,-1.5,C.white);}
+  person(store,1.2,.6);
+  hit('store',4.6,3,4.4,11,1.5,5);label('GROCERIES',11,3.3,3.4,4.4);
+  // CAR on the driveway
+  function car(body){const g=new T.Group();box(g,.95,.22,1.9,0,.3,0,body);box(g,.86,.36,1,0,.6,-.1,C.white);
+    box(g,.88,.2,.05,0,.62,.42,C.slate);box(g,.88,.2,.05,0,.62,-.62,C.slate);
+    [[-.5,.62],[.5,.62],[-.5,-.62],[.5,-.62]].forEach(q=>{const w=cyl(g,.2,.2,.14,14,q[0],.2,q[1],C.tyre,true);w.rotation.z=Math.PI/2;});g.userData.unit='car';scene.add(g);return g;}
+  const drive=grp(scene,.5,0,9.2);plinth(drive,6.4,3.4,0,0);
+  const carA=car(C.slate);carA.position.set(-.6,0,9.2);carA.rotation.y=Math.PI/2;
+  const carB=car(C.white);carB.position.set(2.05,0,9.45);carB.scale.setScalar(.001);
+  const debris=grp(scene,1,0,10.65);[[-.45,0],[.1,.12],[.65,-.02]].forEach(q=>box(debris,.18,.08,.14,q[0],.04,q[1],C.white));debris.scale.setScalar(.001);
+  hit('car',6.4,2,3.4,.5,1,9.2);label('CAR',.5,2.6,8.4,2.6);
+  // FUNERAL COSTS
+  const fun=grp(scene,-5.5,0,8);plinth(fun,3.4,2.8,0,0);
+  sheet(fun,1.4,1.8,-.45,-.6,.12,[[-.1,1.45,.95],[-.22,1.2,.7],[-.1,.95,.95],[-.22,.7,.7]]);
+  const funStack=stack(fun,.9,.3,.6,2);plate(fun,1.1,.8,.32,1.1).set('$15,000');
+  hit('funeral',3.4,2.4,2.8,-5.5,1.2,8);label('FUNERAL',-5.5,2.8,7.4,4.2,()=>cur.labels*cur.funeral);
+
+  // the partner: at work, or in hospital
+  const partner=person(scene,-10.6,-3.5);
+  const PLOC={home:[-3.05,-.9,0],work:[-10.3,-3.9,0],hosp:[-11.1,4.8,1.5]};let pAt=null,pFade=1;
+
+  // money flows
+  flow(-8.4,-3.5,-4,-1.4,3,()=>cur.income*cur.partner+0*cur.bills);
+  flow(4,-1.4,8.7,-3.4,3,()=>cur.bills);
+  flow(4,1.4,8.7,4.3,3,()=>cur.bills);
+  flow(.5,3.2,.5,7.5,2,()=>cur.bills);
+  flow(-2.4,3.2,-4.6,6.6,2,()=>cur.funeral,()=>cur.funeral);
+
+  // THE SEVEN POLICIES
+  const polRow=grp(scene,0,0,0), pols=[];
+  for(let i=0;i<7;i++){const x=PP[i][0],z=PP[i][1],g=grp(polRow,x,0,z);
+    plinth(g,2.7,2.6,0,0);
+    const doc=sheet(g,1.3,1.6,0,-.35,.14,[[-.08,1.25,.85],[-.2,1,.6],[-.08,.75,.85],[-.2,.5,.6]]);
+    const bm=new T.MeshPhongMaterial({color:0x1a1f27,emissive:C.blue,emissiveIntensity:0,shininess:60});
+    box(doc,1.34,.14,.12,0,1.6+.07+.002,0,bm);
+    hit('p'+i,2.7,2.6,2.6,x,1.3,z);
+    label(POLN[i],x,3.05,z-.3,3,()=>cur.polOn);
+    flow(x,z+1.35,PE[i],-3.2,2,()=>cur.polOn*cur.pol[i],()=>cur.polOn);
+    pols.push({bm});}
+
+  // the title, built from blocks
+  const GLY={W:'10001100011000110101101011101110001',H:'10001100011000111111100011000110001',E:'11111100001000011110100001000011111',
+    N:'10001110011010110011100011000110001',T:'11111001000010000100001000010000100',P:'11110100011000111110100001000010000',
+    A:'01110100011000111111100011000110001',Y:'10001100010101000100001000010000100',C:'01111100001000010000100001000001111',
+    Q:'01110100011000110001101011001001101',U:'10001100011000110001100011000101110',S:'01111100001000001110000010000111110',
+    O:'01110100011000110001100011000101110'};
+  const titleG=grp(scene,0,44,-8), cells=[], U=.62;
+  ['WHEN THE','PAYCHEQUE','STOPS'].forEach((ln,li)=>{const w=ln.length*6-1;[...ln].forEach((ch,ci)=>{const g=GLY[ch];if(!g)return;
+    for(let r=0;r<7;r++)for(let c=0;c<5;c++)if(g[r*5+c]==='1')cells.push([(ci*6+c-(w-1)/2)*U,(12-(li*9+r))*U]);});});
+  const titleM=new T.InstancedMesh(new T.BoxGeometry(U*.9,U*.9,U*1.6),plastic(C.white),cells.length), mx=new T.Matrix4();
+  cells.forEach((q,i)=>{mx.makeTranslation(q[0],q[1],0);titleM.setMatrixAt(i,mx);});titleM.frustumCulled=false;titleG.add(titleM);
+
+  /* ===== WORLD 2: the claim ===== */
+  // the policy document
+  const docG=grp(scene,CX-6,0,0);plinth(docG,4.6,7.2,0,.5);
+  const bigDoc=sheet(docG,2.6,3.2,0,-1.4,.1,[[-.2,2.55,1.9],[-.5,2.25,1.3],[-.2,1.95,1.9],[-.5,1.65,1.3],[-.2,1.35,1.9]]);
+  box(bigDoc,2.5,.3,.012,0,3.0,bigDoc.userData.face,C.blue).castShadow=false;
+  plate(bigDoc,1.5,.25,.62,bigDoc.userData.face+.09+.01).set('$500,000');
+  label('TERM LIFE · 20 YEARS',CX-6,4.1,-1.6,4.8,()=>1);
+  hit('doc',3,3.6,1.2,CX-6,1.8,-1.4);
+  // the three conditions
+  const sw=[];[['IN FORCE','inforce'],['BENEFICIARY','benef'],['NO EXCLUSION','clean']].forEach((q,i)=>{const x=-1.5+i*1.5;
+    box(docG,1.1,.24,1.1,x,.12,2.4,C.slate);
+    const km=new T.MeshPhongMaterial({color:C.blue,shininess:80});const knob=box(docG,.7,.3,.7,x,.38,2.4,km);
+    label(q[0],CX-6+x,.3,3.3,1.45,()=>1);hit(q[1],1.2,.8,1.2,CX-6+x,.4,2.4);sw.push({km,knob,k:q[1]});});
+  // needed and paid, as a wall of blocks
+  const wallG=grp(scene,CX+1,0,-1);plinth(wallG,6.4,3.4,0,.7);
+  const NC=10,NR=8,BS=.44,BP=.5,goldM=plastic(C.gold),edgeM=new T.LineBasicMaterial({color:0x8a93a2,transparent:true,opacity:.55});
+  const cellGeo=new T.BoxGeometry(BS,BS,BS),edgeGeo=new T.EdgesGeometry(cellGeo),wall=[];
+  for(let i=0;i<NC*NR;i++){const c=i%NC,r=Math.floor(i/NC),x=(c-(NC-1)/2)*BP,y=.3+BS/2+r*BP;
+    const g=add(wallG,cellGeo,goldM,x,y,0);const e=new T.LineSegments(edgeGeo,edgeM);e.position.set(x,y,0);wallG.add(e);wall.push({g,e,x,y});}
+  const needPlate=plate(wallG,1.5,-1.3,.55,1.4), payPlate=plate(wallG,1.5,1.3,.55,1.4), wallPlates=wallG.children.slice(-2);
+  label('NEEDED',CX-.3,1.25,.4,2.4,()=>Math.min(1,cur.need/10));label('PAID',CX+2.3,1.25,.4,2.4,()=>Math.min(1,cur.need/10));
+  hit('wall',5.4,4.6,1.4,CX+1,2.3,-1);
+  // who receives it
+  const rec=grp(scene,CX+7,0,0);plinth(rec,3.4,7.4,0,-1.6);
+  const you2=person(rec,0,.9);label('YOU',CX+7,2.1,.9,2.2,()=>1);hit('you',1.4,2,1.4,CX+7,1,.9);
+  const est=grp(rec,0,0,-3.8);box(est,2.2,.25,1.6,0,.12,0,C.slate);box(est,1.8,1.4,1.2,0,.95,-.1,C.slate);prism(est,2.2,.6,1.6,0,1.65,0,C.slate);
+  label('ESTATE',CX+7,3.1,-3.8,2.6,()=>1);hit('estate',2.4,2.6,2,CX+7,1.2,-3.8);
+  const toYou=flow(CX+4.3,-.4,CX+6.4,.7,2,()=>cur.pay>1?cur.benef:0);
+  const toEst=flow(CX+4.3,-1.6,CX+6.1,-3.6,2,()=>cur.pay>1?1-cur.benef:0);
+  // age: the term covers 35 to 55; permanent cover lasts for life
+  const RX0=CX-8,AX=a=>RX0+(a-35)*.3;
+  const rulG=grp(scene,0,0,0);box(rulG,17.4,.3,3.4,CX-.5,-.15,8.3,C.surf);
+  box(rulG,15.3,.06,.5,CX-.5,.03,7.6,C.slate);box(rulG,6,.09,.52,AX(45),.05,7.6,C.blue);
+  const permG=grp(scene,0,0,0);box(permG,15,.09,.52,CX-.5,.05,8.9,C.blue);
+  const cashStack=stack(permG,AX(85)+.7,8.9,.5,2);
+  label('TERM',RX0+1.3,.3,7.1,1.8,()=>1);label('PERMANENT',RX0+1.9,.3,8.4,2.6,()=>cur.perm);
+  [35,55,85].forEach(a=>label(String(a),AX(a),.45,6.75,1.4,()=>1));
+  const marker=grp(scene,AX(42),0,0);box(marker,.1,1.5,.1,0,.75,8.25,C.white);box(marker,.5,.5,.06,0,1.6,8.25,C.white);
+  const ageTag=label('42',AX(42),2.3,8.25,2.6,()=>1);
+  hit('ruler',17,2,3.4,CX-.5,.6,8.3);
+
+  if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>{labels.forEach(l=>l.draw());plates.forEach(p=>{if(p.txt)p.draw();});});
+
+  // tap target marker
+  const HOT={row:()=>[0,-21.8,2.2],work:()=>[-11,-4,2.8],home:()=>[-1.6,-.6,2.6],car:()=>[.3,9.2,2],steps:()=>[1.9,1.4,1.3],
+    inforce:()=>[CX-7.5,2.4,.85],benef:()=>[CX-6,2.4,.85],clean:()=>[CX-4.5,2.4,.85],ruler:()=>[AX(cur.age),8.25,1.1]};
+  const ring=new T.Mesh(new T.RingGeometry(.96,1.03,64),new T.MeshBasicMaterial({color:C.blue,transparent:true,opacity:.9,side:T.DoubleSide}));
+  ring.rotation.x=-Math.PI/2;ring.position.y=.03;scene.add(ring);
+
+  /* ---------- per-frame ---------- */
+  const cv={tx:0,ty:0,tz:0,hw:2,hh:2,az:0,el:.3}; let camInit=false;
+  function viewOf(name){const v=V[name],w=(cam.aspect>1.15&&v.wide)?v.wide:{};return{tx:v.t[0],ty:v.t[1],tz:v.t[2],hw:w.hw||v.hw,hh:w.hh||v.hh,az:w.az!==undefined?w.az:v.az,el:w.el!==undefined?w.el:v.el};}
+  function putPartner(loc){const q=PLOC[loc];pAt=loc;partner.position.set(q[0],q[2]?.9:0,q[1]);partner.rotation.z=q[2]?Math.PI/2:0;}
+  function placePartner(s,k){if(pAt===null)putPartner(s.ploc);
+    if(s.ploc!==pAt){pFade+=(0-pFade)*Math.min(1,k*3);if(pFade<.04||reduce)putPartner(s.ploc);}
+    else pFade+=(1-pFade)*Math.min(1,k*3);}
+  function snap(s){putPartner(s.ploc);pFade=1;}
+  snap(S[idx]);
+  function onoff(g,v){g.visible=v>.01;g.scale.setScalar(Math.max(.001,v));}
+  function resize(){const w=stage.clientWidth,h=stage.clientHeight;if(!w||!h)return;renderer.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix();}
+  if(window.ResizeObserver)new ResizeObserver(resize).observe(stage);else window.addEventListener('resize',resize);
+  resize();
+
+  let last=performance.now(),clock=0,shHalf=0;
+  function frame(now){
+    requestAnimationFrame(frame);
+    const dt=Math.min(.1,(now-last)/1000);last=now;
+    const s=S[idx],e=eff(),run=paused?0:dt;clock+=run;
+    const k=reduce?(paused?0:1):1-Math.exp(-run*2.4),kc=reduce?(paused?0:1):1-Math.exp(-run*2);
+    NUM.forEach(n=>{const t=n==='labels'?e.labels:s[n];cur[n]+=(t-cur[n])*k;if(Math.abs(t-cur[n])<.004)cur[n]=t;});
+    ARR.forEach(n=>{for(let i=0;i<cur[n].length;i++){cur[n][i]+=(s[n][i]-cur[n][i])*k;if(Math.abs(s[n][i]-cur[n][i])<.004)cur[n][i]=s[n][i];}});
+    // household
+    placePartner(s,k*.8);const pv=cur.partner*pFade;partner.scale.setScalar(Math.max(.001,pv));partner.visible=pv>.02;
+    saveStack(cur.save);savePlate.set(fmt(cur.save*1e4));funStack(cur.funeral*1.5);
+    workPlate.set(fmt(3600*cur.income*cur.partner));
+    onoff(polRow,cur.polOn);onoff(titleG,cur.title);
+    guest.scale.setScalar(Math.max(.001,cur.guest));guest.visible=cur.guest>.02;
+    // fire
+    onoff(fireG,cur.fire);fireLight.intensity=cur.fire*(reduce?1.4:1.2+.5*Math.sin(clock*9));
+    if(!reduce)flames.forEach(f=>{f.m.scale.y=.85+.25*Math.sin(clock*7+f.o);});
+    // crash
+    carA.rotation.y=Math.PI/2-cur.crash*.55;carA.position.x=-.6+cur.crash*.5;
+    carB.scale.setScalar(Math.max(.001,cur.crash));carB.visible=cur.crash>.02;carB.rotation.y=-Math.PI/2+.9;
+    debris.scale.setScalar(Math.max(.001,cur.crash));
+    // policies
+    pols.forEach((p,i)=>{p.bm.emissiveIntensity=cur.pol[i]*(cur.pol[i]>.75?1.1:.6);});
+    // claim
+    const ageOK=s.perm?1:(cur.age<=55?1:0);
+    wall.forEach((c,i)=>{const f=Math.max(0,Math.min(1,cur.pay-i));c.g.visible=f>.02;c.g.scale.set(Math.max(f,.02),1,1);c.g.position.x=c.x-(1-f)*BS/2;
+      c.e.visible=i<Math.ceil(cur.need-.001)&&f<.98;});
+    needPlate.set(fmt(cur.need*1e4));wallPlates.forEach(g=>{g.visible=cur.need>.3;});payPlate.set(fmt(cur.pay*1e4));
+    sw.forEach(q=>{const v=cur[q.k];q.knob.position.y=.12+.26*v;q.km.color.setHex(v>.5?C.blue:C.slate);});
+    you2.position.y=0;
+    marker.position.x=AX(cur.age);ageTag.sp.position.x=AX(cur.age);ageTag.set(String(Math.round(cur.age)));
+    onoff(permG,cur.perm);cashStack(cur.cash);
+    void ageOK;
+    flows.forEach(f=>f.update(clock));
+    labels.forEach(l=>{const o=l.src();l.sp.material.opacity=o;l.sp.visible=o>.02;});
+    // tap target
+    const hp=!inspect&&s.hot?HOT[s.hot]():null;ring.visible=!!hp;
+    if(hp){const q=hp[2]*(reduce?1:1+.05*Math.sin(clock*3.2));ring.position.x=hp[0];ring.position.z=hp[1];ring.scale.set(q,q,1);ring.material.opacity=reduce?.9:.6+.3*Math.sin(clock*3.2);}
+    updateHud();
+    // camera
+    const tv=viewOf(e.view);
+    if(!camInit){Object.assign(cv,tv);camInit=true;}else for(const a in cv)cv[a]+=(tv[a]-cv[a])*kc;
+    if(orbitHome&&!paused){orbit.az+=(0-orbit.az)*kc;orbit.el+=(0-orbit.el)*kc;}
+    const th=Math.tan(cam.fov*Math.PI/360),dist=1.1*Math.max(cv.hh/th,cv.hw/(th*cam.aspect));
+    const az=cv.az+orbit.az,el=Math.max(.05,Math.min(1.45,cv.el+orbit.el));
+    cam.position.set(cv.tx+dist*Math.sin(az)*Math.cos(el),cv.ty+dist*Math.sin(el),cv.tz+dist*Math.cos(az)*Math.cos(el));
+    cam.lookAt(cv.tx,cv.ty,cv.tz);
+    // lights and shadows follow the focus
+    const ext=Math.max(cv.hw,cv.hh);
+    focus.position.set(cv.tx,cv.ty+5+ext*.5,cv.tz+2.5+ext*.25);focus.distance=18+ext*2.6;
+    key.target.position.set(cv.tx,cv.ty,cv.tz);key.position.set(cv.tx+16,cv.ty+34,cv.tz+12);
+    const half=Math.max(14,Math.min(48,ext*1.5));
+    if(Math.abs(half-shHalf)>.5){shHalf=half;const sc=key.shadow.camera;sc.left=-half;sc.right=half;sc.top=half;sc.bottom=-half;sc.updateProjectionMatrix();}
+    renderer.render(scene,cam);
+  }
+  requestAnimationFrame(frame);
+  void you1;void toYou;void toEst;
+
+  /* pointer: drag orbits, tap picks */
+  const ray=new T.Raycaster(),ndc=new T.Vector2();
+  function pick(ev){const r=canvas.getBoundingClientRect();ndc.set(((ev.clientX-r.left)/r.width)*2-1,-((ev.clientY-r.top)/r.height)*2+1);ray.setFromCamera(ndc,cam);
+    const h=ray.intersectObjects(hits,false);for(let i=0;i<h.length;i++){const id=h[i].object.userData.id;
+      if(/^p\d$/.test(id)&&cur.polOn<.5)continue;return id;}return null;}
+  let down=null;
+  canvas.addEventListener('pointerdown',ev=>{down={x:ev.clientX,y:ev.clientY,az:orbit.az,el:orbit.el,moved:false};try{canvas.setPointerCapture(ev.pointerId);}catch(e){}$('hint').style.opacity='0';});
+  canvas.addEventListener('pointermove',ev=>{
+    if(!down){if(ev.pointerType==='mouse')canvas.style.cursor=pick(ev)?'pointer':'grab';return;}
+    const dx=ev.clientX-down.x,dy=ev.clientY-down.y;if(Math.abs(dx)+Math.abs(dy)>7)down.moved=true;
+    if(down.moved){orbitHome=false;orbit.az=Math.max(-1.1,Math.min(1.1,down.az-dx*.006));orbit.el=Math.max(-.4,Math.min(.5,down.el+dy*.004));}});
+  canvas.addEventListener('pointerup',ev=>{const d=down;down=null;if(!d||d.moved)return;const id=pick(ev);if(!id)return;
+    const h=S[idx].hot;if(!inspect&&h&&(h===id||(h==='row'&&/^p\d$/.test(id))||(h==='home'&&id==='save'))){next();return;}look(id);});
+  canvas.addEventListener('pointercancel',()=>{down=null;});
+
+  // collision audit for the production team; only active at the #audit address
+  if(location.hash==='#audit')window.__prxAudit={scene,T,hits,go:i=>{go(i);setCur(S[i]);snap(S[i]);}};
+  return{snap};
+}
+
+function start(){
+  if(renderer){try{world=build();}catch(e){world=null;fail();if(window.console)console.error(e);}}else fail();
+  render();
+  try{if(!localStorage.getItem('prx-insurance-help-seen')){localStorage.setItem('prx-insurance-help-seen','1');$('help').hidden=false;}}catch(e){}
+}
+start();
+})();
+</script>
+</body></html>
